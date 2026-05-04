@@ -6,19 +6,28 @@
         <img src="public/assets/branding/graycale-studio-full-logo.png" alt="Logotipo de Grayscale Studio" width="300">
     </picture>
 </p>
-<p align="center"><strong>Economía circular al alcance de tu comunidad</strong></p>
+<p align="center"><strong>Procesa y mejora imágenes en escala de grises con precisión profesional</strong></p>
 <p align="center">
   <a href="https://" target="_blank">
     <img src="https://img.shields.io/badge/Demo%20en%20vivo-0078d4?style=for-the-badge&logo=github&logoColor=white" alt="Abrir demo en vivo" />
   </a>
 </p>
-<!-- markdownlint-enable MD033 -->
 
 > Aplicación web profesional para la expansión y ecualización de histogramas de imágenes en escala de grises, construida bajo los principios de Clean Architecture y Domain-Driven Design (DDD).
 
+## Tabla de contenidos
+
+- [Tabla de contenidos](#tabla-de-contenidos)
+- [Descripción del Proyecto](#descripción-del-proyecto)
+- [Características Implementadas](#características-implementadas)
+- [Tecnologías y Librerías](#tecnologías-y-librerías)
+- [Arquitectura del Proyecto (DDD + SOLID)](#arquitectura-del-proyecto-ddd--solid)
+- [Inicio Rápido (Desarrollo)](#inicio-rápido-desarrollo)
+- [Instrucciones de Uso](#instrucciones-de-uso)
+
 ---
 
-## Descripción
+## Descripción del Proyecto
 
 **GrayScale Studio** es una moderna herramienta web diseñada para procesar imágenes en blanco y negro (JPG/JPEG). Validando matemáticamente que la imagen carezca de canales de color, el sistema extrae las frecuencias de intensidades (0-255), renderiza el histograma original y permite aplicar transformaciones de contraste no lineales (Ecualización) y lineales (Expansión Min-Max).
 
