@@ -1,0 +1,13 @@
+/* Semantic BEM scoped styles for PrimaryButton */
+.primary-button-root {
+  /* Tailwind classes handle most styling, but we can add specific overrides here */
+}
+
+.primary-button-root:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primary-button-root:not(:disabled):hover {
+  background-color: var(--color-primary-container, #0057ff); /* fallback if variable not set */
+}
