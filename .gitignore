@@ -1,2 +1,6 @@
 # Ignore generated or large workspace assets
 stitch_assets/
+
+# Ignore dependencies
+node_modules/
+.vscode/
