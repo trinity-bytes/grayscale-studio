@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>GrayScale Studio - Main Workspace</title>
+  <meta name="description"
+    content="Professional web application for grayscale image histogram equalization and expansion, built with Clean Architecture and DDD.">
+  <link rel="icon" type="image/png" href="/assets/branding/grayscale-studio-isotipo.png">
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
   <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
@@ -78,12 +82,12 @@
             "margin": "32px"
           },
           "fontFamily": {
-            "body-sm": ["Inter"],
-            "body-md": ["Inter"],
-            "data-mono": ["Space Grotesk"],
-            "display-lg": ["Space Grotesk"],
-            "headline-md": ["Space Grotesk"],
-            "label-caps": ["Space Grotesk"]
+            "body-sm": ["Poppins", "sans-serif"],
+            "body-md": ["Poppins", "sans-serif"],
+            "data-mono": ["Poppins", "sans-serif"],
+            "display-lg": ["Poppins", "sans-serif"],
+            "headline-md": ["Poppins", "sans-serif"],
+            "label-caps": ["Poppins", "sans-serif"]
           },
           "fontSize": {
             "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
@@ -97,48 +101,26 @@
       }
     }
   </script>
-  <style>
-    .glass-panel {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(255, 255, 255, 0.2);
-      border-left: 1px solid rgba(255, 255, 255, 0.2);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      border-right: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    .glass-sub-panel {
-      background: rgba(255, 255, 255, 0.4);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(255, 255, 255, 0.2);
-      border-left: 1px solid rgba(255, 255, 255, 0.2);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      border-right: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    
-    #loader-overlay {
-      transition: opacity 0.5s ease-out;
-    }
-    #loader-overlay:not(.active) {
-      opacity: 0;
-      pointer-events: none;
-    }
-  </style>
+  <!-- Styles are centralized in src/shared/styles/ and bundled by Vite -->
 </head>
+
 <body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col antialiased">
-  
-  <div id="loader-overlay" class="active fixed inset-0 bg-background/80 backdrop-blur flex items-center justify-center z-[100]">
-      <div class="flex flex-col items-center gap-sm">
-        <span class="material-symbols-outlined animate-spin text-primary text-[48px]">autorenew</span>
-        <p class="font-data-mono text-primary font-medium">Cargando OpenCV.js Engine...</p>
+
+  <div id="loader-overlay" class="active fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100]">
+    <div class="flex flex-col items-center gap-md">
+      <img src="/assets/branding/grayscale-studio-full-logo.png" alt="GrayScale Studio" class="" />
+      <p class="font-data-mono text-on-surface font-semibold text-sm tracking-wider">LOADING OPENCV ENGINE</p>
+      <div class="w-32 h-1 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-primary rounded-full animate-pulse" style="width: 60%;"></div>
       </div>
+    </div>
   </div>
 
   <top-nav-bar></top-nav-bar>
 
-  <main class="flex-1 max-w-[1440px] w-full mx-auto px-lg pb-margin grid grid-cols-12 gap-gutter items-start mt-md relative">
-    
+  <main
+    class="flex-1 max-w-[1440px] w-full mx-auto px-lg pb-margin grid grid-cols-12 gap-gutter items-start mt-md relative">
+
     <!-- Left Sidebar: Technical Controls -->
     <aside class="col-span-3 flex flex-col gap-md">
       <image-info-panel id="image-info-panel"></image-info-panel>
@@ -155,11 +137,12 @@
     <aside class="col-span-3 flex flex-col gap-md h-full">
       <analysis-panel id="analysis-panel" class="flex-1 flex flex-col"></analysis-panel>
     </aside>
-    
+
   </main>
 
   <script async src="https://docs.opencv.org/4.8.0/opencv.js" type="text/javascript"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="./src/main.js"></script>
 </body>
+
 </html>

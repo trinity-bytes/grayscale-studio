@@ -5,6 +5,7 @@ import { EqualizeImageUseCase } from "./application/EqualizeImageUseCase.js";
 import { ExpandImageUseCase } from "./application/ExpandImageUseCase.js";
 import { ChartJsRenderer } from "./infrastructure/chart/ChartJsRenderer.js";
 import "./presentation/components/index.js";
+import "./shared/styles/main.css";
 
 /**
  * ==========================================

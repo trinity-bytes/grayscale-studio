@@ -1,0 +1,11 @@
+/* =============================================
+ * MAIN STYLESHEET — Aggregator
+ * =============================================
+ * Single entry point that imports all shared styles.
+ * Imported via main.js so Vite bundles them.
+ */
+
+@import './typography.css';
+@import './effects.css';
+@import './cursors.css';
+@import './layout.css';
