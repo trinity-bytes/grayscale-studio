@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD033 -->
 <p align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="public/assets/branding/graycale-studio-full-logo-negativo.png" />
