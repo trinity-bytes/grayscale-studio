@@ -1,0 +1,43 @@
+/* =============================================
+ * LAYOUT — Global body and base layout styles
+ * =============================================
+ */
+
+body {
+  background-image: url('/assets/images/abstract-white-bkg-1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: white;
+}
+
+/* ===== Loader Overlay ===== */
+#loader-overlay {
+  transition: opacity 0.5s ease-out;
+  background-color: white;
+}
+
+#loader-overlay:not(.active) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== Loader Isotipo Animation ===== */
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(0, 67, 200, 0.3));
+  }
+
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px rgba(0, 67, 200, 0.6));
+  }
+}
+
+.loader-isotipo {
+  animation: pulse-glow 2s ease-in-out infinite;
+}

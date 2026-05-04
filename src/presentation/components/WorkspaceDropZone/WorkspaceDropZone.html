@@ -1,0 +1,18 @@
+<div id="drop-area" class="glass-panel rounded-lg flex-1 border-2 border-dashed border-outline-variant flex flex-col items-center justify-center relative overflow-hidden group transition-colors">
+  
+  <!-- Placeholder Content -->
+  <div id="placeholder-content" class="flex flex-col items-center gap-sm text-center p-xl z-10">
+    <span class="material-symbols-outlined text-[48px] text-secondary mb-sm group-hover:text-primary transition-colors" style="font-variation-settings: 'FILL' 0;">cloud_upload</span>
+    <h2 class="font-headline-md text-xl text-on-surface">Upload Image</h2>
+    <p class="font-body-sm text-on-surface-variant max-w-[280px]">Drop your grayscale image here, or click to browse files.</p>
+    <button id="btn-browse" class="glass-sub-panel border-outline-variant text-on-surface font-label-caps py-sm px-lg rounded mt-sm hover:bg-surface-variant transition-colors">
+      Browse Files
+    </button>
+    <input type="file" id="file-input" class="hidden" accept="image/jpeg, image/png, image/jpg" />
+  </div>
+
+  <!-- Canvas Container (Hidden by default) -->
+  <div id="canvas-container" class="hidden w-full h-full flex items-center justify-center p-sm z-10 relative">
+     <canvas id="main-canvas" class="max-w-full max-h-full object-contain shadow-lg rounded"></canvas>
+  </div>
+</div>

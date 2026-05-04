@@ -1,0 +1,16 @@
+# Ignore generated or large workspace assets
+stitch_assets/
+
+# Ignore dependencies
+node_modules/
+.vscode/
+
+# Build output
+dist/
+dist-ssr/
+*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
