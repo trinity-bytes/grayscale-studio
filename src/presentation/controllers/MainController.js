@@ -43,7 +43,7 @@ export class MainController {
             this.view.getWorkspaceCanvasId()
           );
 
-          if (!this.currentImageModel.isGrayscale) {
+          if (!this.currentImageModel.isStrictGrayscale) {
             this.view.showError("Color image detected. Please upload a grayscale image.");
             this.view.showPlaceholder();
             this.view.updateImageInfo();
@@ -51,21 +51,18 @@ export class MainController {
           }
 
           // Valid Grayscale image
+          const metadata = this.currentImageModel.getMetadata();
           this.view.updateImageInfo(
-             this.currentImageModel.metadata.totalPixels, // Wait, width/height is not in metadata directly
-             // The OpenCvImageProcessor returns totalPixels, minVal, maxVal.
-             // We can just show total pixels for now or estimate resolution
-             Math.sqrt(this.currentImageModel.metadata.totalPixels).toFixed(0), // Approx width
+             metadata.width,
+             metadata.height,
              1 // Channels
           );
 
           // Render Original Histogram
-          this.currentHistogram = this.currentImageModel.histogram;
+          this.currentHistogram = this.currentImageModel.getHistogram();
           this.chartRenderer.render(
             this.view.getOriginalHistogramCanvas(),
-            this.currentHistogram.data,
-            "Original Histogram",
-            "#54647a"
+            this.currentHistogram
           );
 
           this.view.enableControls();
@@ -84,15 +81,13 @@ export class MainController {
   handleEqualize() {
     try {
       const newHistogram = this.equalizeUseCase.execute(
-        this.view.getWorkspaceCanvasId(),
+        this.view.getHiddenImageId(),
         this.view.getWorkspaceCanvasId()
       );
 
       this.chartRenderer.render(
         this.view.getResultHistogramCanvas(),
-        newHistogram.data,
-        "Equalized Histogram",
-        "#0043c8"
+        newHistogram
       );
     } catch (error) {
       console.error(error);
@@ -103,15 +98,13 @@ export class MainController {
   handleExpand() {
     try {
       const newHistogram = this.expandUseCase.execute(
-        this.view.getWorkspaceCanvasId(),
+        this.view.getHiddenImageId(),
         this.view.getWorkspaceCanvasId()
       );
 
       this.chartRenderer.render(
         this.view.getResultHistogramCanvas(),
-        newHistogram.data,
-        "Expanded Histogram",
-        "#0043c8"
+        newHistogram
       );
     } catch (error) {
       console.error(error);

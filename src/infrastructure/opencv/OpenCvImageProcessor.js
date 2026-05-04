@@ -25,6 +25,8 @@ export class OpenCvImageProcessor extends IImageProcessor {
       histogramData: [],
       metadata: {
         totalPixels: 0,
+        width: 0,
+        height: 0,
         minVal: 0,
         maxVal: 0,
       },
@@ -48,6 +50,8 @@ export class OpenCvImageProcessor extends IImageProcessor {
     // Cálculo de metadatos solicitados (Pixeles totales y Rango Min/Max de intensidad)
     let minMax = cv.minMaxLoc(grayMat);
     resultData.metadata.totalPixels = grayMat.rows * grayMat.cols;
+    resultData.metadata.width = grayMat.cols;
+    resultData.metadata.height = grayMat.rows;
     resultData.metadata.minVal = Math.round(minMax.minVal);
     resultData.metadata.maxVal = Math.round(minMax.maxVal);
 
@@ -76,15 +80,15 @@ export class OpenCvImageProcessor extends IImageProcessor {
     cv.absdiff(channels.get(0), channels.get(1), diffRG);
     cv.absdiff(channels.get(0), channels.get(2), diffRB);
 
-    // Valida la ausencia perfecta de aberraciones cromáticas cruzadas
-    let nonZeroRG = cv.countNonZero(diffRG);
-    let nonZeroRB = cv.countNonZero(diffRB);
+    let meanRG = cv.mean(diffRG)[0];
+    let meanRB = cv.mean(diffRB)[0];
 
     channels.delete();
     diffRG.delete();
     diffRB.delete();
 
-    return nonZeroRG === 0 && nonZeroRB === 0;
+    // Allow a small threshold (e.g. 2.0) to account for JPEG compression artifacts
+    return meanRG < 2.0 && meanRB < 2.0;
   }
 
   static extractHistogram(mat) {
