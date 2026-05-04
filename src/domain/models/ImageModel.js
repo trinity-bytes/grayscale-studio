@@ -16,6 +16,8 @@ export class ImageModel {
     this.isStrictGrayscale = isStrictGrayscale;
     this.metadata = {
       totalPixels: metadata.totalPixels || 0,
+      width: metadata.width || 0,
+      height: metadata.height || 0,
       minVal: metadata.minVal || 0,
       maxVal: metadata.maxVal || 0,
     };
