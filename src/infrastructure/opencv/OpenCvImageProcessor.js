@@ -1,6 +1,6 @@
 import { HistogramModel } from "../../domain/models/HistogramModel.js";
 import { ImageModel } from "../../domain/models/ImageModel.js";
-import { IImageProcessor } from "../../domain/services/IImageProcessor.js";
+import { IImageProcessor } from "../../domain/services/ImageProcessor.js";
 
 /**
  * ==========================================
