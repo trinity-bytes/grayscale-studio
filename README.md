@@ -1,10 +1,10 @@
-<p align="center">
+<div align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="public/assets/branding/grayscale-studio-full-logo-negativo.png" />
         <source media="(prefers-color-scheme: light)" srcset="public/assets/branding/grayscale-studio-full-logo.png" />
         <img src="public/assets/branding/grayscale-studio-full-logo.png" alt="Logotipo de Grayscale Studio" width="300">
     </picture>
-</p>
+</div>
 <p align="center"><strong>Procesa y mejora imágenes en escala de grises con precisión profesional</strong></p>
 <p align="center">
     <a href="https://" target="_blank">
@@ -16,6 +16,7 @@
 
 ## Tabla de contenidos
 
+- [Tabla de contenidos](#tabla-de-contenidos)
 - [Descripción del Proyecto](#descripción-del-proyecto)
 - [Características Implementadas](#características-implementadas)
 - [Tecnologías y Librerías](#tecnologías-y-librerías)
