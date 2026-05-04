@@ -1,6 +1,6 @@
-export { TopNavBar } from './TopNavBar.js';
-export { ImageInfoPanel } from './ImageInfoPanel.js';
-export { ProcessingControls } from './ProcessingControls.js';
-export { WorkspaceDropZone } from './WorkspaceDropZone.js';
-export { AnalysisPanel } from './AnalysisPanel.js';
-export { ErrorAlert } from './ErrorAlert.js';
+export { TopNavBar } from './TopNavBar/TopNavBar.js';
+export { ImageInfoPanel } from './ImageInfoPanel/ImageInfoPanel.js';
+export { ProcessingControls } from './ProcessingControls/ProcessingControls.js';
+export { WorkspaceDropZone } from './WorkspaceDropZone/WorkspaceDropZone.js';
+export { AnalysisPanel } from './AnalysisPanel/AnalysisPanel.js';
+export { ErrorAlert } from './ErrorAlert/ErrorAlert.js';
