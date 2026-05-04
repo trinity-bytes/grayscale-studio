@@ -8,16 +8,15 @@
 </p>
 <p align="center"><strong>Procesa y mejora imágenes en escala de grises con precisión profesional</strong></p>
 <p align="center">
-  <a href="https://" target="_blank">
-    <img src="https://img.shields.io/badge/Demo%20en%20vivo-0078d4?style=for-the-badge&logo=github&logoColor=white" alt="Abrir demo en vivo" />
-  </a>
+    <a href="https://" target="_blank">
+        <img src="https://img.shields.io/badge/Demo%20en%20vivo-0078d4?style=for-the-badge&logo=github&logoColor=white" alt="Abrir demo en vivo" />
+    </a>
 </p>
 
 > Aplicación web profesional para la expansión y ecualización de histogramas de imágenes en escala de grises, construida bajo los principios de Clean Architecture y Domain-Driven Design (DDD).
 
 ## Tabla de contenidos
 
-- [Tabla de contenidos](#tabla-de-contenidos)
 - [Descripción del Proyecto](#descripción-del-proyecto)
 - [Características Implementadas](#características-implementadas)
 - [Tecnologías y Librerías](#tecnologías-y-librerías)
