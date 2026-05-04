@@ -7,7 +7,7 @@
 </div>
 <p align="center"><strong>Procesa y mejora imágenes en escala de grises con precisión profesional</strong></p>
 <p align="center">
-    <a href="https://" target="_blank">
+    <a href="https://trinity-bytes.github.io/grayscale-studio/" target="_blank">
         <img src="https://img.shields.io/badge/Demo%20en%20vivo-0078d4?style=for-the-badge&logo=github&logoColor=white" alt="Abrir demo en vivo" />
     </a>
 </p>
