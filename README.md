@@ -1,10 +1,7 @@
 <!-- markdownlint-disable MD033 -->
 <div align="center">
-    <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="public/assets/branding/grayscale-studio-full-logo-negativo.png" />
-        <source media="(prefers-color-scheme: light)" srcset="public/assets/branding/grayscale-studio-full-logo.png" />
-        <img src="public/assets/branding/grayscale-studio-full-logo.png" alt="Logotipo de Grayscale Studio" width="300">
-    </picture>
+    <img src="./public/assets/branding/grayscale-studio-full-logo.png#gh-light-mode-only" alt="Logotipo de Grayscale Studio" width="300">
+    <img src="./public/assets/branding/grayscale-studio-full-logo-negativo.png#gh-dark-mode-only" alt="Logotipo de Grayscale Studio" width="300">
 </div>
 <p align="center"><strong>Procesa y mejora imágenes en escala de grises con precisión profesional</strong></p>
 <p align="center">
