@@ -80,10 +80,10 @@ export class MainView {
   }
 
   getOriginalHistogramCanvas() {
-    return this.analysisPanel.getOriginalCanvas();
+    return this.analysisPanel.getOriginalCanvas().id;
   }
 
   getResultHistogramCanvas() {
-    return this.analysisPanel.getResultCanvas();
+    return this.analysisPanel.getResultCanvas().id;
   }
 }
