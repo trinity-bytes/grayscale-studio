@@ -32,7 +32,7 @@
 
 **GrayScale Studio** es una moderna herramienta web diseñada para procesar imágenes en blanco y negro (JPG/JPEG). Validando matemáticamente que la imagen carezca de canales de color, el sistema extrae las frecuencias de intensidades (0-255), renderiza el histograma original y permite aplicar transformaciones de contraste no lineales (Ecualización) y lineales (Expansión Min-Max).
 
-El proyecto destaca por su rigurosa arquitectura de software basada en Vanilla JavaScript, separando la lógica de negocio pura de las implementaciones de UI (DOM) y de las librerías matemáticas y gráficas.
+El proyecto destaca por su rigurosa arquitectura de software basada en Vanilla JavaScript y ahora utiliza **Vite** como servidor de desarrollo y bundler, separando la lógica de negocio pura de las implementaciones de UI (DOM) y de las librerías matemáticas y gráficas.
 
 ---
 
@@ -53,6 +53,7 @@ El proyecto destaca por su rigurosa arquitectura de software basada en Vanilla J
 |---|---|
 | **HTML5 / CSS3** | Capa de Presentación (UI y estructura) |
 | **Vanilla JavaScript (ES6 Modules)** | Capas de Dominio, Aplicación e Infraestructura |
+| **Vite** | Servidor de desarrollo local, bundler y build optimizado para distribución |
 | **[OpenCV.js](https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html) (CDN)** | Motor matemático (Infraestructura). Inyectado mediante WebAssembly. |
 | **[Chart.js](https://www.chartjs.org/) (CDN)** | Renderizado interactivo de datos de histograma (Infraestructura). |
 
@@ -60,26 +61,80 @@ El proyecto destaca por su rigurosa arquitectura de software basada en Vanilla J
 
 ## Arquitectura del Proyecto (DDD + SOLID)
 
-El código fuente está estrictamente dividido en **4 capas lógicas**, asegurando un alto grado de cohesión y un bajo acoplamiento:
+El proyecto está organizado como un solo árbol visual, desde los recursos públicos hasta las capas internas de la app:
 
-`
-(insertar arquitectura interna)
-`
+```text
+grayscale-studio/
+├─ index.html
+├─ public/
+│  ├─ assets/
+│  │  ├─ branding/
+│  │  ├─ cursors/
+│  │  ├─ fonts/
+│  │  └─ images/
+│  └─ docs/
+├─ src/
+│  ├─ main.js                        # Composition Root y punto de arranque
+│  ├─ application/
+│  │  ├─ LoadAndValidateImageUseCase.js
+│  │  ├─ EqualizeImageUseCase.js
+│  │  └─ ExpandImageUseCase.js       # Casos de uso de la aplicación
+│  ├─ domain/
+│  │  ├─ models/
+│  │  │  ├─ ImageModel.js
+│  │  │  └─ HistogramModel.js
+│  │  └─ services/
+│  │     └─ ImageProcessor.js        # Contrato de dominio
+│  ├─ infrastructure/
+│  │  ├─ file/
+│  │  │  └─ BrowserFileReader.js
+│  │  ├─ opencv/
+│  │  │  └─ OpenCvImageProcessor.js   # Procesamiento matemático con OpenCV.js
+│  │  └─ chart/
+│  │     └─ ChartJsRenderer.js       # Renderizado de histogramas con Chart.js
+│  ├─ presentation/
+│  │  ├─ views/
+│  │  │  └─ MainView.js
+│  │  ├─ controllers/
+│  │  │  └─ MainController.js
+│  │  └─ components/
+│  │     ├─ AnalysisPanel/
+│  │     ├─ ErrorAlert/
+│  │     ├─ ImageInfoPanel/
+│  │     ├─ ProcessingControls/
+│  │     ├─ TopNavBar/
+│  │     └─ WorkspaceDropZone/
+│  └─ shared/
+│     ├─ components/
+│     │  └─ PrimaryButton/
+│     └─ styles/
+└─ stitch_assets/
+   └─ workspace_main.html
+```
 
-- **Inversión de Dependencias (DIP):** El controlador principal delega la renderización visual a `ChartJsRenderer` instanciado desde el Composition Root, y los procesadores de dominio obligan a la infraestructura a cumplir contratos (`IImageProcessor`).
+Este diseño mantiene el flujo principal bien delimitado: `MainView` captura la interacción, `MainController` coordina la experiencia, los `UseCase` ejecutan la intención de negocio, el dominio conserva las reglas puras y la infraestructura resuelve los detalles externos sin contaminar las capas superiores.
 
 ---
 
 ## Inicio Rápido (Desarrollo)
 
-Dado que la aplicación utiliza **Módulos ES6** nativos (`<script type="module">`), debe ejecutarse desde un servidor HTTP local para evitar restricciones de políticas CORS impuestas por los navegadores modernos sobre el sistema de archivos `file://`.
+Esta aplicación ahora está integrada con **Vite** para un flujo de desarrollo moderno y un build optimizado.
 
-1. **Clona este repositorio o abre la carpeta en tu editor.**
-2. **Inicia un servidor local estático.** Varias opciones:
-   - Extensión **Live Server** en VS Code.
-   - Usando Node.js: `npx http-server` o `npx serve .`
-   - Usando Python: `python -m http.server 3000`
-3. **Navega a la URL local** provista (ej. `http://127.0.0.1:3000`).
+1. Asegúrate de tener instalado `Node.js` (recomendado `>=16`).
+2. Abre la carpeta del proyecto en tu terminal.
+3. Instala las dependencias:
+   - `npm install`
+4. Inicia el servidor de desarrollo:
+   - `npm run dev`
+5. Abre la URL local que muestra Vite en la terminal, por ejemplo `http://localhost:5173`.
+
+Para generar la versión de producción:
+
+- `npm run build`
+
+Para previsualizar el build de producción localmente:
+
+- `npm run preview`
 
 ---
 
