@@ -108,18 +108,40 @@
 
   <div id="loader-overlay" class="active fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[100]">
     <div class="flex flex-col items-center gap-md">
-      <img src="/assets/branding/grayscale-studio-full-logo.png" alt="GrayScale Studio" class="h-16 w-auto loader-isotipo" />
-      <p class="font-data-mono text-on-surface font-semibold text-sm tracking-wider">LOADING OPENCV ENGINE</p>
-      <div class="w-32 h-1 bg-surface-variant rounded-full overflow-hidden">
+      <img src="assets/branding/grayscale-studio-isotipo.png" alt="GrayScale Studio"
+        class="h-40 w-auto loader-isotipo" />
+      <p class="font-data-mono text-on-surface font-semibold text-lg tracking-wider">LOADING OPENCV ENGINE</p>
+      <div class="w-40 h-1 bg-surface-variant rounded-full overflow-hidden">
         <div class="h-full bg-primary rounded-full animate-pulse" style="width: 60%;"></div>
       </div>
     </div>
   </div>
 
-  <top-nav-bar></top-nav-bar>
+  <top-nav-bar class="hidden lg:block"></top-nav-bar>
+
+  <!-- Mobile Guard -->
+  <div id="mobile-guard"
+    class="flex lg:hidden flex-col items-center justify-center flex-1 px-lg text-center gap-lg py-xl">
+    <div
+      class="glass-panel p-xl rounded-xl flex flex-col items-center gap-lg max-w-md w-full border border-outline-variant shadow-lg relative overflow-hidden">
+      <!-- Decorative background glow -->
+      <div class="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-150 transform -translate-y-1/2"></div>
+
+      <img src="assets/branding/grayscale-studio-full-logo.png" alt="GrayScale Studio"
+        class="w-64 h-auto opacity-90 relative z-10" />
+
+      <div class="flex flex-col gap-sm items-center relative z-10">
+        <h2 class="font-headline-md text-on-surface">Larger Screen Required</h2>
+        <p class="font-body-md text-on-surface-variant">
+          Grayscale Studio is a professional tool optimized for precise histogram analysis and image manipulation.
+          Please access this workspace from a tablet or desktop device.
+        </p>
+      </div>
+    </div>
+  </div>
 
   <main
-    class="flex-1 max-w-[1440px] w-full mx-auto px-lg pb-margin grid grid-cols-12 gap-gutter items-start mt-md relative">
+    class="hidden lg:grid flex-1 max-w-[1440px] w-full mx-auto px-lg pb-margin grid-cols-12 gap-gutter items-start mt-md relative">
 
     <!-- Left Sidebar: Technical Controls -->
     <aside class="col-span-3 flex flex-col gap-md">

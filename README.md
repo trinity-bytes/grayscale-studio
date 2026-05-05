@@ -1,8 +1,9 @@
+<!-- markdownlint-disable MD033 -->
 <div align="center">
     <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="public/assets/branding/grayscale-studio-full-logo-negativo.png" />
-        <source media="(prefers-color-scheme: light)" srcset="public/assets/branding/grayscale-studio-full-logo.png" />
-        <img src="public/assets/branding/grayscale-studio-full-logo.png" alt="Logotipo de Grayscale Studio" width="300">
+        <source media="(prefers-color-scheme: dark)" srcset="https://trinity-bytes.github.io/grayscale-studio/assets/branding/grayscale-studio-full-logo-negativo.png" />
+        <source media="(prefers-color-scheme: light)" srcset="https://trinity-bytes.github.io/grayscale-studio/assets/branding/grayscale-studio-full-logo.png" />
+        <img src="https://trinity-bytes.github.io/grayscale-studio/assets/branding/grayscale-studio-full-logo.png" alt="Logotipo de Grayscale Studio" width="300">
     </picture>
 </div>
 <p align="center"><strong>Procesa y mejora imágenes en escala de grises con precisión profesional</strong></p>
@@ -11,6 +12,7 @@
         <img src="https://img.shields.io/badge/Demo%20en%20vivo-0078d4?style=for-the-badge&logo=github&logoColor=white" alt="Abrir demo en vivo" />
     </a>
 </p>
+<!-- markdownlint-enable MD033 -->
 
 > Aplicación web profesional para la expansión y ecualización de histogramas de imágenes en escala de grises, construida bajo los principios de Clean Architecture y Domain-Driven Design (DDD).
 
