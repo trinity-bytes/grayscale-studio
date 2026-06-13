@@ -26,18 +26,19 @@
 
 .dark {
   /* Glass panels — dark mode */
-  --glass-bg-color: 30, 33, 41;
-  --glass-bg-opacity: 0.92;
-  --glass-border-light: rgba(255, 255, 255, 0.08);
-  --glass-border-dark: rgba(0, 0, 0, 0.3);
+  --glass-bg-color: 22, 25, 32;
+  --glass-bg-opacity: 0.97;
+  --glass-border-light: rgba(255, 255, 255, 0.06);
+  --glass-border-dark: rgba(0, 0, 0, 0.4);
+  --glass-sub-bg-opacity: 0.85;
 
   /* Dashboard semantic tokens — dark mode */
   --surface-bg: #12141a;
-  --surface-text: #e4e6ea;
-  --surface-text-muted: #8b8fa3;
+  --surface-text: #e8eaed;
+  --surface-text-muted: #9aa0ac;
   --canvas-bg: #1a1d26;
   --chart-grid: rgba(255, 255, 255, 0.08);
-  --chart-tick: #e4e6ea;
+  --chart-tick: #e8eaed;
   --chart-bar: rgba(100, 180, 255, 0.7);
   --chart-bar-processed: rgba(255, 130, 150, 0.7);
 }

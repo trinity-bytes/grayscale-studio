@@ -195,23 +195,23 @@
     </div>
 
     <main
-      class="hidden md:grid flex-1 max-w-[1440px] w-full mx-auto px-lg pb-lg grid-cols-12 gap-gutter items-start mt-md relative"
+      class="hidden md:grid flex-1 max-w-[1440px] w-full mx-auto px-sm pb-lg grid-cols-12 gap-sm items-start mt-md relative"
     >
       <!-- Left Zone: Metadata + Browse (2 cols) -->
-      <aside class="col-span-2 flex flex-col gap-md">
+      <aside class="col-span-2 flex flex-col gap-sm">
         <image-info-panel id="image-info-panel"></image-info-panel>
       </aside>
 
       <!-- Center Zone: Workspace + Toolbar (7 cols) -->
       <section
-        class="col-span-7 flex flex-col gap-md h-[calc(100vh-100px)] min-h-[600px]"
+        class="col-span-7 flex flex-col gap-sm h-[calc(100vh-100px)] min-h-[600px]"
       >
         <error-alert id="main-error-alert"></error-alert>
         <workspace-drop-zone id="main-workspace"></workspace-drop-zone>
       </section>
 
       <!-- Right Zone: Analysis Tabs (3 cols) -->
-      <aside class="col-span-3 flex flex-col gap-md h-full">
+      <aside class="col-span-3 flex flex-col gap-sm h-full">
         <analysis-panel
           id="analysis-panel"
           class="flex-1 flex flex-col"

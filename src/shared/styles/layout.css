@@ -20,9 +20,16 @@ body {
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   pointer-events: none;
   z-index: -1;
+}
+
+/* Unified dashboard background — hides background image through panel gaps */
+.dark main {
+  background: rgba(18, 20, 26, 0.6);
+  border-radius: 12px;
+  padding: 4px;
 }
 
 /* ===== Loader Overlay ===== */
