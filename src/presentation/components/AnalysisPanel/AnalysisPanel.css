@@ -1,1 +1,10 @@
 /* Scoped styles for AnalysisPanel */
+.tab-btn {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+}
+.tab-btn:hover {
+  background-color: rgba(var(--primary-rgb), 0.05);
+}

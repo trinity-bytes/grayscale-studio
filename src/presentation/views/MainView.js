@@ -29,6 +29,12 @@ export class MainView {
     this.processingControls.addEventListener("on-expand", handler);
   }
 
+  bindError(handler) {
+    this.workspace.addEventListener("on-error", (e) => {
+      handler(e.detail.message);
+    });
+  }
+
   // Update methods
   showError(msg) {
     this.errorAlert.show(msg);
@@ -85,5 +91,25 @@ export class MainView {
 
   getResultHistogramCanvas() {
     return this.analysisPanel.getResultCanvas().id;
+  }
+
+  getMathEqCanvas() {
+    return this.analysisPanel.getMathEqCanvas().id;
+  }
+
+  getMathExpCanvas() {
+    return this.analysisPanel.getMathExpCanvas().id;
+  }
+
+  switchToVisualTab() {
+    this.analysisPanel.switchToVisualTab();
+  }
+
+  switchToMathEqTab() {
+    this.analysisPanel.switchToMathEqTab();
+  }
+
+  switchToMathExpTab() {
+    this.analysisPanel.switchToMathExpTab();
   }
 }

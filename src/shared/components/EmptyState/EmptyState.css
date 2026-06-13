@@ -1,0 +1,4 @@
+/* EmptyState scoped styles */
+.empty-state-root {
+  min-height: 100px;
+}

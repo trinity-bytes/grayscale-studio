@@ -67,4 +67,98 @@ export class ChartJsRenderer {
 
     this.chartInstances.set(canvasId, newChart);
   }
+
+  /**
+   * Pinta la gráfica matemática (Dual-axis para Histograma + Función de mapeo)
+   * @param {string} canvasId 
+   * @param {import('../../domain/models/HistogramMath.js').HistogramMath} histogramMath 
+   * @param {string} type - "equalization" o "expansion"
+   */
+  renderMath(canvasId, histogramMath, type) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    if (this.chartInstances.has(canvasId)) {
+      this.chartInstances.get(canvasId).destroy();
+      this.chartInstances.delete(canvasId);
+    }
+
+    const ctx = canvas.getContext("2d");
+    
+    let lineData = [];
+    let lineLabel = "";
+    
+    if (type === "equalization") {
+      lineData = histogramMath.getEqualizationData().lut;
+      lineLabel = "LUT (Equalization)";
+    } else {
+      lineData = histogramMath.getExpansionData().lut;
+      lineLabel = "LUT (Expansion)";
+    }
+
+    const newChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: histogramMath.labels,
+        datasets: [
+          {
+            type: "line",
+            label: lineLabel,
+            data: lineData,
+            borderColor: "rgba(255, 99, 132, 1)",
+            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            borderWidth: 2,
+            yAxisID: "y2",
+            tension: 0.1,
+            pointRadius: 0
+          },
+          {
+            type: "bar",
+            label: "Original Histogram",
+            data: histogramMath.frequencies,
+            backgroundColor: "rgba(54, 162, 235, 0.3)",
+            borderColor: "rgba(54, 162, 235, 0.5)",
+            borderWidth: 1,
+            yAxisID: "y",
+            barPercentage: 1.0,
+            categoryPercentage: 1.0,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
+        scales: {
+          x: {
+            display: true,
+            title: { display: true, text: "Input Intensity (0-255)" },
+          },
+          y: {
+            display: true,
+            position: 'left',
+            title: { display: true, text: "Pixel Count" },
+          },
+          y2: {
+            display: true,
+            position: 'right',
+            title: { display: true, text: "Output Intensity (0-255)" },
+            min: 0,
+            max: 255,
+            grid: {
+              drawOnChartArea: false
+            }
+          }
+        },
+        animation: {
+          duration: 500,
+        },
+      }
+    });
+
+    this.chartInstances.set(canvasId, newChart);
+  }
 }

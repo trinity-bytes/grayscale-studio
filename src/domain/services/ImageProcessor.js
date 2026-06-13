@@ -1,4 +1,8 @@
-export class IImageProcessor {
+/**
+ * Interfaz dedicada a operaciones de carga y pipeline matemático.
+ * Usada por LoadAndValidateImageUseCase.
+ */
+export class ILoadProcessor {
   /**
    * Extrae datos matemáticos y dibuja la base inicial de la imagen
    * @param {string} sourceId
@@ -28,7 +32,28 @@ export class IImageProcessor {
   static extractHistogram(imageMatrix) {
     throw new Error("El método extractHistogram debe ser implementado.");
   }
+}
 
+/**
+ * Interfaz dedicada a extracción de histograma.
+ * Usada internamente y por futuros use cases que necesiten histogramas.
+ */
+export class IHistogramProcessor {
+  /**
+   * Extrae el modelo de histograma puro de las densidades
+   * @param {any} imageMatrix
+   * @returns {import('../models/HistogramModel.js').HistogramModel}
+   */
+  static extractHistogram(imageMatrix) {
+    throw new Error("El método extractHistogram debe ser implementado.");
+  }
+}
+
+/**
+ * Interfaz dedicada a transformaciones de imagen (ecualización y expansión).
+ * Usada por EqualizeImageUseCase y ExpandImageUseCase.
+ */
+export class ITransformProcessor {
   /**
    * Aplica el algoritmo de ecualización global de histograma y renderiza el resultado
    * @param {string} sourceId

@@ -155,12 +155,12 @@
       </div>
     </div>
 
-    <top-nav-bar class="hidden lg:block"></top-nav-bar>
+    <top-nav-bar class="hidden md:block"></top-nav-bar>
 
     <!-- Mobile Guard -->
     <div
       id="mobile-guard"
-      class="flex lg:hidden flex-col items-center justify-center flex-1 px-lg text-center gap-lg py-xl"
+      class="flex md:hidden flex-col items-center justify-center flex-1 px-lg text-center gap-lg py-xl"
     >
       <div
         class="glass-panel p-xl rounded-xl flex flex-col items-center gap-lg max-w-md w-full border border-outline-variant shadow-lg relative overflow-hidden"
@@ -190,24 +190,24 @@
     </div>
 
     <main
-      class="hidden lg:grid flex-1 max-w-[1440px] w-full mx-auto px-lg pb-margin grid-cols-12 gap-gutter items-start mt-md relative"
+      class="hidden md:grid flex-1 max-w-[1440px] w-full mx-auto px-lg pb-margin grid-cols-12 gap-gutter items-start mt-md relative"
     >
       <!-- Left Sidebar: Technical Controls -->
-      <aside class="col-span-3 flex flex-col gap-md">
+      <aside class="md:col-span-4 lg:col-span-3 flex flex-col gap-md">
         <image-info-panel id="image-info-panel"></image-info-panel>
         <processing-controls id="processing-controls"></processing-controls>
       </aside>
 
       <!-- Central Workspace -->
       <section
-        class="col-span-6 flex flex-col gap-md h-[calc(100vh-120px)] min-h-[600px]"
+        class="md:col-span-8 lg:col-span-6 flex flex-col gap-md h-[calc(100vh-120px)] min-h-[600px]"
       >
         <error-alert id="main-error-alert"></error-alert>
         <workspace-drop-zone id="main-workspace"></workspace-drop-zone>
       </section>
 
       <!-- Right Sidebar: Analysis Panel -->
-      <aside class="col-span-3 flex flex-col gap-md h-full">
+      <aside class="md:col-span-12 lg:col-span-3 flex flex-col gap-md h-full">
         <analysis-panel
           id="analysis-panel"
           class="flex-1 flex flex-col"

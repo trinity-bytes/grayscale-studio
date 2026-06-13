@@ -1,10 +1,14 @@
 {
   "name": "grayscale-studio",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A web application to process and enhance grayscale images with professional precision",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
@@ -14,16 +18,14 @@
   "author": "",
   "license": "ISC",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
   "bugs": {
     "url": "https://github.com/trinity-bytes/grayscale-studio/issues"
   },
   "homepage": "https://github.com/trinity-bytes/grayscale-studio#readme",
   "devDependencies": {
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "vitest": "^3.0.0",
+    "jsdom": "^26.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
   }
 }

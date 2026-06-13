@@ -17,6 +17,7 @@ export class ErrorAlert extends HTMLElement {
   show(message) {
     this.querySelector('#error-message').textContent = message;
     this.classList.remove('hidden');
+    this.querySelector('#btn-close').focus();
   }
 
   hide() {
