@@ -97,6 +97,22 @@ export class WorkspaceDropZone extends HTMLElement {
   getCanvas() {
     return this.querySelector('#main-canvas');
   }
+
+  getProcessedCanvas() {
+    return this.querySelector('#processed-canvas');
+  }
+
+  showProcessedCanvas() {
+    this.querySelector('#processed-container').classList.remove('hidden');
+  }
+
+  hideProcessedCanvas() {
+    this.querySelector('#processed-container').classList.add('hidden');
+  }
+
+  resetToOriginal() {
+    this.hideProcessedCanvas();
+  }
 }
 
 customElements.define('workspace-drop-zone', WorkspaceDropZone);

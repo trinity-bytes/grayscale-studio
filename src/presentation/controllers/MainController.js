@@ -31,6 +31,7 @@ export class MainController {
     try {
       this.view.hideError();
       this.view.disableControls();
+      this.view.resetToOriginal();
       
       // Load file as base64
       const base64Data = await this.loadUseCase.execute(file);
@@ -102,8 +103,10 @@ export class MainController {
     try {
       const newHistogram = this.equalizeUseCase.execute(
         this.view.getHiddenImageId(),
-        this.view.getWorkspaceCanvasId()
+        this.view.getProcessedCanvasId()
       );
+
+      this.view.showProcessedCanvas();
 
       this.chartRenderer.render(
         this.view.getResultHistogramCanvas(),
@@ -121,8 +124,10 @@ export class MainController {
     try {
       const newHistogram = this.expandUseCase.execute(
         this.view.getHiddenImageId(),
-        this.view.getWorkspaceCanvasId()
+        this.view.getProcessedCanvasId()
       );
+
+      this.view.showProcessedCanvas();
 
       this.chartRenderer.render(
         this.view.getResultHistogramCanvas(),

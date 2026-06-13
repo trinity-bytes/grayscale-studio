@@ -12,7 +12,20 @@
   </div>
 
   <!-- Canvas Container (Hidden by default) -->
-  <div id="canvas-container" class="hidden w-full h-full flex items-center justify-center p-sm z-10 relative">
-     <canvas id="main-canvas" class="max-w-full max-h-full object-contain shadow-lg rounded"></canvas>
+  <div id="canvas-container" class="hidden w-full h-full flex gap-sm z-10 relative p-sm">
+    <!-- Original Image -->
+    <div class="flex-1 flex flex-col gap-xs">
+      <span class="font-label-caps text-on-surface-variant text-xs text-center">Original</span>
+      <div class="flex-1 flex items-center justify-center">
+        <canvas id="main-canvas" class="max-w-full max-h-full object-contain shadow-lg rounded"></canvas>
+      </div>
+    </div>
+    <!-- Processed Image (Hidden until processing) -->
+    <div id="processed-container" class="hidden flex-1 flex flex-col gap-xs">
+      <span class="font-label-caps text-primary text-xs text-center">Processed</span>
+      <div class="flex-1 flex items-center justify-center">
+        <canvas id="processed-canvas" class="max-w-full max-h-full object-contain shadow-lg rounded"></canvas>
+      </div>
+    </div>
   </div>
 </div>

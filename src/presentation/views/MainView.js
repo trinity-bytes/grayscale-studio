@@ -77,8 +77,24 @@ export class MainView {
     return this.workspace.getCanvas().id;
   }
 
+  getProcessedCanvasId() {
+    return this.workspace.getProcessedCanvas().id;
+  }
+
   showCanvas() {
     this.workspace.showCanvas();
+  }
+
+  showProcessedCanvas() {
+    this.workspace.showProcessedCanvas();
+  }
+
+  hideProcessedCanvas() {
+    this.workspace.hideProcessedCanvas();
+  }
+
+  resetToOriginal() {
+    this.workspace.resetToOriginal();
   }
 
   showPlaceholder() {
