@@ -1,5 +1,4 @@
 import { BrowserFileReader } from "../infrastructure/file/BrowserFileReader.js";
-import { OpenCvImageProcessor } from "../infrastructure/opencv/OpenCvImageProcessor.js";
 
 /**
  * ==========================================
@@ -9,6 +8,13 @@ import { OpenCvImageProcessor } from "../infrastructure/opencv/OpenCvImageProces
  * permite extraer su matriz matemática para verificar la escala de grises.
  */
 export class LoadAndValidateImageUseCase {
+  /**
+   * @param {import('../domain/services/ImageProcessor.js').ILoadProcessor} loadProcessor
+   */
+  constructor(loadProcessor) {
+    this.loadProcessor = loadProcessor;
+  }
+
   /**
    * @param {File} rawFile - Objeto nativo Web API (File) proveído por inputs.
    * @returns {Promise<string>} Promesa de la data codificada en base64 de la imagen subida.
@@ -25,7 +31,7 @@ export class LoadAndValidateImageUseCase {
    * @returns {import('../domain/models/ImageModel.js').ImageModel} Ente dominante con los metadatos e histograma.
    */
   executeMathematicalExtraction(tempImgId, canvasDestId) {
-    return OpenCvImageProcessor.executeMathematicalPipeline(
+    return this.loadProcessor.executeMathematicalPipeline(
       tempImgId,
       canvasDestId,
     );

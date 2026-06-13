@@ -1,5 +1,3 @@
-import { OpenCvImageProcessor } from "../infrastructure/opencv/OpenCvImageProcessor.js";
-
 /**
  * ==========================================
  * EXPAND IMAGE USE CASE
@@ -9,11 +7,18 @@ import { OpenCvImageProcessor } from "../infrastructure/opencv/OpenCvImageProces
  */
 export class ExpandImageUseCase {
   /**
+   * @param {import('../domain/services/ImageProcessor.js').ITransformProcessor} transformProcessor
+   */
+  constructor(transformProcessor) {
+    this.transformProcessor = transformProcessor;
+  }
+
+  /**
    * @param {string} sourceId - ID del lienzo que contiene la imagen de análisis.
    * @param {string} destinationId - ID del lienzo destino para el dibujo expandido.
    * @returns {import('../domain/models/HistogramModel.js').HistogramModel} Datos del histograma expandido.
    */
   execute(sourceId, destinationId) {
-    return OpenCvImageProcessor.applyExpansion(sourceId, destinationId);
+    return this.transformProcessor.applyExpansion(sourceId, destinationId);
   }
 }
