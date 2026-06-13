@@ -4,22 +4,31 @@
  * Reusable glass panel classes used across the app.
  */
 
+:root {
+  --glass-bg-color: 255, 255, 255;
+  --glass-bg-opacity: 0.85;
+  --glass-blur: 12px;
+  --glass-border-light: rgba(255, 255, 255, 0.2);
+  --glass-border-dark: rgba(0, 0, 0, 0.1);
+  --glass-sub-bg-opacity: 0.5;
+}
+
 .glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(var(--glass-bg-color), var(--glass-bg-opacity));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border-top: 1px solid var(--glass-border-light);
+  border-left: 1px solid var(--glass-border-light);
+  border-bottom: 1px solid var(--glass-border-dark);
+  border-right: 1px solid var(--glass-border-dark);
 }
 
 .glass-sub-panel {
-  background: rgba(255, 255, 255, 0.4);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(var(--glass-bg-color), var(--glass-sub-bg-opacity));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border-top: 1px solid var(--glass-border-light);
+  border-left: 1px solid var(--glass-border-light);
+  border-bottom: 1px solid var(--glass-border-dark);
+  border-right: 1px solid var(--glass-border-dark);
 }

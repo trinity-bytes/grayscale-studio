@@ -1,3 +1,5 @@
+import { HistogramMath } from '../../domain/models/HistogramMath.js';
+
 export class MainController {
   constructor(view, loadUseCase, equalizeUseCase, expandUseCase, chartRenderer) {
     this.view = view;
@@ -16,6 +18,7 @@ export class MainController {
     this.view.bindFileSelected(this.handleFileSelected.bind(this));
     this.view.bindEqualize(this.handleEqualize.bind(this));
     this.view.bindExpand(this.handleExpand.bind(this));
+    this.view.bindError(this.handleError.bind(this));
     
     // Set WASM status to ready
     const topNavBar = document.querySelector('top-nav-bar');
@@ -65,6 +68,23 @@ export class MainController {
             this.currentHistogram
           );
 
+          // Compute Math Visualizations
+          this.histogramMath = new HistogramMath(this.currentHistogram);
+          
+          this.chartRenderer.renderMath(
+            this.view.getMathEqCanvas(),
+            this.histogramMath,
+            "equalization"
+          );
+
+          this.chartRenderer.renderMath(
+            this.view.getMathExpCanvas(),
+            this.histogramMath,
+            "expansion"
+          );
+
+          this.view.switchToVisualTab();
+
           this.view.enableControls();
         } catch (error) {
           console.error(error);
@@ -89,6 +109,8 @@ export class MainController {
         this.view.getResultHistogramCanvas(),
         newHistogram
       );
+      
+      this.view.switchToVisualTab();
     } catch (error) {
       console.error(error);
       this.view.showError("Error equalizing the image.");
@@ -106,9 +128,15 @@ export class MainController {
         this.view.getResultHistogramCanvas(),
         newHistogram
       );
+
+      this.view.switchToVisualTab();
     } catch (error) {
       console.error(error);
       this.view.showError("Error expanding the image.");
     }
+  }
+
+  handleError(message) {
+    this.view.showError(message);
   }
 }

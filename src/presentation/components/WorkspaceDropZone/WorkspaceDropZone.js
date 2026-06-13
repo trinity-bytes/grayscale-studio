@@ -1,5 +1,6 @@
 import html from './WorkspaceDropZone.html?raw';
 import './WorkspaceDropZone.css';
+import '../../../shared/components/EmptyState/EmptyState.js';
 
 export class WorkspaceDropZone extends HTMLElement {
   connectedCallback() {
@@ -10,6 +11,8 @@ export class WorkspaceDropZone extends HTMLElement {
   bindEvents() {
     const dropZone = this.querySelector('#drop-area');
     const fileInput = this.querySelector('#file-input');
+    const dropHint = this.querySelector('#drop-hint-text');
+    const placeholder = this.querySelector('#placeholder-content');
 
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
       dropZone.addEventListener(eventName, this.preventDefaults, false);
@@ -19,6 +22,9 @@ export class WorkspaceDropZone extends HTMLElement {
       dropZone.addEventListener(eventName, () => {
         dropZone.classList.add('border-primary');
         dropZone.classList.remove('border-outline-variant');
+        dropZone.classList.add('bg-primary/5');
+        dropHint.classList.remove('hidden');
+        placeholder.style.opacity = '0.6';
       }, false);
     });
 
@@ -26,6 +32,9 @@ export class WorkspaceDropZone extends HTMLElement {
       dropZone.addEventListener(eventName, () => {
         dropZone.classList.remove('border-primary');
         dropZone.classList.add('border-outline-variant');
+        dropZone.classList.remove('bg-primary/5');
+        dropHint.classList.add('hidden');
+        placeholder.style.opacity = '';
       }, false);
     });
 
@@ -33,7 +42,13 @@ export class WorkspaceDropZone extends HTMLElement {
       const dt = e.dataTransfer;
       const files = dt.files;
       if (files.length > 0) {
-        this.emitFile(files[0]);
+        const file = files[0];
+        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!validTypes.includes(file.type)) {
+          this.showError('Only JPEG and PNG images are accepted.');
+          return;
+        }
+        this.emitFile(file);
       }
     }, false);
 
@@ -58,6 +73,14 @@ export class WorkspaceDropZone extends HTMLElement {
       bubbles: true,
       composed: true,
       detail: { file }
+    }));
+  }
+
+  showError(message) {
+    this.dispatchEvent(new CustomEvent('on-error', {
+      bubbles: true,
+      composed: true,
+      detail: { message }
     }));
   }
 

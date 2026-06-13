@@ -22,12 +22,14 @@ export class ProcessingControls extends HTMLElement {
   enable() {
     this.querySelectorAll('primary-button').forEach(btn => {
       btn.removeAttribute('disabled');
+      btn.removeAttribute('title');
     });
   }
 
   disable() {
     this.querySelectorAll('primary-button').forEach(btn => {
       btn.setAttribute('disabled', 'true');
+      btn.setAttribute('title', 'Load an image first');
     });
   }
 }
