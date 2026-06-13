@@ -155,6 +155,28 @@ export class AnalysisPanel extends HTMLElement {
     container.innerHTML = '';
     container.classList.add('hidden');
   }
+
+  /**
+   * Show the result histogram canvas and hide its empty state.
+   * Called after processing completes.
+   */
+  showResultHistogram() {
+    const emptyState = this.querySelector('#result-empty-state');
+    const histogramContainer = this.querySelector('#result-histogram-container');
+    if (emptyState) emptyState.classList.add('hidden');
+    if (histogramContainer) histogramContainer.classList.remove('hidden');
+  }
+
+  /**
+   * Reset result histogram to empty state.
+   * Called when a new image is loaded.
+   */
+  hideResultHistogram() {
+    const emptyState = this.querySelector('#result-empty-state');
+    const histogramContainer = this.querySelector('#result-histogram-container');
+    if (emptyState) emptyState.classList.remove('hidden');
+    if (histogramContainer) histogramContainer.classList.add('hidden');
+  }
 }
 
 customElements.define('analysis-panel', AnalysisPanel);

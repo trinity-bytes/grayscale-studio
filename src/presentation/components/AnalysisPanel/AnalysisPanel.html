@@ -11,7 +11,7 @@
     <button class="tab-btn font-label-md px-2 py-1 rounded text-on-surface-variant" role="tab" aria-selected="false" aria-controls="tab-math-exp" id="tab-btn-math-exp" tabindex="-1" data-target="tab-math-exp">Explicación</button>
   </div>
   
-  <!-- Visual Tab (Original & Result) — side-by-side histograms -->
+  <!-- Visual Tab (Original & Result) — simultaneous histograms -->
   <div id="tab-visual" class="tab-content flex flex-col gap-xs flex-1 h-full overflow-hidden" role="tabpanel" aria-labelledby="tab-btn-visual">
     <empty-state class="tab-empty-state" icon="bar_chart" title="No Data Yet" description="Load an image to see histogram data"></empty-state>
     <!-- Original Histogram -->
@@ -23,10 +23,13 @@
       <div id="original-metrics" class="metrics-grid hidden"></div>
     </div>
     
-    <!-- Result Histogram -->
+    <!-- Result Histogram — always present, empty state shown until processing -->
     <div class="flex flex-col gap-xs flex-1 min-h-0">
       <span class="font-label-caps text-primary text-xs">Result Histogram</span>
-      <div class="glass-sub-panel rounded relative overflow-hidden flex items-end px-xs pb-xs border-b border-primary/30 bg-primary/5 min-h-[100px] h-[45%] w-full">
+      <div id="result-empty-state" class="glass-sub-panel rounded flex items-center justify-center min-h-[100px] h-[45%] w-full">
+        <empty-state icon="hourglass_empty" title="Awaiting Processing" description="Run Ecualizar or Expansión to see the result histogram"></empty-state>
+      </div>
+      <div id="result-histogram-container" class="hidden glass-sub-panel rounded relative overflow-hidden flex items-end px-xs pb-xs border-b border-primary/30 bg-primary/5 min-h-[100px] h-[45%] w-full">
          <canvas id="result-histogram-canvas" class="w-full h-full absolute inset-0"></canvas>
       </div>
       <div id="result-metrics" class="metrics-grid hidden"></div>
