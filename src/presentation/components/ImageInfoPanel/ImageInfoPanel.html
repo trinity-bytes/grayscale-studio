@@ -3,6 +3,10 @@
     <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 0;">info</span>
     <h3 class="font-headline-md text-base">Image Info</h3>
   </div>
+  <!-- Mini Thumbnail (visible when image loaded) -->
+  <div id="thumbnail-container" class="hidden flex justify-center py-sm">
+    <canvas id="thumbnail-canvas" class="max-w-full max-h-24 rounded shadow-sm object-contain"></canvas>
+  </div>
   <empty-state id="info-empty-state" icon="info" title="No Image Loaded" description="Upload an image to see its information"></empty-state>
   <div id="info-content" class="flex flex-col gap-xs font-data-mono text-sm text-on-surface-variant">
     <div class="flex justify-between">
@@ -22,4 +26,9 @@
       <span id="fmt-val" class="text-on-surface font-medium">-</span>
     </div>
   </div>
+  <!-- Browse Files Button -->
+  <button id="btn-browse-info" class="glass-sub-panel border-outline-variant text-on-surface font-label-caps py-sm px-lg rounded mt-sm hover:bg-surface-variant transition-colors flex items-center justify-center gap-xs">
+    <span class="material-symbols-outlined text-sm">folder_open</span>
+    Browse Files
+  </button>
 </div>

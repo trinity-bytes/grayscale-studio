@@ -12,19 +12,37 @@
   </div>
 
   <!-- Canvas Container (Hidden by default) -->
-  <div id="canvas-container" class="hidden w-full h-full flex gap-sm z-10 relative p-sm">
-    <!-- Original Image -->
-    <div class="flex-1 flex flex-col gap-xs">
-      <span class="font-label-caps text-on-surface-variant text-xs text-center">Original</span>
-      <div class="flex-1 flex items-center justify-center">
-        <canvas id="main-canvas" class="max-w-full max-h-full object-contain shadow-lg rounded"></canvas>
-      </div>
+  <div id="canvas-container" class="hidden w-full h-full flex flex-col gap-sm z-10 relative p-sm">
+    <!-- Toolbar Overlay (visible when image loaded) -->
+    <div id="workspace-toolbar" class="hidden flex items-center gap-sm justify-end">
+      <button id="btn-equalize" class="glass-sub-panel border-outline-variant text-on-surface font-label-caps py-sm px-md rounded hover:bg-surface-variant transition-colors flex items-center gap-xs" title="Load an image first" disabled>
+        <span class="material-symbols-outlined text-sm">equalizer</span>
+        Ecualizar
+      </button>
+      <button id="btn-expand" class="glass-sub-panel border-outline-variant text-on-surface font-label-caps py-sm px-md rounded hover:bg-surface-variant transition-colors flex items-center gap-xs" title="Load an image first" disabled>
+        <span class="material-symbols-outlined text-sm">expand</span>
+        Expansión
+      </button>
+      <button id="btn-show-math" class="hidden glass-sub-panel border-primary text-primary font-label-caps py-sm px-md rounded hover:bg-primary/10 transition-colors flex items-center gap-xs">
+        <span class="material-symbols-outlined text-sm">functions</span>
+        Ver Operación Math
+      </button>
     </div>
-    <!-- Processed Image (Hidden until processing) -->
-    <div id="processed-container" class="hidden flex-1 flex flex-col gap-xs">
-      <span class="font-label-caps text-primary text-xs text-center">Processed</span>
-      <div class="flex-1 flex items-center justify-center">
-        <canvas id="processed-canvas" class="max-w-full max-h-full object-contain shadow-lg rounded"></canvas>
+    <!-- Side-by-side canvases -->
+    <div class="flex flex-1 gap-sm min-h-0">
+      <!-- Original Image -->
+      <div class="flex-1 flex flex-col gap-xs">
+        <span class="font-label-caps text-on-surface-variant text-xs text-center">Original</span>
+        <div class="flex-1 flex items-center justify-center">
+          <canvas id="main-canvas" class="max-w-full max-h-full object-contain shadow-lg rounded"></canvas>
+        </div>
+      </div>
+      <!-- Processed Image (Hidden until processing) -->
+      <div id="processed-container" class="hidden flex-1 flex flex-col gap-xs">
+        <span class="font-label-caps text-primary text-xs text-center">Processed</span>
+        <div class="flex-1 flex items-center justify-center">
+          <canvas id="processed-canvas" class="max-w-full max-h-full object-contain shadow-lg rounded"></canvas>
+        </div>
       </div>
     </div>
   </div>
