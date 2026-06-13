@@ -159,4 +159,12 @@ export class MainView {
   hideMetrics(containerId) {
     this.analysisPanel.hideMetrics(containerId);
   }
+
+  showResultHistogram() {
+    this.analysisPanel.showResultHistogram();
+  }
+
+  hideResultHistogram() {
+    this.analysisPanel.hideResultHistogram();
+  }
 }
