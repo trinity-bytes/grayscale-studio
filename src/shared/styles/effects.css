@@ -51,6 +51,7 @@
   border-left: 1px solid var(--glass-border-light);
   border-bottom: 1px solid var(--glass-border-dark);
   border-right: 1px solid var(--glass-border-dark);
+  color: var(--surface-text);
 }
 
 .glass-sub-panel {
@@ -61,4 +62,5 @@
   border-left: 1px solid var(--glass-border-light);
   border-bottom: 1px solid var(--glass-border-dark);
   border-right: 1px solid var(--glass-border-dark);
+  color: var(--surface-text);
 }

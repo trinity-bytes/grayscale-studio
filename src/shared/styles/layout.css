@@ -70,3 +70,13 @@ body {
 .loader-isotipo {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* ===== Dark mode text color overrides ===== */
+/* Tailwind CDN doesn't auto-invert static color classes */
+.dark .text-on-surface { color: #e8eaed !important; }
+.dark .text-on-surface-variant { color: #9aa0ac !important; }
+.dark .text-primary { color: #8ab4ff !important; }
+.dark .text-secondary { color: #a0aec0 !important; }
+.dark .text-error { color: #f87171 !important; }
+.dark .border-outline-variant { border-color: rgba(255, 255, 255, 0.1) !important; }
+.dark .bg-surface-variant { background-color: rgba(255, 255, 255, 0.08) !important; }
