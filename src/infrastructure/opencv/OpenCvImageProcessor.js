@@ -1,6 +1,6 @@
 import { HistogramModel } from "../../domain/models/HistogramModel.js";
 import { ImageModel } from "../../domain/models/ImageModel.js";
-import { IImageProcessor } from "../../domain/services/ImageProcessor.js";
+import { ILoadProcessor, IHistogramProcessor, ITransformProcessor } from "../../domain/services/ImageProcessor.js";
 
 /**
  * ==========================================
@@ -8,8 +8,10 @@ import { IImageProcessor } from "../../domain/services/ImageProcessor.js";
  * ==========================================
  * Clase pura encargada de procesar las matrices matemáticas usando
  * WebAssembly sin interactuar con el árbol del DOM interactivo.
+ * Implementa las tres interfaces ISP: ILoadProcessor, IHistogramProcessor, ITransformProcessor.
+ * Cada use case solo depende de la interfaz que necesita.
  */
-export class OpenCvImageProcessor extends IImageProcessor {
+export class OpenCvImageProcessor {
   static executeMathematicalPipeline(sourceId, destinationId) {
     let mat;
     try {

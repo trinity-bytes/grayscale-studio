@@ -4,6 +4,7 @@ import { LoadAndValidateImageUseCase } from "./application/LoadAndValidateImageU
 import { EqualizeImageUseCase } from "./application/EqualizeImageUseCase.js";
 import { ExpandImageUseCase } from "./application/ExpandImageUseCase.js";
 import { ChartJsRenderer } from "./infrastructure/chart/ChartJsRenderer.js";
+import { OpenCvImageProcessor } from "./infrastructure/opencv/OpenCvImageProcessor.js";
 import "./presentation/components/index.js";
 import "./shared/styles/main.css";
 
@@ -29,9 +30,10 @@ function bootstrapApp() {
 
       const mainView = new MainView();
 
-      const loadAndValidateUseCase = new LoadAndValidateImageUseCase();
-      const equalizeUseCase = new EqualizeImageUseCase();
-      const expandUseCase = new ExpandImageUseCase();
+      const processor = new OpenCvImageProcessor();
+      const loadAndValidateUseCase = new LoadAndValidateImageUseCase(processor);
+      const equalizeUseCase = new EqualizeImageUseCase(processor);
+      const expandUseCase = new ExpandImageUseCase(processor);
       const chartRenderer = new ChartJsRenderer();
 
       const appController = new MainController(
