@@ -1,9 +1,28 @@
 import html from './TopNavBar.html?raw';
 import './TopNavBar.css';
+import { ThemeManager } from '../../shared/utils/ThemeManager.js';
 
 export class TopNavBar extends HTMLElement {
   connectedCallback() {
     this.innerHTML = html;
+    this._syncThemeIcon();
+
+    this.querySelector('#theme-toggle').addEventListener('click', () => {
+      ThemeManager.toggle();
+      this._syncThemeIcon();
+    });
+  }
+
+  _syncThemeIcon() {
+    const sun = this.querySelector('#theme-icon-sun');
+    const moon = this.querySelector('#theme-icon-moon');
+    if (ThemeManager.isDark()) {
+      sun.classList.add('hidden');
+      moon.classList.remove('hidden');
+    } else {
+      sun.classList.remove('hidden');
+      moon.classList.add('hidden');
+    }
   }
 
   setWasmStatus(status) {

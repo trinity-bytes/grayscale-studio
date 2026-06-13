@@ -5,6 +5,7 @@ import { EqualizeImageUseCase } from "./application/EqualizeImageUseCase.js";
 import { ExpandImageUseCase } from "./application/ExpandImageUseCase.js";
 import { ChartJsRenderer } from "./infrastructure/chart/ChartJsRenderer.js";
 import { OpenCvImageProcessor } from "./infrastructure/opencv/OpenCvImageProcessor.js";
+import { ThemeManager } from "./shared/utils/ThemeManager.js";
 import "./presentation/components/index.js";
 import "./shared/styles/main.css";
 
@@ -16,6 +17,7 @@ import "./shared/styles/main.css";
  * que WebAssembly (OpenCV.js) asienta en memoria.
  */
 function bootstrapApp() {
+  ThemeManager.init();
   console.log("Inicializando aplicación GrayScale Master en capas limpias...");
 
   const checkOpenCvReady = setInterval(() => {

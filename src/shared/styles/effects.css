@@ -5,12 +5,41 @@
  */
 
 :root {
+  /* Glass panels — light mode */
   --glass-bg-color: 255, 255, 255;
   --glass-bg-opacity: 0.85;
   --glass-blur: 12px;
   --glass-border-light: rgba(255, 255, 255, 0.2);
   --glass-border-dark: rgba(0, 0, 0, 0.1);
   --glass-sub-bg-opacity: 0.5;
+
+  /* Dashboard semantic tokens — light mode */
+  --surface-bg: #f7f9fb;
+  --surface-text: #191c1e;
+  --surface-text-muted: #737688;
+  --canvas-bg: transparent;
+  --chart-grid: rgba(0, 0, 0, 0.1);
+  --chart-tick: #191c1e;
+  --chart-bar: rgba(54, 162, 235, 0.6);
+  --chart-bar-processed: rgba(255, 99, 132, 0.6);
+}
+
+.dark {
+  /* Glass panels — dark mode */
+  --glass-bg-color: 30, 33, 41;
+  --glass-bg-opacity: 0.92;
+  --glass-border-light: rgba(255, 255, 255, 0.08);
+  --glass-border-dark: rgba(0, 0, 0, 0.3);
+
+  /* Dashboard semantic tokens — dark mode */
+  --surface-bg: #12141a;
+  --surface-text: #e4e6ea;
+  --surface-text-muted: #8b8fa3;
+  --canvas-bg: #1a1d26;
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-tick: #e4e6ea;
+  --chart-bar: rgba(100, 180, 255, 0.7);
+  --chart-bar-processed: rgba(255, 130, 150, 0.7);
 }
 
 .glass-panel {

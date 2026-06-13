@@ -13,6 +13,11 @@
       <a class="text-on-surface-variant font-body-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Analysis</a>
       <a class="text-on-surface-variant font-body-sm font-medium leading-normal hover:text-primary transition-colors" href="#">History</a>
       
+      <button id="theme-toggle" class="p-sm rounded-lg hover:bg-surface-variant transition-colors cursor-pointer" title="Toggle dark mode" aria-label="Toggle theme">
+        <span id="theme-icon-sun" class="material-symbols-outlined text-on-surface-variant">light_mode</span>
+        <span id="theme-icon-moon" class="material-symbols-outlined text-on-surface-variant hidden">dark_mode</span>
+      </button>
+
       <div id="wasm-badge" class="px-sm py-xs bg-surface-variant text-on-surface-variant rounded-full text-xs font-data-mono flex items-center gap-xs">
         <span id="wasm-status-dot" class="size-2 rounded-full bg-secondary block animate-pulse"></span>
         <span id="wasm-status-text">WASM: Loading</span>
