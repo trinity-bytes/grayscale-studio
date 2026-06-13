@@ -2,7 +2,6 @@ export class MainView {
   constructor() {
     this.topNavBar = document.querySelector("top-nav-bar");
     this.imageInfoPanel = document.getElementById("image-info-panel");
-    this.processingControls = document.getElementById("processing-controls");
     this.workspace = document.getElementById("main-workspace");
     this.analysisPanel = document.getElementById("analysis-panel");
     this.errorAlert = document.getElementById("main-error-alert");
@@ -22,11 +21,15 @@ export class MainView {
   }
 
   bindEqualize(handler) {
-    this.processingControls.addEventListener("on-equalize", handler);
+    this.workspace.addEventListener("on-equalize", handler);
   }
 
   bindExpand(handler) {
-    this.processingControls.addEventListener("on-expand", handler);
+    this.workspace.addEventListener("on-expand", handler);
+  }
+
+  bindShowMath(handler) {
+    this.workspace.addEventListener("on-show-math", handler);
   }
 
   bindError(handler) {
@@ -56,12 +59,32 @@ export class MainView {
     this.imageInfoPanel.updateInfo(res, ch, depth, fmt);
   }
 
+  updateThumbnail(canvasElement) {
+    if (!canvasElement) return;
+    canvasElement.toBlob((blob) => {
+      if (!blob) return;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        this.imageInfoPanel.setThumbnail(reader.result);
+      };
+      reader.readAsDataURL(blob);
+    }, 'image/png');
+  }
+
   enableControls() {
-    this.processingControls.enable();
+    this.workspace.enableToolbarButtons();
   }
 
   disableControls() {
-    this.processingControls.disable();
+    this.workspace.disableToolbarButtons();
+  }
+
+  showMathButton() {
+    this.workspace.showMathButton();
+  }
+
+  hideMathButton() {
+    this.workspace.hideMathButton();
   }
 
   setHiddenImageSrc(base64Data, onLoadCallback) {
