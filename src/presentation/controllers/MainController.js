@@ -77,6 +77,7 @@ export class MainController {
       this.view.disableControls();
       this.view.hideMathButton();
       this.view.resetToOriginal();
+      this.view.hideResultHistogram();
       this.lastOperation = null;
       
       // Load file as base64
@@ -167,6 +168,14 @@ export class MainController {
 
       this.view.showProcessedCanvas();
       this.view.showMathButton();
+      this.view.showResultHistogram();
+
+      // Dispatch processed state change event
+      this.view.workspace.dispatchEvent(new CustomEvent('on-processed-state-changed', {
+        bubbles: true,
+        composed: true,
+        detail: { processed: true }
+      }));
 
       // Update thumbnail from processed canvas
       const processedCanvas = this.view.workspace.getProcessedCanvas();
@@ -199,6 +208,14 @@ export class MainController {
 
       this.view.showProcessedCanvas();
       this.view.showMathButton();
+      this.view.showResultHistogram();
+
+      // Dispatch processed state change event
+      this.view.workspace.dispatchEvent(new CustomEvent('on-processed-state-changed', {
+        bubbles: true,
+        composed: true,
+        detail: { processed: true }
+      }));
 
       // Update thumbnail from processed canvas
       const processedCanvas = this.view.workspace.getProcessedCanvas();

@@ -1,6 +1,6 @@
 import html from './TopNavBar.html?raw';
 import './TopNavBar.css';
-import { ThemeManager } from '../../shared/utils/ThemeManager.js';
+import { ThemeManager } from '../../../shared/utils/ThemeManager.js';
 
 export class TopNavBar extends HTMLElement {
   connectedCallback() {
