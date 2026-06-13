@@ -4,7 +4,7 @@
  */
 
 body {
-  background-image: url('/assets/images/abstract-white-bkg-1.jpg');
+  background-image: url("/assets/images/pok-rie-3.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -12,10 +12,40 @@ body {
   background-color: white;
 }
 
+.dark body {
+  background-color: #0c0e14;
+}
+
+.dark body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Unified dashboard background — hides background image through panel gaps */
+.dark main {
+  background: rgba(18, 20, 26, 0.6);
+  border-radius: 12px;
+  padding: 4px;
+}
+
 /* ===== Loader Overlay ===== */
 #loader-overlay {
   transition: opacity 0.5s ease-out;
   background-color: white;
+}
+
+.dark #loader-overlay {
+  background-color: #12141a;
+}
+
+/* ===== Canvas backgrounds ===== */
+.dark #main-canvas,
+.dark #processed-canvas {
+  background-color: var(--canvas-bg);
 }
 
 #loader-overlay:not(.active) {
@@ -25,7 +55,6 @@ body {
 
 /* ===== Loader Isotipo Animation ===== */
 @keyframes pulse-glow {
-
   0%,
   100% {
     transform: scale(1);
@@ -41,3 +70,13 @@ body {
 .loader-isotipo {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* ===== Dark mode text color overrides ===== */
+/* Tailwind CDN doesn't auto-invert static color classes */
+.dark .text-on-surface { color: #e8eaed !important; }
+.dark .text-on-surface-variant { color: #9aa0ac !important; }
+.dark .text-primary { color: #8ab4ff !important; }
+.dark .text-secondary { color: #a0aec0 !important; }
+.dark .text-error { color: #f87171 !important; }
+.dark .border-outline-variant { border-color: rgba(255, 255, 255, 0.1) !important; }
+.dark .bg-surface-variant { background-color: rgba(255, 255, 255, 0.08) !important; }

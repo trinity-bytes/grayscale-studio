@@ -1,6 +1,7 @@
 import html from './AnalysisPanel.html?raw';
 import './AnalysisPanel.css';
 import '../../../shared/components/EmptyState/EmptyState.js';
+import { strings } from '../../../shared/i18n/strings.js';
 
 export class AnalysisPanel extends HTMLElement {
   connectedCallback() {
@@ -114,6 +115,86 @@ export class AnalysisPanel extends HTMLElement {
   switchToMathExpTab() {
     const expTab = this.querySelector('[data-target="tab-math-exp"]');
     if (expTab) expTab.click();
+  }
+
+  /**
+   * Display histogram metrics (Min, Max, Mean, Std) in the metrics grid.
+   * @param {string} containerId - 'original-metrics' or 'result-metrics'
+   * @param {{ min: number, max: number, mean: number, std: number }} metrics
+   */
+  showMetrics(containerId, metrics) {
+    const container = this.querySelector(`#${containerId}`);
+    if (!container) return;
+    container.innerHTML = `
+      <div class="metric-item">
+        <span class="metric-label">${strings.analysis.metricsMin}</span>
+        <span class="metric-value">${metrics.min}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">${strings.analysis.metricsMax}</span>
+        <span class="metric-value">${metrics.max}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">${strings.analysis.metricsMean}</span>
+        <span class="metric-value">${metrics.mean}</span>
+      </div>
+      <div class="metric-item">
+        <span class="metric-label">${strings.analysis.metricsStd}</span>
+        <span class="metric-value">${metrics.std}</span>
+      </div>
+    `;
+    container.classList.remove('hidden');
+  }
+
+  /**
+   * Clear metrics display for a container.
+   * @param {string} containerId
+   */
+  hideMetrics(containerId) {
+    const container = this.querySelector(`#${containerId}`);
+    if (!container) return;
+    container.innerHTML = '';
+    container.classList.add('hidden');
+  }
+
+  /**
+   * Show histogram containers and hide the main empty state.
+   * Called when an image is loaded.
+   */
+  showHistogramContainers() {
+    const containers = this.querySelector('#histogram-containers');
+    if (containers) containers.classList.remove('hidden');
+  }
+
+  /**
+   * Hide histogram containers and show the main empty state.
+   * Called when resetting to initial state.
+   */
+  hideHistogramContainers() {
+    const containers = this.querySelector('#histogram-containers');
+    if (containers) containers.classList.add('hidden');
+  }
+
+  /**
+   * Show the result histogram canvas and hide its empty state.
+   * Called after processing completes.
+   */
+  showResultHistogram() {
+    const emptyState = this.querySelector('#result-empty-state');
+    const histogramContainer = this.querySelector('#result-histogram-container');
+    if (emptyState) emptyState.classList.add('hidden');
+    if (histogramContainer) histogramContainer.classList.remove('hidden');
+  }
+
+  /**
+   * Reset result histogram to empty state.
+   * Called when a new image is loaded.
+   */
+  hideResultHistogram() {
+    const emptyState = this.querySelector('#result-empty-state');
+    const histogramContainer = this.querySelector('#result-histogram-container');
+    if (emptyState) emptyState.classList.remove('hidden');
+    if (histogramContainer) histogramContainer.classList.add('hidden');
   }
 }
 

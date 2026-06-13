@@ -1,6 +1,7 @@
 import html from './WorkspaceDropZone.html?raw';
 import './WorkspaceDropZone.css';
 import '../../../shared/components/EmptyState/EmptyState.js';
+import { strings } from '../../../shared/i18n/strings.js';
 
 export class WorkspaceDropZone extends HTMLElement {
   connectedCallback() {
@@ -45,7 +46,7 @@ export class WorkspaceDropZone extends HTMLElement {
         const file = files[0];
         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!validTypes.includes(file.type)) {
-          this.showError('Only JPEG and PNG images are accepted.');
+          this.showError(strings.dropzone.invalidType);
           return;
         }
         this.emitFile(file);
@@ -60,6 +61,19 @@ export class WorkspaceDropZone extends HTMLElement {
       if (e.target.files.length > 0) {
         this.emitFile(e.target.files[0]);
       }
+    });
+
+    // Toolbar button handlers
+    this.querySelector('#btn-equalize').addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('on-equalize', { bubbles: true, composed: true }));
+    });
+
+    this.querySelector('#btn-expand').addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('on-expand', { bubbles: true, composed: true }));
+    });
+
+    this.querySelector('#btn-show-math').addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('on-show-math', { bubbles: true, composed: true }));
     });
   }
 
@@ -87,15 +101,81 @@ export class WorkspaceDropZone extends HTMLElement {
   showCanvas() {
     this.querySelector('#placeholder-content').classList.add('hidden');
     this.querySelector('#canvas-container').classList.remove('hidden');
+    this.showToolbar();
   }
 
   showPlaceholder() {
     this.querySelector('#placeholder-content').classList.remove('hidden');
     this.querySelector('#canvas-container').classList.add('hidden');
+    this.hideToolbar();
   }
 
   getCanvas() {
     return this.querySelector('#main-canvas');
+  }
+
+  getProcessedCanvas() {
+    return this.querySelector('#processed-canvas');
+  }
+
+  showProcessedCanvas() {
+    this.querySelector('#processed-container').classList.remove('hidden');
+  }
+
+  hideProcessedCanvas() {
+    this.querySelector('#processed-container').classList.add('hidden');
+  }
+
+  resetToOriginal() {
+    this.hideProcessedCanvas();
+    this.hideMathButton();
+  }
+
+  // Toolbar methods
+  showToolbar() {
+    const toolbar = this.querySelector('#workspace-toolbar');
+    if (toolbar) toolbar.classList.remove('hidden');
+  }
+
+  hideToolbar() {
+    const toolbar = this.querySelector('#workspace-toolbar');
+    if (toolbar) toolbar.classList.add('hidden');
+  }
+
+  enableToolbarButtons() {
+    const btnEqualize = this.querySelector('#btn-equalize');
+    const btnExpand = this.querySelector('#btn-expand');
+    if (btnEqualize) {
+      btnEqualize.disabled = false;
+      btnEqualize.removeAttribute('title');
+    }
+    if (btnExpand) {
+      btnExpand.disabled = false;
+      btnExpand.removeAttribute('title');
+    }
+  }
+
+  disableToolbarButtons() {
+    const btnEqualize = this.querySelector('#btn-equalize');
+    const btnExpand = this.querySelector('#btn-expand');
+    if (btnEqualize) {
+      btnEqualize.disabled = true;
+      btnEqualize.setAttribute('title', strings.dropzone.loadImageFirst);
+    }
+    if (btnExpand) {
+      btnExpand.disabled = true;
+      btnExpand.setAttribute('title', strings.dropzone.loadImageFirst);
+    }
+  }
+
+  showMathButton() {
+    const btn = this.querySelector('#btn-show-math');
+    if (btn) btn.classList.remove('hidden');
+  }
+
+  hideMathButton() {
+    const btn = this.querySelector('#btn-show-math');
+    if (btn) btn.classList.add('hidden');
   }
 }
 

@@ -1,8 +1,9 @@
+import { strings } from '../../shared/i18n/strings.js';
+
 export class MainView {
   constructor() {
     this.topNavBar = document.querySelector("top-nav-bar");
     this.imageInfoPanel = document.getElementById("image-info-panel");
-    this.processingControls = document.getElementById("processing-controls");
     this.workspace = document.getElementById("main-workspace");
     this.analysisPanel = document.getElementById("analysis-panel");
     this.errorAlert = document.getElementById("main-error-alert");
@@ -22,11 +23,15 @@ export class MainView {
   }
 
   bindEqualize(handler) {
-    this.processingControls.addEventListener("on-equalize", handler);
+    this.workspace.addEventListener("on-equalize", handler);
   }
 
   bindExpand(handler) {
-    this.processingControls.addEventListener("on-expand", handler);
+    this.workspace.addEventListener("on-expand", handler);
+  }
+
+  bindShowMath(handler) {
+    this.workspace.addEventListener("on-show-math", handler);
   }
 
   bindError(handler) {
@@ -48,20 +53,40 @@ export class MainView {
     const res = width && height ? `${width} x ${height}` : "-";
     const ch = channels
       ? channels === 1
-        ? "1 (Grayscale)"
-        : `${channels} (Color)`
+        ? strings.imageInfo.grayscale
+        : `${channels} ${strings.imageInfo.color}`
       : "-";
-    const depth = channels ? "8-bit" : "-";
-    const fmt = channels ? "Loaded from memory" : "-";
+    const depth = channels ? strings.imageInfo.bitDepthValue : "-";
+    const fmt = channels ? strings.imageInfo.loadedFromMemory : "-";
     this.imageInfoPanel.updateInfo(res, ch, depth, fmt);
   }
 
+  updateThumbnail(canvasElement) {
+    if (!canvasElement) return;
+    canvasElement.toBlob((blob) => {
+      if (!blob) return;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        this.imageInfoPanel.setThumbnail(reader.result);
+      };
+      reader.readAsDataURL(blob);
+    }, 'image/png');
+  }
+
   enableControls() {
-    this.processingControls.enable();
+    this.workspace.enableToolbarButtons();
   }
 
   disableControls() {
-    this.processingControls.disable();
+    this.workspace.disableToolbarButtons();
+  }
+
+  showMathButton() {
+    this.workspace.showMathButton();
+  }
+
+  hideMathButton() {
+    this.workspace.hideMathButton();
   }
 
   setHiddenImageSrc(base64Data, onLoadCallback) {
@@ -77,8 +102,24 @@ export class MainView {
     return this.workspace.getCanvas().id;
   }
 
+  getProcessedCanvasId() {
+    return this.workspace.getProcessedCanvas().id;
+  }
+
   showCanvas() {
     this.workspace.showCanvas();
+  }
+
+  showProcessedCanvas() {
+    this.workspace.showProcessedCanvas();
+  }
+
+  hideProcessedCanvas() {
+    this.workspace.hideProcessedCanvas();
+  }
+
+  resetToOriginal() {
+    this.workspace.resetToOriginal();
   }
 
   showPlaceholder() {
@@ -111,5 +152,37 @@ export class MainView {
 
   switchToMathExpTab() {
     this.analysisPanel.switchToMathExpTab();
+  }
+
+  showMetrics(containerId, metrics) {
+    this.analysisPanel.showMetrics(containerId, metrics);
+  }
+
+  hideMetrics(containerId) {
+    this.analysisPanel.hideMetrics(containerId);
+  }
+
+  showResultHistogram() {
+    this.analysisPanel.showResultHistogram();
+  }
+
+  hideResultHistogram() {
+    this.analysisPanel.hideResultHistogram();
+  }
+
+  hideEmptyStates() {
+    this.analysisPanel.hideEmptyStates();
+  }
+
+  showEmptyStates() {
+    this.analysisPanel.showEmptyStates();
+  }
+
+  showHistogramContainers() {
+    this.analysisPanel.showHistogramContainers();
+  }
+
+  hideHistogramContainers() {
+    this.analysisPanel.hideHistogramContainers();
   }
 }

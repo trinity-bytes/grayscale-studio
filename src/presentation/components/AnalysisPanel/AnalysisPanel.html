@@ -1,57 +1,74 @@
 <div class="glass-panel rounded-lg p-md flex flex-col gap-sm flex-1 h-full">
   <div class="flex items-center gap-sm border-b border-outline-variant pb-sm mb-sm">
     <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 0;">bar_chart</span>
-    <h3 class="font-headline-md text-base">Analysis</h3>
+    <h3 class="font-headline-md text-base">Análisis</h3>
   </div>
 
   <!-- Tabs Navigation -->
-  <div class="flex gap-2 mb-2 border-b border-outline-variant pb-1" id="analysis-tabs" role="tablist" aria-label="Analysis tabs">
-    <button class="tab-btn active font-label-md px-2 py-1 rounded" role="tab" aria-selected="true" aria-controls="tab-visual" id="tab-btn-visual" tabindex="0" data-target="tab-visual">Visual</button>
-    <button class="tab-btn font-label-md px-2 py-1 rounded text-on-surface-variant" role="tab" aria-selected="false" aria-controls="tab-math-eq" id="tab-btn-math-eq" tabindex="-1" data-target="tab-math-eq">Math: Eq</button>
-    <button class="tab-btn font-label-md px-2 py-1 rounded text-on-surface-variant" role="tab" aria-selected="false" aria-controls="tab-math-exp" id="tab-btn-math-exp" tabindex="-1" data-target="tab-math-exp">Math: Exp</button>
+  <div class="flex gap-1 mb-3 border-b border-outline-variant pb-2 px-1" id="analysis-tabs" role="tablist" aria-label="Pestañas de análisis">
+    <button class="tab-btn active font-label-md px-3 py-1.5 rounded" role="tab" aria-selected="true" aria-controls="tab-visual" id="tab-btn-visual" tabindex="0" data-target="tab-visual">Visual</button>
+    <button class="tab-btn font-label-md px-3 py-1.5 rounded text-on-surface-variant" role="tab" aria-selected="false" aria-controls="tab-math-eq" id="tab-btn-math-eq" tabindex="-1" data-target="tab-math-eq">Ecuaciones</button>
+    <button class="tab-btn font-label-md px-3 py-1.5 rounded text-on-surface-variant" role="tab" aria-selected="false" aria-controls="tab-math-exp" id="tab-btn-math-exp" tabindex="-1" data-target="tab-math-exp">Explicación</button>
   </div>
   
-  <!-- Visual Tab (Original & Result) -->
-  <div id="tab-visual" class="tab-content flex flex-col gap-xs flex-1 h-full" role="tabpanel" aria-labelledby="tab-btn-visual">
-    <empty-state class="tab-empty-state" icon="bar_chart" title="No Data Yet" description="Load an image to see histogram data"></empty-state>
-    <!-- Original Histogram -->
-    <div class="flex flex-col gap-xs mb-md flex-1">
-      <span class="font-label-caps text-on-surface-variant text-xs">Original Histogram</span>
-      <div class="glass-sub-panel rounded relative overflow-hidden flex items-end px-xs pb-xs border-b border-outline-variant h-full min-h-[120px] w-full">
-         <canvas id="original-histogram-canvas" class="w-full h-full absolute inset-0"></canvas>
-      </div>
-    </div>
+  <!-- Visual Tab (Original & Result) — simultaneous histograms -->
+  <div id="tab-visual" class="tab-content flex flex-col gap-sm flex-1 h-full overflow-hidden px-1" role="tabpanel" aria-labelledby="tab-btn-visual">
+    <empty-state class="tab-empty-state" icon="bar_chart" title="Sin Datos Aún" description="Carga una imagen para ver los datos del histograma"></empty-state>
     
-    <!-- Result Histogram -->
-    <div class="flex flex-col gap-xs flex-1">
-      <span class="font-label-caps text-primary text-xs">Result Histogram</span>
-      <div class="glass-sub-panel rounded relative overflow-hidden flex items-end px-xs pb-xs border-b border-primary/30 bg-primary/5 h-full min-h-[120px] w-full">
-         <canvas id="result-histogram-canvas" class="w-full h-full absolute inset-0"></canvas>
+    <!-- Histogram containers — hidden until image loaded -->
+    <div id="histogram-containers" class="hidden flex flex-col gap-md flex-1 h-full">
+      <!-- Original Histogram -->
+      <div class="flex flex-col gap-xs flex-1 min-h-0">
+        <span class="font-label-caps text-on-surface-variant text-xs">Histograma Original</span>
+        <div class="glass-sub-panel rounded relative overflow-hidden flex items-end px-xs pb-xs border-b border-outline-variant min-h-[120px] h-[50%] w-full">
+           <canvas id="original-histogram-canvas" class="w-full h-full absolute inset-0"></canvas>
+        </div>
+        <div id="original-metrics" class="metrics-grid hidden"></div>
+      </div>
+      
+      <!-- Result Histogram — shown after processing -->
+      <div class="flex flex-col gap-xs flex-1 min-h-0">
+        <span class="font-label-caps text-primary text-xs">Histograma de Resultado</span>
+        <div id="result-empty-state" class="glass-sub-panel rounded flex items-center justify-center min-h-[120px] h-[50%] w-full">
+          <empty-state icon="hourglass_empty" title="Esperando Procesamiento" description="Ejecuta Ecualizar o Expansión para ver el histograma de resultado"></empty-state>
+        </div>
+        <div id="result-histogram-container" class="hidden glass-sub-panel rounded relative overflow-hidden flex items-end px-xs pb-xs border-b border-primary/30 bg-primary/5 min-h-[120px] h-[50%] w-full">
+           <canvas id="result-histogram-canvas" class="w-full h-full absolute inset-0"></canvas>
+        </div>
+        <div id="result-metrics" class="metrics-grid hidden"></div>
       </div>
     </div>
   </div>
 
-  <!-- Math: Equalization Tab -->
-  <div id="tab-math-eq" class="tab-content flex-col gap-xs flex-1 h-full hidden" role="tabpanel" aria-labelledby="tab-btn-math-eq">
-    <empty-state class="tab-empty-state" icon="functions" title="No Data Yet" description="Process an image to see equalization math"></empty-state>
-    <span class="font-label-caps text-on-surface-variant text-xs">CDF & Equalization Mapping</span>
-    <div class="glass-sub-panel rounded relative overflow-hidden flex items-end px-xs pb-xs border-b border-outline-variant h-full min-h-[250px] w-full">
+  <!-- Ecuaciones Tab (Math Equalization + Expansion) -->
+  <div id="tab-math-eq" class="tab-content flex-col gap-sm flex-1 h-full hidden px-1" role="tabpanel" aria-labelledby="tab-btn-math-eq">
+    <empty-state class="tab-empty-state" icon="functions" title="Sin Datos Aún" description="Procesa una imagen para ver la matemática de ecualización"></empty-state>
+    <span class="font-label-caps text-on-surface-variant text-xs">Ecualización de Histograma</span>
+    <div class="glass-sub-panel rounded relative overflow-hidden flex items-end px-xs pb-xs border-b border-outline-variant h-full min-h-[200px] w-full">
        <canvas id="math-eq-canvas" class="w-full h-full absolute inset-0"></canvas>
     </div>
-    <div class="text-xs text-on-surface-variant mt-2 p-2 bg-surface-variant rounded">
-      Formula: LUT(i) = round(CDF(i) * 255)
+    <div class="equation-block text-xs text-on-surface-variant mt-2 p-2 rounded">
+      <div class="equation-title font-label-md mb-1">Función de Distribución Acumulada (CDF)</div>
+      <div class="equation-formula">CDF(i) = Σ<sub>k=0</sub><sup>i</sup> h(k) / N</div>
+      <div class="equation-title font-label-md mb-1 mt-2">Mapeo de Ecualización</div>
+      <div class="equation-formula">LUT(i) = round(CDF(i) × (L - 1))</div>
+      <div class="equation-note mt-1">donde L = 256 niveles de gris, N = total de píxeles</div>
     </div>
   </div>
 
-  <!-- Math: Expansion Tab -->
-  <div id="tab-math-exp" class="tab-content flex-col gap-xs flex-1 h-full hidden" role="tabpanel" aria-labelledby="tab-btn-math-exp">
-    <empty-state class="tab-empty-state" icon="linear_scale" title="No Data Yet" description="Process an image to see expansion math"></empty-state>
-    <span class="font-label-caps text-on-surface-variant text-xs">Linear Expansion Mapping</span>
-    <div class="glass-sub-panel rounded relative overflow-hidden flex items-end px-xs pb-xs border-b border-outline-variant h-full min-h-[250px] w-full">
+  <!-- Explicación Tab -->
+  <div id="tab-math-exp" class="tab-content flex-col gap-sm flex-1 h-full hidden px-1" role="tabpanel" aria-labelledby="tab-btn-math-exp">
+    <empty-state class="tab-empty-state" icon="linear_scale" title="Sin Datos Aún" description="Procesa una imagen para ver la explicación de expansión"></empty-state>
+    <span class="font-label-caps text-on-surface-variant text-xs">Expansión Lineal de Contraste</span>
+    <div class="glass-sub-panel rounded relative overflow-hidden flex items-end px-xs pb-xs border-b border-outline-variant h-full min-h-[200px] w-full">
        <canvas id="math-exp-canvas" class="w-full h-full absolute inset-0"></canvas>
     </div>
-    <div class="text-xs text-on-surface-variant mt-2 p-2 bg-surface-variant rounded">
-      Formula: LUT(i) = round((i - min) * 255 / (max - min))
+    <div class="equation-block text-xs text-on-surface-variant mt-2 p-2 rounded">
+      <div class="equation-title font-label-md mb-1">Fórmula de Expansión Lineal</div>
+      <div class="equation-formula">LUT(i) = round((i - min) × 255 / (max - min))</div>
+      <div class="equation-title font-label-md mb-1 mt-2">Descripción</div>
+      <div class="equation-desc">La expansión lineal distribuye uniformemente los valores de intensidad originales en todo el rango [0, 255], aumentando el contraste de la imagen.</div>
+      <div class="equation-note mt-1">min = intensidad mínima, max = intensidad máxima del histograma original</div>
     </div>
   </div>
 </div>

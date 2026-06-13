@@ -12,7 +12,7 @@ import { ILoadProcessor, IHistogramProcessor, ITransformProcessor } from "../../
  * Cada use case solo depende de la interfaz que necesita.
  */
 export class OpenCvImageProcessor {
-  static executeMathematicalPipeline(sourceId, destinationId) {
+  executeMathematicalPipeline(sourceId, destinationId) {
     let mat;
     try {
       mat = cv.imread(sourceId); // Lectura cruda desde la ID en RAM
@@ -70,7 +70,7 @@ export class OpenCvImageProcessor {
     );
   }
 
-  static checkIfGrayscale(mat) {
+  checkIfGrayscale(mat) {
     if (mat.channels() === 1) return true;
 
     let channels = new cv.MatVector();
@@ -93,7 +93,7 @@ export class OpenCvImageProcessor {
     return meanRG < 2.0 && meanRB < 2.0;
   }
 
-  static extractHistogram(mat) {
+  extractHistogram(mat) {
     let mask = new cv.Mat();
     let hist = new cv.Mat();
     let matVec = new cv.MatVector();
@@ -113,7 +113,7 @@ export class OpenCvImageProcessor {
     return new HistogramModel(histogramData);
   }
 
-  static applyEqualization(sourceId, destinationId) {
+  applyEqualization(sourceId, destinationId) {
     let src = cv.imread(sourceId);
     let dst = new cv.Mat();
 
@@ -136,7 +136,7 @@ export class OpenCvImageProcessor {
     return histogramModel;
   }
 
-  static applyExpansion(sourceId, destinationId) {
+  applyExpansion(sourceId, destinationId) {
     let src = cv.imread(sourceId);
     let dst = new cv.Mat();
 

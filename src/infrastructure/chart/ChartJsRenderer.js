@@ -1,3 +1,5 @@
+import { strings } from '../../shared/i18n/strings.js';
+
 /**
  * ==========================================
  * CHART.JS EXTERNAL LIBRARY ADAPTER OR WRAPPER
@@ -9,6 +11,26 @@ export class ChartJsRenderer {
   constructor() {
     // Almacena un mapa de (ID_LIENZO -> Objeto Chart) para saber cuándo pisarlos.
     this.chartInstances = new Map();
+  }
+
+  /**
+   * Read CSS custom property values from :root or .dark context.
+   * @returns {{ gridColor: string, tickColor: string, barColor: string, barBorderColor: string, barProcessedColor: string, barProcessedBorder: string }}
+   */
+  getThemeColors() {
+    const styles = getComputedStyle(document.documentElement);
+    const gridColor = styles.getPropertyValue('--chart-grid').trim() || 'rgba(0,0,0,0.1)';
+    const tickColor = styles.getPropertyValue('--chart-tick').trim() || '#191c1e';
+    const barColor = styles.getPropertyValue('--chart-bar').trim() || 'rgba(54, 162, 235, 0.6)';
+    const barProcessedColor = styles.getPropertyValue('--chart-bar-processed').trim() || 'rgba(255, 99, 132, 0.6)';
+    return {
+      gridColor,
+      tickColor,
+      barColor,
+      barBorderColor: barColor.replace(/[\d.]+\)$/, '1)'),
+      barProcessedColor,
+      barProcessedBorder: barProcessedColor.replace(/[\d.]+\)$/, '1)'),
+    };
   }
 
   /**
@@ -29,6 +51,7 @@ export class ChartJsRenderer {
       this.chartInstances.delete(canvasId);
     }
 
+    const theme = this.getThemeColors();
     const ctx = canvas.getContext("2d");
     const newChart = new Chart(ctx, {
       type: "bar",
@@ -36,10 +59,10 @@ export class ChartJsRenderer {
         labels: histogramModel.getLabels(),
         datasets: [
           {
-            label: "Frecuencia de Intensidad",
+            label: strings.charts.frequencyIntensity,
             data: histogramModel.getFrequencies(),
-            backgroundColor: "rgba(54, 162, 235, 0.6)",
-            borderColor: "rgba(54, 162, 235, 1)",
+            backgroundColor: theme.barColor,
+            borderColor: theme.barBorderColor,
             borderWidth: 1,
             barPercentage: 1.0,
             categoryPercentage: 1.0,
@@ -52,11 +75,15 @@ export class ChartJsRenderer {
         scales: {
           x: {
             display: true,
-            title: { display: true, text: "Nivel de Gris (0-255)" },
+            title: { display: true, text: strings.charts.grayLevel },
+            ticks: { color: theme.tickColor },
+            grid: { color: theme.gridColor },
           },
           y: {
             display: true,
-            title: { display: true, text: "Cantidad de Píxeles" },
+            title: { display: true, text: strings.charts.pixelCount },
+            ticks: { color: theme.tickColor },
+            grid: { color: theme.gridColor },
           },
         },
         animation: {
@@ -83,6 +110,7 @@ export class ChartJsRenderer {
       this.chartInstances.delete(canvasId);
     }
 
+    const theme = this.getThemeColors();
     const ctx = canvas.getContext("2d");
     
     let lineData = [];
@@ -90,10 +118,10 @@ export class ChartJsRenderer {
     
     if (type === "equalization") {
       lineData = histogramMath.getEqualizationData().lut;
-      lineLabel = "LUT (Equalization)";
+      lineLabel = strings.charts.lutEqualization;
     } else {
       lineData = histogramMath.getExpansionData().lut;
-      lineLabel = "LUT (Expansion)";
+      lineLabel = strings.charts.lutExpansion;
     }
 
     const newChart = new Chart(ctx, {
@@ -105,8 +133,8 @@ export class ChartJsRenderer {
             type: "line",
             label: lineLabel,
             data: lineData,
-            borderColor: "rgba(255, 99, 132, 1)",
-            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            borderColor: theme.barProcessedBorder,
+            backgroundColor: theme.barProcessedColor,
             borderWidth: 2,
             yAxisID: "y2",
             tension: 0.1,
@@ -114,10 +142,10 @@ export class ChartJsRenderer {
           },
           {
             type: "bar",
-            label: "Original Histogram",
+            label: strings.charts.originalHistogram,
             data: histogramMath.frequencies,
-            backgroundColor: "rgba(54, 162, 235, 0.3)",
-            borderColor: "rgba(54, 162, 235, 0.5)",
+            backgroundColor: theme.barColor,
+            borderColor: theme.barBorderColor,
             borderWidth: 1,
             yAxisID: "y",
             barPercentage: 1.0,
@@ -135,19 +163,24 @@ export class ChartJsRenderer {
         scales: {
           x: {
             display: true,
-            title: { display: true, text: "Input Intensity (0-255)" },
+            title: { display: true, text: strings.charts.inputIntensity },
+            ticks: { color: theme.tickColor },
+            grid: { color: theme.gridColor },
           },
           y: {
             display: true,
             position: 'left',
-            title: { display: true, text: "Pixel Count" },
+            title: { display: true, text: strings.charts.pixelCountAxis },
+            ticks: { color: theme.tickColor },
+            grid: { color: theme.gridColor },
           },
           y2: {
             display: true,
             position: 'right',
-            title: { display: true, text: "Output Intensity (0-255)" },
+            title: { display: true, text: strings.charts.outputIntensity },
             min: 0,
             max: 255,
+            ticks: { color: theme.tickColor },
             grid: {
               drawOnChartArea: false
             }

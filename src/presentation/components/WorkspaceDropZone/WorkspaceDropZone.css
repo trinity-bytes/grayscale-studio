@@ -1,1 +1,33 @@
 /* Scoped styles for WorkspaceDropZone */
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+#workspace-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+#workspace-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#workspace-toolbar button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.dark #workspace-toolbar .glass-sub-panel {
+  background: rgba(30, 33, 41, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark #workspace-toolbar button:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.08);
+}
