@@ -1,3 +1,5 @@
+import { strings } from '../../shared/i18n/strings.js';
+
 export class MainView {
   constructor() {
     this.topNavBar = document.querySelector("top-nav-bar");
@@ -51,11 +53,11 @@ export class MainView {
     const res = width && height ? `${width} x ${height}` : "-";
     const ch = channels
       ? channels === 1
-        ? "1 (Grayscale)"
-        : `${channels} (Color)`
+        ? strings.imageInfo.grayscale
+        : `${channels} ${strings.imageInfo.color}`
       : "-";
-    const depth = channels ? "8-bit" : "-";
-    const fmt = channels ? "Loaded from memory" : "-";
+    const depth = channels ? strings.imageInfo.bitDepthValue : "-";
+    const fmt = channels ? strings.imageInfo.loadedFromMemory : "-";
     this.imageInfoPanel.updateInfo(res, ch, depth, fmt);
   }
 
@@ -166,5 +168,21 @@ export class MainView {
 
   hideResultHistogram() {
     this.analysisPanel.hideResultHistogram();
+  }
+
+  hideEmptyStates() {
+    this.analysisPanel.hideEmptyStates();
+  }
+
+  showEmptyStates() {
+    this.analysisPanel.showEmptyStates();
+  }
+
+  showHistogramContainers() {
+    this.analysisPanel.showHistogramContainers();
+  }
+
+  hideHistogramContainers() {
+    this.analysisPanel.hideHistogramContainers();
   }
 }

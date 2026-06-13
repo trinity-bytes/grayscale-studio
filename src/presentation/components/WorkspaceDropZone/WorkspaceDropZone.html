@@ -2,12 +2,12 @@
   
   <!-- Placeholder Content -->
   <div id="placeholder-content" class="flex flex-col items-center gap-sm text-center p-xl z-10 transition-opacity">
-    <empty-state icon="cloud_upload" title="Upload Image" description="Drop your grayscale image here, or click to browse files.">
+    <empty-state icon="cloud_upload" title="Subir Imagen" description="Arrastra tu imagen en escala de grises aquí, o haz clic para explorar archivos.">
       <button id="btn-browse" class="glass-sub-panel border-outline-variant text-on-surface font-label-caps py-sm px-lg rounded mt-sm hover:bg-surface-variant transition-colors">
-        Browse Files
+        Explorar Archivos
       </button>
     </empty-state>
-    <p id="drop-hint-text" class="hidden text-primary font-label-caps text-sm">Drop image here</p>
+    <p id="drop-hint-text" class="hidden text-primary font-label-caps text-sm">Soltar imagen aquí</p>
     <input type="file" id="file-input" class="hidden" accept="image/jpeg, image/png, image/jpg" />
   </div>
 
@@ -15,11 +15,11 @@
   <div id="canvas-container" class="hidden w-full h-full flex flex-col gap-sm z-10 relative p-sm">
     <!-- Toolbar Overlay (visible when image loaded) -->
     <div id="workspace-toolbar" class="hidden flex items-center gap-sm justify-end">
-      <button id="btn-equalize" class="glass-sub-panel border-outline-variant text-on-surface font-label-caps py-sm px-md rounded hover:bg-surface-variant transition-colors flex items-center gap-xs" title="Load an image first" disabled>
+      <button id="btn-equalize" class="glass-sub-panel border-outline-variant text-on-surface font-label-caps py-sm px-md rounded hover:bg-surface-variant transition-colors flex items-center gap-xs" title="Carga una imagen primero" disabled>
         <span class="material-symbols-outlined text-sm">equalizer</span>
         Ecualizar
       </button>
-      <button id="btn-expand" class="glass-sub-panel border-outline-variant text-on-surface font-label-caps py-sm px-md rounded hover:bg-surface-variant transition-colors flex items-center gap-xs" title="Load an image first" disabled>
+      <button id="btn-expand" class="glass-sub-panel border-outline-variant text-on-surface font-label-caps py-sm px-md rounded hover:bg-surface-variant transition-colors flex items-center gap-xs" title="Carga una imagen primero" disabled>
         <span class="material-symbols-outlined text-sm">expand</span>
         Expansión
       </button>
@@ -39,7 +39,7 @@
       </div>
       <!-- Processed Image (Hidden until processing) -->
       <div id="processed-container" class="hidden flex-1 flex flex-col gap-xs">
-        <span class="font-label-caps text-primary text-xs text-center">Processed</span>
+        <span class="font-label-caps text-primary text-xs text-center">Procesado</span>
         <div class="flex-1 flex items-center justify-center">
           <canvas id="processed-canvas" class="max-w-full max-h-full object-contain shadow-lg rounded"></canvas>
         </div>
