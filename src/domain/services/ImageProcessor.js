@@ -9,7 +9,7 @@ export class ILoadProcessor {
    * @param {string} destinationId
    * @returns {import('../models/ImageModel.js').ImageModel}
    */
-  static executeMathematicalPipeline(sourceId, destinationId) {
+  executeMathematicalPipeline(sourceId, destinationId) {
     throw new Error(
       "El método executeMathematicalPipeline debe ser implementado.",
     );
@@ -20,7 +20,7 @@ export class ILoadProcessor {
    * @param {any} imageMatrix
    * @returns {boolean}
    */
-  static checkIfGrayscale(imageMatrix) {
+  checkIfGrayscale(imageMatrix) {
     throw new Error("El método checkIfGrayscale debe ser implementado.");
   }
 
@@ -29,7 +29,7 @@ export class ILoadProcessor {
    * @param {any} imageMatrix
    * @returns {import('../models/HistogramModel.js').HistogramModel}
    */
-  static extractHistogram(imageMatrix) {
+  extractHistogram(imageMatrix) {
     throw new Error("El método extractHistogram debe ser implementado.");
   }
 }
@@ -44,7 +44,7 @@ export class IHistogramProcessor {
    * @param {any} imageMatrix
    * @returns {import('../models/HistogramModel.js').HistogramModel}
    */
-  static extractHistogram(imageMatrix) {
+  extractHistogram(imageMatrix) {
     throw new Error("El método extractHistogram debe ser implementado.");
   }
 }
@@ -60,7 +60,7 @@ export class ITransformProcessor {
    * @param {string} destinationId
    * @returns {import('../models/HistogramModel.js').HistogramModel}
    */
-  static applyEqualization(sourceId, destinationId) {
+  applyEqualization(sourceId, destinationId) {
     throw new Error("El método applyEqualization debe ser implementado.");
   }
 
@@ -70,7 +70,7 @@ export class ITransformProcessor {
    * @param {string} destinationId
    * @returns {import('../models/HistogramModel.js').HistogramModel}
    */
-  static applyExpansion(sourceId, destinationId) {
+  applyExpansion(sourceId, destinationId) {
     throw new Error("El método applyExpansion debe ser implementado.");
   }
 }

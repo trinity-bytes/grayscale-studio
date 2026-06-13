@@ -151,4 +151,20 @@ export class MainView {
   switchToMathExpTab() {
     this.analysisPanel.switchToMathExpTab();
   }
+
+  showMetrics(containerId, metrics) {
+    this.analysisPanel.showMetrics(containerId, metrics);
+  }
+
+  hideMetrics(containerId) {
+    this.analysisPanel.hideMetrics(containerId);
+  }
+
+  showResultHistogram() {
+    this.analysisPanel.showResultHistogram();
+  }
+
+  hideResultHistogram() {
+    this.analysisPanel.hideResultHistogram();
+  }
 }
