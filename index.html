@@ -195,24 +195,23 @@
     </div>
 
     <main
-      class="hidden md:grid flex-1 max-w-[1440px] w-full mx-auto px-lg pb-margin grid-cols-12 gap-gutter items-start mt-md relative"
+      class="hidden md:grid flex-1 max-w-[1440px] w-full mx-auto px-lg pb-lg grid-cols-12 gap-gutter items-start mt-md relative"
     >
-      <!-- Left Sidebar: Technical Controls -->
-      <aside class="md:col-span-4 lg:col-span-3 flex flex-col gap-md">
+      <!-- Left Zone: Metadata + Browse (2 cols) -->
+      <aside class="col-span-2 flex flex-col gap-md">
         <image-info-panel id="image-info-panel"></image-info-panel>
-        <processing-controls id="processing-controls"></processing-controls>
       </aside>
 
-      <!-- Central Workspace -->
+      <!-- Center Zone: Workspace + Toolbar (7 cols) -->
       <section
-        class="md:col-span-8 lg:col-span-6 flex flex-col gap-md h-[calc(100vh-120px)] min-h-[600px]"
+        class="col-span-7 flex flex-col gap-md h-[calc(100vh-100px)] min-h-[600px]"
       >
         <error-alert id="main-error-alert"></error-alert>
         <workspace-drop-zone id="main-workspace"></workspace-drop-zone>
       </section>
 
-      <!-- Right Sidebar: Analysis Panel -->
-      <aside class="md:col-span-12 lg:col-span-3 flex flex-col gap-md h-full">
+      <!-- Right Zone: Analysis Tabs (3 cols) -->
+      <aside class="col-span-3 flex flex-col gap-md h-full">
         <analysis-panel
           id="analysis-panel"
           class="flex-1 flex flex-col"
