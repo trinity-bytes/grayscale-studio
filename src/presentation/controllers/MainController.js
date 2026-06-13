@@ -10,6 +10,7 @@ export class MainController {
 
     this.currentImageModel = null;
     this.currentHistogram = null;
+    this.lastOperation = null;
 
     this.init();
   }
@@ -18,6 +19,7 @@ export class MainController {
     this.view.bindFileSelected(this.handleFileSelected.bind(this));
     this.view.bindEqualize(this.handleEqualize.bind(this));
     this.view.bindExpand(this.handleExpand.bind(this));
+    this.view.bindShowMath(this.handleShowMath.bind(this));
     this.view.bindError(this.handleError.bind(this));
     
     // Set WASM status to ready
@@ -31,7 +33,9 @@ export class MainController {
     try {
       this.view.hideError();
       this.view.disableControls();
+      this.view.hideMathButton();
       this.view.resetToOriginal();
+      this.lastOperation = null;
       
       // Load file as base64
       const base64Data = await this.loadUseCase.execute(file);
@@ -61,6 +65,10 @@ export class MainController {
              metadata.height,
              1 // Channels
           );
+
+          // Update thumbnail from workspace canvas
+          const workspaceCanvas = this.view.workspace.getCanvas();
+          this.view.updateThumbnail(workspaceCanvas);
 
           // Render Original Histogram
           this.currentHistogram = this.currentImageModel.getHistogram();
@@ -101,12 +109,19 @@ export class MainController {
 
   handleEqualize() {
     try {
+      this.lastOperation = 'equalize';
+
       const newHistogram = this.equalizeUseCase.execute(
         this.view.getHiddenImageId(),
         this.view.getProcessedCanvasId()
       );
 
       this.view.showProcessedCanvas();
+      this.view.showMathButton();
+
+      // Update thumbnail from processed canvas
+      const processedCanvas = this.view.workspace.getProcessedCanvas();
+      this.view.updateThumbnail(processedCanvas);
 
       this.chartRenderer.render(
         this.view.getResultHistogramCanvas(),
@@ -122,12 +137,19 @@ export class MainController {
 
   handleExpand() {
     try {
+      this.lastOperation = 'expand';
+
       const newHistogram = this.expandUseCase.execute(
         this.view.getHiddenImageId(),
         this.view.getProcessedCanvasId()
       );
 
       this.view.showProcessedCanvas();
+      this.view.showMathButton();
+
+      // Update thumbnail from processed canvas
+      const processedCanvas = this.view.workspace.getProcessedCanvas();
+      this.view.updateThumbnail(processedCanvas);
 
       this.chartRenderer.render(
         this.view.getResultHistogramCanvas(),
@@ -138,6 +160,14 @@ export class MainController {
     } catch (error) {
       console.error(error);
       this.view.showError("Error expanding the image.");
+    }
+  }
+
+  handleShowMath() {
+    if (this.lastOperation === 'expand') {
+      this.view.switchToMathExpTab();
+    } else {
+      this.view.switchToMathEqTab();
     }
   }
 
