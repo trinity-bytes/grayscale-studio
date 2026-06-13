@@ -29,13 +29,16 @@ export class ImageInfoPanel extends HTMLElement {
     const allDashes = [resolution, channels, bitDepth, format].every(v => !v || v === '-');
     const emptyState = this.querySelector('#info-empty-state');
     const infoContent = this.querySelector('#info-content');
+    const browseBtn = this.querySelector('#btn-browse-info');
 
     if (allDashes) {
       emptyState.hidden = false;
       infoContent.hidden = true;
+      if (browseBtn) browseBtn.classList.add('hidden');
     } else {
       emptyState.hidden = true;
       infoContent.hidden = false;
+      if (browseBtn) browseBtn.classList.remove('hidden');
     }
   }
 
@@ -73,6 +76,8 @@ export class ImageInfoPanel extends HTMLElement {
     this.updateInfo('-', '-', '-', '-');
     const container = this.querySelector('#thumbnail-container');
     if (container) container.classList.add('hidden');
+    const browseBtn = this.querySelector('#btn-browse-info');
+    if (browseBtn) browseBtn.classList.add('hidden');
   }
 }
 

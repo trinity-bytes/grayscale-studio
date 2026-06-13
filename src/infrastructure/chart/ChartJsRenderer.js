@@ -1,3 +1,5 @@
+import { strings } from '../../shared/i18n/strings.js';
+
 /**
  * ==========================================
  * CHART.JS EXTERNAL LIBRARY ADAPTER OR WRAPPER
@@ -57,7 +59,7 @@ export class ChartJsRenderer {
         labels: histogramModel.getLabels(),
         datasets: [
           {
-            label: "Frecuencia de Intensidad",
+            label: strings.charts.frequencyIntensity,
             data: histogramModel.getFrequencies(),
             backgroundColor: theme.barColor,
             borderColor: theme.barBorderColor,
@@ -73,13 +75,13 @@ export class ChartJsRenderer {
         scales: {
           x: {
             display: true,
-            title: { display: true, text: "Nivel de Gris (0-255)" },
+            title: { display: true, text: strings.charts.grayLevel },
             ticks: { color: theme.tickColor },
             grid: { color: theme.gridColor },
           },
           y: {
             display: true,
-            title: { display: true, text: "Cantidad de Píxeles" },
+            title: { display: true, text: strings.charts.pixelCount },
             ticks: { color: theme.tickColor },
             grid: { color: theme.gridColor },
           },
@@ -116,10 +118,10 @@ export class ChartJsRenderer {
     
     if (type === "equalization") {
       lineData = histogramMath.getEqualizationData().lut;
-      lineLabel = "LUT (Equalization)";
+      lineLabel = strings.charts.lutEqualization;
     } else {
       lineData = histogramMath.getExpansionData().lut;
-      lineLabel = "LUT (Expansion)";
+      lineLabel = strings.charts.lutExpansion;
     }
 
     const newChart = new Chart(ctx, {
@@ -140,7 +142,7 @@ export class ChartJsRenderer {
           },
           {
             type: "bar",
-            label: "Original Histogram",
+            label: strings.charts.originalHistogram,
             data: histogramMath.frequencies,
             backgroundColor: theme.barColor,
             borderColor: theme.barBorderColor,
@@ -161,21 +163,21 @@ export class ChartJsRenderer {
         scales: {
           x: {
             display: true,
-            title: { display: true, text: "Input Intensity (0-255)" },
+            title: { display: true, text: strings.charts.inputIntensity },
             ticks: { color: theme.tickColor },
             grid: { color: theme.gridColor },
           },
           y: {
             display: true,
             position: 'left',
-            title: { display: true, text: "Pixel Count" },
+            title: { display: true, text: strings.charts.pixelCountAxis },
             ticks: { color: theme.tickColor },
             grid: { color: theme.gridColor },
           },
           y2: {
             display: true,
             position: 'right',
-            title: { display: true, text: "Output Intensity (0-255)" },
+            title: { display: true, text: strings.charts.outputIntensity },
             min: 0,
             max: 255,
             ticks: { color: theme.tickColor },

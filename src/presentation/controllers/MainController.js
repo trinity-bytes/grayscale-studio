@@ -1,4 +1,5 @@
 import { HistogramMath } from '../../domain/models/HistogramMath.js';
+import { strings } from '../../shared/i18n/strings.js';
 
 export class MainController {
   constructor(view, loadUseCase, equalizeUseCase, expandUseCase, chartRenderer) {
@@ -95,9 +96,11 @@ export class MainController {
           );
 
           if (!this.currentImageModel.isStrictGrayscale) {
-            this.view.showError("Color image detected. Please upload a grayscale image.");
+            this.view.showError(strings.errors.colorImage);
             this.view.showPlaceholder();
             this.view.updateImageInfo();
+            this.view.hideHistogramContainers();
+            this.view.showEmptyStates();
             return;
           }
 
@@ -124,6 +127,10 @@ export class MainController {
           const originalMetrics = this.computeMetrics(this.currentHistogram);
           this.view.showMetrics('original-metrics', originalMetrics);
 
+          // Show histogram containers and hide empty state
+          this.view.showHistogramContainers();
+          this.view.hideEmptyStates();
+
           // Hide result metrics (no processing yet)
           this.view.hideMetrics('result-metrics');
 
@@ -147,13 +154,13 @@ export class MainController {
           this.view.enableControls();
         } catch (error) {
           console.error(error);
-          this.view.showError("Error processing image with OpenCV.");
+          this.view.showError(strings.errors.processingFailed);
         }
       });
       
     } catch (error) {
       console.error(error);
-      this.view.showError("Could not load the file.");
+      this.view.showError(strings.errors.loadFailed);
     }
   }
 
@@ -193,7 +200,7 @@ export class MainController {
       this.view.switchToVisualTab();
     } catch (error) {
       console.error(error);
-      this.view.showError("Error equalizing the image.");
+      this.view.showError(strings.errors.equalizeFailed);
     }
   }
 
@@ -233,7 +240,7 @@ export class MainController {
       this.view.switchToVisualTab();
     } catch (error) {
       console.error(error);
-      this.view.showError("Error expanding the image.");
+      this.view.showError(strings.errors.expandFailed);
     }
   }
 

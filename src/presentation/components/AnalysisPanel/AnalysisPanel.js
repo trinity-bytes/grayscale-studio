@@ -1,6 +1,7 @@
 import html from './AnalysisPanel.html?raw';
 import './AnalysisPanel.css';
 import '../../../shared/components/EmptyState/EmptyState.js';
+import { strings } from '../../../shared/i18n/strings.js';
 
 export class AnalysisPanel extends HTMLElement {
   connectedCallback() {
@@ -126,19 +127,19 @@ export class AnalysisPanel extends HTMLElement {
     if (!container) return;
     container.innerHTML = `
       <div class="metric-item">
-        <span class="metric-label">Min</span>
+        <span class="metric-label">${strings.analysis.metricsMin}</span>
         <span class="metric-value">${metrics.min}</span>
       </div>
       <div class="metric-item">
-        <span class="metric-label">Max</span>
+        <span class="metric-label">${strings.analysis.metricsMax}</span>
         <span class="metric-value">${metrics.max}</span>
       </div>
       <div class="metric-item">
-        <span class="metric-label">Mean</span>
+        <span class="metric-label">${strings.analysis.metricsMean}</span>
         <span class="metric-value">${metrics.mean}</span>
       </div>
       <div class="metric-item">
-        <span class="metric-label">Std</span>
+        <span class="metric-label">${strings.analysis.metricsStd}</span>
         <span class="metric-value">${metrics.std}</span>
       </div>
     `;
@@ -154,6 +155,24 @@ export class AnalysisPanel extends HTMLElement {
     if (!container) return;
     container.innerHTML = '';
     container.classList.add('hidden');
+  }
+
+  /**
+   * Show histogram containers and hide the main empty state.
+   * Called when an image is loaded.
+   */
+  showHistogramContainers() {
+    const containers = this.querySelector('#histogram-containers');
+    if (containers) containers.classList.remove('hidden');
+  }
+
+  /**
+   * Hide histogram containers and show the main empty state.
+   * Called when resetting to initial state.
+   */
+  hideHistogramContainers() {
+    const containers = this.querySelector('#histogram-containers');
+    if (containers) containers.classList.add('hidden');
   }
 
   /**

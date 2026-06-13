@@ -1,6 +1,7 @@
 import html from './WorkspaceDropZone.html?raw';
 import './WorkspaceDropZone.css';
 import '../../../shared/components/EmptyState/EmptyState.js';
+import { strings } from '../../../shared/i18n/strings.js';
 
 export class WorkspaceDropZone extends HTMLElement {
   connectedCallback() {
@@ -45,7 +46,7 @@ export class WorkspaceDropZone extends HTMLElement {
         const file = files[0];
         const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
         if (!validTypes.includes(file.type)) {
-          this.showError('Only JPEG and PNG images are accepted.');
+          this.showError(strings.dropzone.invalidType);
           return;
         }
         this.emitFile(file);
@@ -159,11 +160,11 @@ export class WorkspaceDropZone extends HTMLElement {
     const btnExpand = this.querySelector('#btn-expand');
     if (btnEqualize) {
       btnEqualize.disabled = true;
-      btnEqualize.setAttribute('title', 'Load an image first');
+      btnEqualize.setAttribute('title', strings.dropzone.loadImageFirst);
     }
     if (btnExpand) {
       btnExpand.disabled = true;
-      btnExpand.setAttribute('title', 'Load an image first');
+      btnExpand.setAttribute('title', strings.dropzone.loadImageFirst);
     }
   }
 
