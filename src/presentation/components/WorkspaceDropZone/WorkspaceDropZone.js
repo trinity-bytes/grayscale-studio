@@ -61,6 +61,19 @@ export class WorkspaceDropZone extends HTMLElement {
         this.emitFile(e.target.files[0]);
       }
     });
+
+    // Toolbar button handlers
+    this.querySelector('#btn-equalize').addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('on-equalize', { bubbles: true, composed: true }));
+    });
+
+    this.querySelector('#btn-expand').addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('on-expand', { bubbles: true, composed: true }));
+    });
+
+    this.querySelector('#btn-show-math').addEventListener('click', () => {
+      this.dispatchEvent(new CustomEvent('on-show-math', { bubbles: true, composed: true }));
+    });
   }
 
   preventDefaults(e) {
@@ -87,11 +100,13 @@ export class WorkspaceDropZone extends HTMLElement {
   showCanvas() {
     this.querySelector('#placeholder-content').classList.add('hidden');
     this.querySelector('#canvas-container').classList.remove('hidden');
+    this.showToolbar();
   }
 
   showPlaceholder() {
     this.querySelector('#placeholder-content').classList.remove('hidden');
     this.querySelector('#canvas-container').classList.add('hidden');
+    this.hideToolbar();
   }
 
   getCanvas() {
@@ -112,6 +127,54 @@ export class WorkspaceDropZone extends HTMLElement {
 
   resetToOriginal() {
     this.hideProcessedCanvas();
+    this.hideMathButton();
+  }
+
+  // Toolbar methods
+  showToolbar() {
+    const toolbar = this.querySelector('#workspace-toolbar');
+    if (toolbar) toolbar.classList.remove('hidden');
+  }
+
+  hideToolbar() {
+    const toolbar = this.querySelector('#workspace-toolbar');
+    if (toolbar) toolbar.classList.add('hidden');
+  }
+
+  enableToolbarButtons() {
+    const btnEqualize = this.querySelector('#btn-equalize');
+    const btnExpand = this.querySelector('#btn-expand');
+    if (btnEqualize) {
+      btnEqualize.disabled = false;
+      btnEqualize.removeAttribute('title');
+    }
+    if (btnExpand) {
+      btnExpand.disabled = false;
+      btnExpand.removeAttribute('title');
+    }
+  }
+
+  disableToolbarButtons() {
+    const btnEqualize = this.querySelector('#btn-equalize');
+    const btnExpand = this.querySelector('#btn-expand');
+    if (btnEqualize) {
+      btnEqualize.disabled = true;
+      btnEqualize.setAttribute('title', 'Load an image first');
+    }
+    if (btnExpand) {
+      btnExpand.disabled = true;
+      btnExpand.setAttribute('title', 'Load an image first');
+    }
+  }
+
+  showMathButton() {
+    const btn = this.querySelector('#btn-show-math');
+    if (btn) btn.classList.remove('hidden');
+  }
+
+  hideMathButton() {
+    const btn = this.querySelector('#btn-show-math');
+    if (btn) btn.classList.add('hidden');
   }
 }
 
