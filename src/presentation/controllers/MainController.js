@@ -29,6 +29,48 @@ export class MainController {
     }
   }
 
+  /**
+   * Compute histogram statistics (Min, Max, Mean, Std Dev) from frequencies.
+   * @param {import('../../domain/models/HistogramModel.js').HistogramModel} histogram
+   * @returns {{ min: number, max: number, mean: number, std: number }}
+   */
+  computeMetrics(histogram) {
+    const freq = histogram.getFrequencies();
+    const totalPixels = freq.reduce((sum, v) => sum + v, 0);
+    if (totalPixels === 0) return { min: 0, max: 0, mean: 0, std: 0 };
+
+    // Find min/max intensity levels with non-zero frequency
+    let min = 0;
+    let max = 255;
+    for (let i = 0; i < 256; i++) {
+      if (freq[i] > 0) { min = i; break; }
+    }
+    for (let i = 255; i >= 0; i--) {
+      if (freq[i] > 0) { max = i; break; }
+    }
+
+    // Weighted mean
+    let sum = 0;
+    for (let i = 0; i < 256; i++) {
+      sum += i * freq[i];
+    }
+    const mean = sum / totalPixels;
+
+    // Weighted standard deviation
+    let varianceSum = 0;
+    for (let i = 0; i < 256; i++) {
+      varianceSum += freq[i] * (i - mean) ** 2;
+    }
+    const std = Math.sqrt(varianceSum / totalPixels);
+
+    return {
+      min,
+      max,
+      mean: Math.round(mean * 100) / 100,
+      std: Math.round(std * 100) / 100,
+    };
+  }
+
   async handleFileSelected(file) {
     try {
       this.view.hideError();
@@ -76,6 +118,13 @@ export class MainController {
             this.view.getOriginalHistogramCanvas(),
             this.currentHistogram
           );
+
+          // Show original histogram metrics
+          const originalMetrics = this.computeMetrics(this.currentHistogram);
+          this.view.showMetrics('original-metrics', originalMetrics);
+
+          // Hide result metrics (no processing yet)
+          this.view.hideMetrics('result-metrics');
 
           // Compute Math Visualizations
           this.histogramMath = new HistogramMath(this.currentHistogram);
@@ -127,6 +176,10 @@ export class MainController {
         this.view.getResultHistogramCanvas(),
         newHistogram
       );
+
+      // Show result histogram metrics
+      const resultMetrics = this.computeMetrics(newHistogram);
+      this.view.showMetrics('result-metrics', resultMetrics);
       
       this.view.switchToVisualTab();
     } catch (error) {
@@ -155,6 +208,10 @@ export class MainController {
         this.view.getResultHistogramCanvas(),
         newHistogram
       );
+
+      // Show result histogram metrics
+      const resultMetrics = this.computeMetrics(newHistogram);
+      this.view.showMetrics('result-metrics', resultMetrics);
 
       this.view.switchToVisualTab();
     } catch (error) {
