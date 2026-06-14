@@ -1,15 +1,21 @@
 /**
- * ThemeManager — singleton utility for dark/light theme toggling.
+ * ==========================================
+ * THEME MANAGER (Shared Utility)
+ * ==========================================
+ * Singleton que gestiona el tema claro/oscuro de la aplicación.
+ * Persiste la preferencia del usuario en localStorage bajo la clave "gs-theme".
+ * Al inicializar, restaura la preferencia guardada o detecta la preferencia
+ * del sistema operativo del usuario.
  *
- * Persists user choice to localStorage under key "gs-theme".
- * On init, restores saved preference or detects system preference.
+ * @module src/shared/utils/ThemeManager
  */
 const STORAGE_KEY = 'gs-theme';
 
 export const ThemeManager = {
   /**
-   * Initialize theme from localStorage or system preference.
-   * Call once at app bootstrap before first paint.
+   * Inicializa el tema desde localStorage o la preferencia del sistema.
+   * Debe llamarse una sola vez al arrancar la aplicación, antes del primer paint.
+   * Agrega o remueve la clase "dark" en el elemento raíz (<html>).
    */
   init() {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -23,7 +29,8 @@ export const ThemeManager = {
   },
 
   /**
-   * Toggle between light and dark themes.
+   * Alterna entre los temas claro y oscuro.
+   * Actualiza la clase CSS en el elemento raíz y persiste la elección en localStorage.
    */
   toggle() {
     document.documentElement.classList.toggle('dark');
@@ -32,8 +39,8 @@ export const ThemeManager = {
   },
 
   /**
-   * Check if dark mode is currently active.
-   * @returns {boolean}
+   * Verifica si el modo oscuro está actualmente activo.
+   * @returns {boolean} `true` si el tema oscuro está activo, `false` en caso contrario
    */
   isDark() {
     return document.documentElement.classList.contains('dark');

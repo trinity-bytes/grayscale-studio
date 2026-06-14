@@ -3,13 +3,33 @@ import './AnalysisPanel.css';
 import '../../../shared/components/EmptyState/EmptyState.js';
 import { strings } from '../../../shared/i18n/strings.js';
 
+/**
+ * ==========================================
+ * ANALYSIS PANEL (Presentation Component)
+ * ==========================================
+ * Componente Web Component que muestra el panel de análisis de histogramas.
+ * Contiene tres pestañas: Visual (histogramas), Ecuaciones (CDF/LUT)
+ * y Explicación. Soporta navegación por teclado (WAI-ARIA Tabs pattern)
+ * y gestiona la visualización de métricas estadísticas, tablas de conversión
+ * y gráficas matemáticas.
+ *
+ * @module src/presentation/components/AnalysisPanel/AnalysisPanel
+ */
 export class AnalysisPanel extends HTMLElement {
+  /**
+   * Se ejecuta cuando el componente se conecta al DOM.
+   * Renderiza el template HTML y configura las pestañas.
+   */
   connectedCallback() {
     this.className = "flex-1 flex flex-col";
     this.innerHTML = html;
     this.setupTabs();
   }
 
+  /**
+   * Configura el sistema de pestañas con navegación por clic y teclado.
+   * Implementa el patrón WAI-ARIA Tabs para accesibilidad.
+   */
   setupTabs() {
     const tabList = this.querySelector('#analysis-tabs');
     const tabs = this.querySelectorAll('.tab-btn');
@@ -37,7 +57,7 @@ export class AnalysisPanel extends HTMLElement {
       if (targetContent) {
         targetContent.classList.remove('hidden');
         targetContent.classList.add('flex');
-        // Force Chart.js to recalculate canvas sizes after the tab becomes visible
+        // Forzar a Chart.js recalcular tamaños de canvas después de que la pestaña sea visible
         requestAnimationFrame(() => {
           window.dispatchEvent(new Event('resize'));
         });
@@ -48,7 +68,7 @@ export class AnalysisPanel extends HTMLElement {
       tab.addEventListener('click', () => activateTab(tab));
     });
 
-    // Keyboard navigation (WAI-ARIA Tabs pattern)
+    // Navegación por teclado (patrón WAI-ARIA Tabs)
     tabList.addEventListener('keydown', (e) => {
       const tabArray = Array.from(tabs);
       const currentIndex = tabArray.indexOf(document.activeElement);
@@ -72,59 +92,90 @@ export class AnalysisPanel extends HTMLElement {
       }
     });
 
-    // Initialize first tab
+    // Inicializar primera pestaña
     if (tabs.length > 0) {
       tabs[0].click();
     }
   }
 
+  /**
+   * Retorna el elemento canvas del histograma original.
+   * @returns {HTMLCanvasElement} Elemento canvas del histograma original
+   */
   getOriginalCanvas() {
     return this.querySelector('#original-histogram-canvas');
   }
 
+  /**
+   * Retorna el elemento canvas del histograma de resultado.
+   * @returns {HTMLCanvasElement} Elemento canvas del histograma de resultado
+   */
   getResultCanvas() {
     return this.querySelector('#result-histogram-canvas');
   }
 
+  /**
+   * Retorna el elemento canvas de las ecuaciones de ecualización.
+   * @returns {HTMLCanvasElement} Elemento canvas de ecuaciones de ecualización
+   */
   getMathEqCanvas() {
     return this.querySelector('#math-eq-canvas');
   }
 
+  /**
+   * Retorna el elemento canvas de las ecuaciones de expansión.
+   * @returns {HTMLCanvasElement} Elemento canvas de ecuaciones de expansión
+   */
   getMathExpCanvas() {
     return this.querySelector('#math-exp-canvas');
   }
 
+  /**
+   * Muestra todos los estados vacíos de las pestañas.
+   */
   showEmptyStates() {
     this.querySelectorAll('.tab-empty-state').forEach(el => {
       el.hidden = false;
     });
   }
 
+  /**
+   * Oculta todos los estados vacíos de las pestañas.
+   */
   hideEmptyStates() {
     this.querySelectorAll('.tab-empty-state').forEach(el => {
       el.hidden = true;
     });
   }
 
+  /**
+   * Cambia a la pestaña visual (histogramas).
+   */
   switchToVisualTab() {
     const visualTab = this.querySelector('[data-target="tab-visual"]');
     if (visualTab) visualTab.click();
   }
 
+  /**
+   * Cambia a la pestaña de ecuaciones de ecualización.
+   */
   switchToMathEqTab() {
     const eqTab = this.querySelector('[data-target="tab-math-eq"]');
     if (eqTab) eqTab.click();
   }
 
+  /**
+   * Cambia a la pestaña de ecuaciones de expansión.
+   */
   switchToMathExpTab() {
     const expTab = this.querySelector('[data-target="tab-math-exp"]');
     if (expTab) expTab.click();
   }
 
   /**
-   * Display histogram metrics (Min, Max, Mean, Std) in the metrics grid.
-   * @param {string} containerId - 'original-metrics' or 'result-metrics'
-   * @param {{ min: number, max: number, mean: number, std: number }} metrics
+   * Muestra las métricas estadísticas del histograma en el contenedor especificado.
+   * @param {string} containerId - ID del contenedor ('original-metrics' o 'result-metrics')
+   * @param {{ min: number, max: number, mean: number, std: number }} metrics - Objeto con las métricas a mostrar
    */
   showMetrics(containerId, metrics) {
     const container = this.querySelector(`#${containerId}`);
@@ -151,8 +202,8 @@ export class AnalysisPanel extends HTMLElement {
   }
 
   /**
-   * Clear metrics display for a container.
-   * @param {string} containerId
+   * Limpia y oculta las métricas del contenedor especificado.
+   * @param {string} containerId - ID del contenedor de métricas a limpiar
    */
   hideMetrics(containerId) {
     const container = this.querySelector(`#${containerId}`);
@@ -162,8 +213,8 @@ export class AnalysisPanel extends HTMLElement {
   }
 
   /**
-   * Show histogram containers and hide the main empty state.
-   * Called when an image is loaded.
+   * Muestra los contenedores de histogramas y oculta el estado vacío principal.
+   * Se llama cuando se carga una imagen.
    */
   showHistogramContainers() {
     const containers = this.querySelector('#histogram-containers');
@@ -171,8 +222,8 @@ export class AnalysisPanel extends HTMLElement {
   }
 
   /**
-   * Hide histogram containers and show the main empty state.
-   * Called when resetting to initial state.
+   * Oculta los contenedores de histogramas y muestra el estado vacío principal.
+   * Se llama al restablecer al estado inicial.
    */
   hideHistogramContainers() {
     const containers = this.querySelector('#histogram-containers');
@@ -180,8 +231,8 @@ export class AnalysisPanel extends HTMLElement {
   }
 
   /**
-   * Show the result histogram canvas and hide its empty state.
-   * Called after processing completes.
+   * Muestra el canvas del histograma de resultado y oculta su estado vacío.
+   * Se llama después de completar un procesamiento.
    */
   showResultHistogram() {
     const emptyState = this.querySelector('#result-empty-state');
@@ -191,8 +242,8 @@ export class AnalysisPanel extends HTMLElement {
   }
 
   /**
-   * Reset result histogram to empty state.
-   * Called when a new image is loaded.
+   * Restaura el histograma de resultado a su estado vacío.
+   * Se llama al cargar una nueva imagen.
    */
   hideResultHistogram() {
     const emptyState = this.querySelector('#result-empty-state');
@@ -207,9 +258,10 @@ export class AnalysisPanel extends HTMLElement {
   }
 
   /**
-   * Render the step-by-step conversion table for equalization.
-   * @param {number[]} frequencies
-   * @param {number[]} lut
+   * Renderiza la tabla de conversión paso a paso para el proceso de ecualización.
+   * Muestra nivel de entrada, frecuencia, PDF, CDF y nivel de salida para cada intensidad.
+   * @param {number[]} frequencies - Frecuencias originales del histograma (256 niveles)
+   * @param {number[]} lut - Tabla de búsqueda de ecualización (256 niveles)
    */
   showEqualizationTable(frequencies, lut) {
     const tableBody = this.querySelector('#eq-conversion-table-body');
@@ -246,9 +298,11 @@ export class AnalysisPanel extends HTMLElement {
   }
 
   /**
-   * Render the step-by-step expansion procedure details.
-   * @param {number[]} frequencies
-   * @param {number[]} lut
+   * Renderiza los detalles del procedimiento de expansión paso a paso.
+   * Muestra los valores mínimos, máximos, rango, factor de escala y
+   * la fórmula de mapeo para cada nivel de intensidad.
+   * @param {number[]} frequencies - Frecuencias originales del histograma (256 niveles)
+   * @param {number[]} lut - Tabla de búsqueda de expansión (256 niveles)
    */
   showExpansionProcedure(frequencies, lut) {
     const minValEl = this.querySelector('#exp-min-val');

@@ -1,4 +1,17 @@
+/**
+ * ==========================================
+ * INTERNATIONALIZATION STRINGS (Shared)
+ * ==========================================
+ * Objeto centralizado que contiene todas las cadenas de texto traducidas
+ * al español para la interfaz de usuario. Actúa como fuente única de verdad
+ * para la localización (i18n), facilitando el mantenimiento y futuras
+ * traducciones a otros idiomas.
+ *
+ * @module src/shared/i18n/strings
+ * @type {Object}
+ */
 export const strings = {
+  /** Cadenas para la barra de navegación superior */
   nav: {
     workspace: 'Espacio de Trabajo',
     analysis: 'Análisis',
@@ -9,6 +22,7 @@ export const strings = {
     wasmLoading: 'WASM: Cargando',
   },
 
+  /** Cadenas para la zona de carga de archivos (dropzone) */
   dropzone: {
     uploadTitle: 'Subir Imagen',
     uploadDescription: 'Arrastra tu imagen en escala de grises aquí, o haz clic para explorar archivos.',
@@ -20,6 +34,7 @@ export const strings = {
     invalidType: 'Solo se aceptan imágenes JPEG y PNG.',
   },
 
+  /** Cadenas para el panel de información de imagen */
   imageInfo: {
     title: 'Información de Imagen',
     resolution: 'Resolución',
@@ -35,6 +50,7 @@ export const strings = {
     bitDepthValue: '8-bit',
   },
 
+  /** Cadenas para el panel de análisis de histogramas */
   analysis: {
     title: 'Análisis',
     tabVisual: 'Visual',
@@ -54,6 +70,7 @@ export const strings = {
     metricsStd: 'DesvEst',
   },
 
+  /** Cadenas de mensajes de error */
   errors: {
     colorImage: 'Imagen a color detectada. Por favor sube una imagen en escala de grises.',
     processingFailed: 'Error al procesar imagen con OpenCV.',
@@ -62,11 +79,13 @@ export const strings = {
     expandFailed: 'Error al expandir la imagen.',
   },
 
+  /** Cadenas comunes reutilizables */
   common: {
     browseFiles: 'Explorar Archivos',
     dismissError: 'Cerrar error',
   },
 
+  /** Cadenas para las gráficas de Chart.js */
   charts: {
     frequencyIntensity: 'Frecuencia de Intensidad',
     grayLevel: 'Nivel de Gris (0-255)',
@@ -79,12 +98,14 @@ export const strings = {
     outputIntensity: 'Intensidad de Salida (0-255)',
   },
 
+  /** Cadenas para accesibilidad (atributos ARIA) */
   aria: {
     dismissError: 'Cerrar error',
     toggleTheme: 'Alternar tema',
     analysisTabs: 'Pestañas de análisis',
   },
 
+  /** Cadenas para el documento raíz y carga inicial */
   index: {
     title: 'GrayScale Studio - Espacio de Trabajo',
     description: 'Aplicación web profesional para ecualización y expansión de histogramas de imagen en escala de grises, construida con Clean Architecture y DDD.',

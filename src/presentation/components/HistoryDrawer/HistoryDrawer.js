@@ -1,43 +1,85 @@
 import html from './HistoryDrawer.html?raw';
 import './HistoryDrawer.css';
 
+/**
+ * ==========================================
+ * HISTORY DRAWER (Presentation Component)
+ * ==========================================
+ * Componente Web Component que implementa un cajón lateral (drawer) para
+ * mostrar el historial de operaciones de procesamiento de imágenes.
+ * Almacena las entradas en localStorage para persistencia entre sesiones.
+ * Muestra tipo de operación, nombre de archivo, timestamp y métricas
+ * antes/después de cada operación. Se registra como <history-drawer>.
+ *
+ * @module src/presentation/components/HistoryDrawer/HistoryDrawer
+ */
 export class HistoryDrawer extends HTMLElement {
   constructor() {
     super();
+    /** @type {Array<{id: number, type: string, filename: string, timestamp: string, metricsBefore: object, metricsAfter: object}>} Lista de entradas del historial */
     this.entries = [];
   }
 
+  /**
+   * Se ejecuta cuando el componente se conecta al DOM.
+   * Renderiza el template, referencia elementos internos, vincula eventos
+   * y carga el historial desde localStorage.
+   */
   connectedCallback() {
     this.innerHTML = html;
+
+    /** @type {HTMLElement} Overlay de fondo del cajón */
     this.overlay = this.querySelector('#history-drawer-overlay');
+
+    /** @type {HTMLElement} Contenedor principal del cajón */
     this.container = this.querySelector('#history-drawer-container');
+
+    /** @type {HTMLButtonElement} Botón de cerrar cajón */
     this.closeBtn = this.querySelector('#history-close-btn');
+
+    /** @type {HTMLButtonElement} Botón de limpiar historial */
     this.clearBtn = this.querySelector('#history-clear-btn');
+
+    /** @type {HTMLElement} Estado vacío del historial */
     this.emptyState = this.querySelector('#history-empty-state');
+
+    /** @type {HTMLElement} Contenedor de la lista de entradas */
     this.listContainer = this.querySelector('#history-list');
+
+    /** @type {HTMLElement} Pie de página del cajón */
     this.footer = this.querySelector('#history-footer');
 
-    // Bind events
+    // Vincular eventos
     this.closeBtn.addEventListener('click', () => this.close());
     this.overlay.addEventListener('click', () => this.close());
     this.clearBtn.addEventListener('click', () => this.clear());
 
-    // Load initial entries from LocalStorage
+    // Cargar entradas iniciales desde localStorage
     this.loadHistory();
   }
 
+  /**
+   * Abre el cajón lateral con animación y bloquea el scroll del fondo.
+   */
   open() {
     this.overlay.classList.add('open');
     this.container.classList.add('open');
-    document.body.style.overflow = 'hidden'; // Lock background scroll
+    document.body.style.overflow = 'hidden';
   }
 
+  /**
+   * Cierra el cajón lateral y restablece el scroll del fondo.
+   */
   close() {
     this.overlay.classList.remove('open');
     this.container.classList.remove('open');
-    document.body.style.overflow = ''; // Restore background scroll
+    document.body.style.overflow = '';
   }
 
+  /**
+   * Carga el historial de operaciones desde localStorage.
+   * Si hay datos válidos, los parsea; de lo contrario inicializa un array vacío.
+   */
   loadHistory() {
     try {
       const stored = localStorage.getItem('grayscale-history');
@@ -53,6 +95,9 @@ export class HistoryDrawer extends HTMLElement {
     this.render();
   }
 
+  /**
+   * Guarda el historial de operaciones en localStorage.
+   */
   saveHistory() {
     try {
       localStorage.setItem('grayscale-history', JSON.stringify(this.entries));
@@ -62,8 +107,9 @@ export class HistoryDrawer extends HTMLElement {
   }
 
   /**
-   * Add a new entry to the history list
-   * @param {{ type: 'equalize'|'expand', filename: string, metricsBefore: object, metricsAfter: object }} data
+   * Agrega una nueva entrada al historial de operaciones.
+   * Inserta al inicio del array y mantiene un máximo de 20 entradas.
+   * @param {{ type: 'equalize'|'expand', filename: string, metricsBefore: {min: number, max: number, mean: number, std: number}, metricsAfter: {min: number, max: number, mean: number, std: number} }} data - Datos de la operación a registrar
    */
   addEntry(data) {
     const time = new Date().toLocaleTimeString(undefined, {
@@ -81,10 +127,10 @@ export class HistoryDrawer extends HTMLElement {
       metricsAfter: data.metricsAfter
     };
 
-    // Insert at the beginning of the array
+    // Insertar al inicio del array (más reciente primero)
     this.entries.unshift(entry);
 
-    // Max limit of 20 history entries
+    // Límite máximo de 20 entradas en el historial
     if (this.entries.length > 20) {
       this.entries.pop();
     }
@@ -93,12 +139,19 @@ export class HistoryDrawer extends HTMLElement {
     this.render();
   }
 
+  /**
+   * Limpia todo el historial de operaciones.
+   */
   clear() {
     this.entries = [];
     this.saveHistory();
     this.render();
   }
 
+  /**
+   * Renderiza la lista de entradas del historial en el DOM.
+   * Muestra el estado vacío si no hay entradas.
+   */
   render() {
     if (this.entries.length === 0) {
       this.emptyState.classList.remove('hidden');

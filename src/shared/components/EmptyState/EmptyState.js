@@ -1,29 +1,43 @@
 import './EmptyState.css';
 
 /**
- * EmptyState — Web Component for empty/placeholder states.
+ * ==========================================
+ * EMPTY STATE (Shared Web Component)
+ * ==========================================
+ * Componente Web Component para mostrar estados vacíos o placeholders
+ * cuando no hay datos disponibles. Preserva los hijos sloteados (botones,
+ * enlaces, etc.) y los renderiza después de la descripción.
+ * Se registra como elemento personalizado <empty-state>.
  *
- * Usage:
- *   <empty-state icon="cloud_upload" title="Upload" description="Drop here">
- *     <button>Browse</button>
- *   </empty-state>
+ * Atributos observados:
+ * - `icon`: Nombre del icono Material Symbols a mostrar
+ * - `text`: Texto principal del estado vacío
+ * - `description`: Descripción secundaria
  *
- * Children are preserved and rendered after the description.
+ * @module src/shared/components/EmptyState/EmptyState
+ * @example
+ * <empty-state icon="cloud_upload" title="Subir" description="Arrastra aquí">
+ *   <button>Explorar</button>
+ * </empty-state>
  */
 export class EmptyState extends HTMLElement {
+  /**
+   * Se ejecuta cuando el componente se conecta al DOM.
+   * Construye la estructura del estado vacío preservando los hijos sloteados.
+   */
   connectedCallback() {
-    // Save slotted children BEFORE setting innerHTML (innerHTML destroys them)
+    // Guardar hijos sloteados ANTES de setting innerHTML (innerHTML los destruye)
     const slottedChildren = [...this.childNodes];
 
     this.classList.add('empty-state-root');
 
-    // Build template manually (no innerHTML — preserves children)
+    // Construir template manualmente (sin innerHTML — preserva hijos)
     this.innerHTML = '';
 
     const wrapper = document.createElement('div');
     wrapper.className = 'flex flex-col items-center justify-center gap-sm py-lg text-center';
 
-    // Icon
+    // Icono
     const iconEl = document.createElement('span');
     iconEl.className = 'material-symbols-outlined text-[40px] text-secondary empty-icon';
     iconEl.style.fontVariationSettings = "'FILL' 0";
@@ -35,28 +49,39 @@ export class EmptyState extends HTMLElement {
     }
     wrapper.appendChild(iconEl);
 
-    // Title
+    // Título
     const titleEl = document.createElement('h3');
     titleEl.className = 'font-headline-md text-base text-on-surface empty-title';
     titleEl.textContent = this.getAttribute('title') || '';
     wrapper.appendChild(titleEl);
 
-    // Description
+    // Descripción
     const descEl = document.createElement('p');
     descEl.className = 'font-body-sm text-on-surface-variant max-w-[260px] empty-desc';
     descEl.textContent = this.getAttribute('description') || '';
     wrapper.appendChild(descEl);
 
-    // Re-insert slotted children (buttons, links, etc.)
+    // Re-insertar hijos sloteados (botones, enlaces, etc.)
     slottedChildren.forEach(child => wrapper.appendChild(child));
 
     this.appendChild(wrapper);
   }
 
+  /**
+   * Define los atributos que el componente observa para reaccionar a cambios.
+   * @returns {string[]} Lista de atributos observados
+   */
   static get observedAttributes() {
     return ['icon', 'title', 'description'];
   }
 
+  /**
+   * Se ejecuta cuando un atributo observado cambia de valor.
+   * Actualiza dinámicamente el contenido del componente sin reconstruir todo el DOM.
+   * @param {string} name - Nombre del atributo que cambió
+   * @param {string|null} oldValue - Valor anterior del atributo
+   * @param {string|null} newValue - Nuevo valor del atributo
+   */
   attributeChangedCallback(name, oldValue, newValue) {
     if (!this.isConnected) return;
 

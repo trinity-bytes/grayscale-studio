@@ -2,20 +2,25 @@ import { strings } from '../../shared/i18n/strings.js';
 
 /**
  * ==========================================
- * CHART.JS EXTERNAL LIBRARY ADAPTER OR WRAPPER
+ * CHART.JS ADAPTER / WRAPPER (Infrastructure)
  * ==========================================
- * Clase perteneciente a Infraestructura para inicializar, encapsular
- * y gestionar de manera destructiva para liberar RAM a las gráficas del framework Chart.js
+ * Adaptador que encapsula la librería externa Chart.js para renderizar
+ * histogramas y gráficas matemáticas. Gestiona de manera destructiva
+ * las instancias de Chart para evitar fugas de memoria (memory leaks)
+ * al sobrescribir gráficas existentes.
+ *
+ * @module src/infrastructure/chart/ChartJsRenderer
  */
 export class ChartJsRenderer {
   constructor() {
-    // Almacena un mapa de (ID_LIENZO -> Objeto Chart) para saber cuándo pisarlos.
+    /** @type {Map<string, Chart>} Mapa de instancias de Chart indexadas por ID de canvas */
     this.chartInstances = new Map();
   }
 
   /**
-   * Read CSS custom property values from :root or .dark context.
-   * @returns {{ gridColor: string, tickColor: string, barColor: string, barBorderColor: string, barProcessedColor: string, barProcessedBorder: string }}
+   * Lee las propiedades CSS personalizadas del tema actual para aplicar
+   * colores consistentes a las gráficas. Soporta temas claro y oscuro.
+   * @returns {{ gridColor: string, tickColor: string, barColor: string, barBorderColor: string, barProcessedColor: string, barProcessedBorder: string }} Objeto con los colores del tema activo
    */
   getThemeColors() {
     const styles = getComputedStyle(document.documentElement);
@@ -34,9 +39,10 @@ export class ChartJsRenderer {
   }
 
   /**
-   * Pinta o re-pinta la gráfica desde frecuencias limpias.
-   * @param {string} canvasId - Element ID donde depositar barras.
-   * @param {import('../../domain/models/HistogramModel.js').HistogramModel} histogramModel - Carga semántica del valor (0 a 255)
+   * Renderiza o re-renderiza un histograma de frecuencias de intensidad.
+   * Destruye la instancia anterior del canvas si existe para evitar superposiciones.
+   * @param {string} canvasId - ID del elemento canvas donde se dibujará el histograma
+   * @param {import('../../domain/models/HistogramModel.js').HistogramModel} histogramModel - Modelo de histograma con las frecuencias y etiquetas
    */
   render(canvasId, histogramModel) {
     const canvas = document.getElementById(canvasId);
@@ -96,10 +102,12 @@ export class ChartJsRenderer {
   }
 
   /**
-   * Pinta la gráfica matemática (Dual-axis para Histograma + Función de mapeo)
-   * @param {string} canvasId 
-   * @param {import('../../domain/models/HistogramMath.js').HistogramMath} histogramMath 
-   * @param {string} type - "equalization" o "expansion"
+   * Renderiza una gráfica matemática de doble eje (dual-axis) que superpone
+   * el histograma original (barras) con la función de mapeo (línea).
+   * Utilizada para visualizar educativamente las transformaciones de ecualización y expansión.
+   * @param {string} canvasId - ID del elemento canvas donde se dibujará la gráfica
+   * @param {import('../../domain/models/HistogramMath.js').HistogramMath} histogramMath - Modelo matemático con los datos de ecualización/expansión
+   * @param {string} type - Tipo de transformación: "equalization" o "expansion"
    */
   renderMath(canvasId, histogramMath, type) {
     const canvas = document.getElementById(canvasId);

@@ -1,22 +1,61 @@
 import { HistogramMath } from '../../domain/models/HistogramMath.js';
 import { strings } from '../../shared/i18n/strings.js';
 
+/**
+ * ==========================================
+ * MAIN CONTROLLER (Presentation - Controller)
+ * ==========================================
+ * Controlador principal que orquesta la lógica de la aplicación. Sigue el patrón
+ * MVC como el "C" (Controlador) que conecta la Vista (MainView) con los casos de uso
+ * del dominio. Coordina la carga de imágenes, validación, ecualización, expansión
+ * y actualización de la interfaz de usuario.
+ *
+ * @module src/presentation/controllers/MainController
+ */
 export class MainController {
+  /**
+   * Crea una instancia del controlador principal con todas las dependencias inyectadas.
+   * @param {import('../views/MainView.js').MainView} view - Vista principal de la aplicación
+   * @param {import('../../application/LoadAndValidateImageUseCase.js').LoadAndValidateImageUseCase} loadUseCase - Caso de uso de carga y validación
+   * @param {import('../../application/EqualizeImageUseCase.js').EqualizeImageUseCase} equalizeUseCase - Caso de uso de ecualización
+   * @param {import('../../application/ExpandImageUseCase.js').ExpandImageUseCase} expandUseCase - Caso de uso de expansión
+   * @param {import('../../infrastructure/chart/ChartJsRenderer.js').ChartJsRenderer} chartRenderer - Renderizador de gráficas Chart.js
+   */
   constructor(view, loadUseCase, equalizeUseCase, expandUseCase, chartRenderer) {
+    /** @type {import('../views/MainView.js').MainView} Vista principal */
     this.view = view;
+
+    /** @type {import('../../application/LoadAndValidateImageUseCase.js').LoadAndValidateImageUseCase} Caso de uso de carga */
     this.loadUseCase = loadUseCase;
+
+    /** @type {import('../../application/EqualizeImageUseCase.js').EqualizeImageUseCase} Caso de uso de ecualización */
     this.equalizeUseCase = equalizeUseCase;
+
+    /** @type {import('../../application/ExpandImageUseCase.js').ExpandImageUseCase} Caso de uso de expansión */
     this.expandUseCase = expandUseCase;
+
+    /** @type {import('../../infrastructure/chart/ChartJsRenderer.js').ChartJsRenderer} Renderizador de gráficas */
     this.chartRenderer = chartRenderer;
 
+    /** @type {import('../../domain/models/ImageModel.js').ImageModel|null} Modelo de la imagen actualmente cargada */
     this.currentImageModel = null;
+
+    /** @type {import('../../domain/models/HistogramModel.js').HistogramModel|null} Histograma de la imagen actual */
     this.currentHistogram = null;
+
+    /** @type {string|null} Nombre del archivo de la imagen cargada */
     this.currentFilename = null;
+
+    /** @type {string|null} Última operación ejecutada ('equalize' o 'expand') */
     this.lastOperation = null;
 
     this.init();
   }
 
+  /**
+   * Inicializa el controlador vinculando los eventos de la vista a los handlers
+   * correspondientes y estableciendo el estado de WASM como listo.
+   */
   init() {
     this.view.bindFileSelected(this.handleFileSelected.bind(this));
     this.view.bindEqualize(this.handleEqualize.bind(this));
@@ -24,7 +63,7 @@ export class MainController {
     this.view.bindShowMath(this.handleShowMath.bind(this));
     this.view.bindError(this.handleError.bind(this));
     
-    // Set WASM status to ready
+    // Establecer estado de WASM como listo
     const topNavBar = document.querySelector('top-nav-bar');
     if (topNavBar) {
       topNavBar.setWasmStatus('Ready');
@@ -32,16 +71,16 @@ export class MainController {
   }
 
   /**
-   * Compute histogram statistics (Min, Max, Mean, Std Dev) from frequencies.
-   * @param {import('../../domain/models/HistogramModel.js').HistogramModel} histogram
-   * @returns {{ min: number, max: number, mean: number, std: number }}
+   * Calcula las métricas estadísticas del histograma: Mínimo, Máximo, Media y Desviación Estándar.
+   * @param {import('../../domain/models/HistogramModel.js').HistogramModel} histogram - Modelo de histograma a analizar
+   * @returns {{ min: number, max: number, mean: number, std: number }} Objeto con las métricas calculadas
    */
   computeMetrics(histogram) {
     const freq = histogram.getFrequencies();
     const totalPixels = freq.reduce((sum, v) => sum + v, 0);
     if (totalPixels === 0) return { min: 0, max: 0, mean: 0, std: 0 };
 
-    // Find min/max intensity levels with non-zero frequency
+    // Encontrar niveles de intensidad mínimos y máximos con frecuencia no nula
     let min = 0;
     let max = 255;
     for (let i = 0; i < 256; i++) {
@@ -51,14 +90,14 @@ export class MainController {
       if (freq[i] > 0) { max = i; break; }
     }
 
-    // Weighted mean
+    // Media ponderada
     let sum = 0;
     for (let i = 0; i < 256; i++) {
       sum += i * freq[i];
     }
     const mean = sum / totalPixels;
 
-    // Weighted standard deviation
+    // Desviación estándar ponderada
     let varianceSum = 0;
     for (let i = 0; i < 256; i++) {
       varianceSum += freq[i] * (i - mean) ** 2;
@@ -73,6 +112,12 @@ export class MainController {
     };
   }
 
+  /**
+   * Maneja la selección de un archivo de imagen por parte del usuario.
+   * Orquesta el flujo completo: carga, validación de grises, extracción de metadata,
+   * renderizado de histogramas y cálculos matemáticos.
+   * @param {File} file - Archivo de imagen seleccionado por el usuario
+   */
   async handleFileSelected(file) {
     try {
       this.view.hideError();
@@ -83,15 +128,15 @@ export class MainController {
       this.lastOperation = null;
       this.currentFilename = file.name;
       
-      // Load file as base64
+      // Cargar archivo como base64
       const base64Data = await this.loadUseCase.execute(file);
       
-      // We must wait for the hidden image to load the base64 data to process it
+      // Esperar a que la imagen oculta cargue los datos base64 para procesarlos
       this.view.setHiddenImageSrc(base64Data, () => {
         try {
           this.view.showCanvas();
           
-          // Execute extraction and validation using the use case
+          // Ejecutar extracción y validación usando el caso de uso
           this.currentImageModel = this.loadUseCase.executeMathematicalExtraction(
             this.view.getHiddenImageId(),
             this.view.getWorkspaceCanvasId()
@@ -106,37 +151,37 @@ export class MainController {
             return;
           }
 
-          // Valid Grayscale image
+          // Imagen en grises válida
           const metadata = this.currentImageModel.getMetadata();
           this.view.updateImageInfo(
              metadata.width,
              metadata.height,
-             1 // Channels
+             1 // Canales
           );
 
-          // Update thumbnail from workspace canvas
+          // Actualizar miniatura desde el canvas del workspace
           const workspaceCanvas = this.view.workspace.getCanvas();
           this.view.updateThumbnail(workspaceCanvas);
 
-          // Render Original Histogram
+          // Renderizar histograma original
           this.currentHistogram = this.currentImageModel.getHistogram();
           this.chartRenderer.render(
             this.view.getOriginalHistogramCanvas(),
             this.currentHistogram
           );
 
-          // Show original histogram metrics
+          // Mostrar métricas del histograma original
           const originalMetrics = this.computeMetrics(this.currentHistogram);
           this.view.showMetrics('original-metrics', originalMetrics);
 
-          // Show histogram containers and hide empty state
+          // Mostrar contenedores de histogramas y ocultar estado vacío
           this.view.showHistogramContainers();
           this.view.hideEmptyStates();
 
-          // Hide result metrics (no processing yet)
+          // Ocultar métricas de resultado (sin procesamiento aún)
           this.view.hideMetrics('result-metrics');
 
-          // Compute Math Visualizations
+          // Calcular visualizaciones matemáticas
           this.histogramMath = new HistogramMath(this.currentHistogram);
           
           this.chartRenderer.renderMath(
@@ -166,6 +211,11 @@ export class MainController {
     }
   }
 
+  /**
+   * Maneja la ecualización del histograma de la imagen cargada.
+   * Ejecuta el caso de uso de ecualización, actualiza la UI con el resultado,
+   * renderiza el histograma de resultado y registra la operación en el historial.
+   */
   handleEqualize() {
     try {
       this.lastOperation = 'equalize';
@@ -179,14 +229,14 @@ export class MainController {
       this.view.showMathButton();
       this.view.showResultHistogram();
 
-      // Dispatch processed state change event
+      // Despachar evento de cambio de estado procesado
       this.view.workspace.dispatchEvent(new CustomEvent('on-processed-state-changed', {
         bubbles: true,
         composed: true,
         detail: { processed: true }
       }));
 
-      // Update thumbnail from processed canvas
+      // Actualizar miniatura desde el canvas procesado
       const processedCanvas = this.view.workspace.getProcessedCanvas();
       this.view.updateThumbnail(processedCanvas);
 
@@ -195,15 +245,15 @@ export class MainController {
         newHistogram
       );
 
-      // Show result histogram metrics
+      // Mostrar métricas del histograma de resultado
       const resultMetrics = this.computeMetrics(newHistogram);
       this.view.showMetrics('result-metrics', resultMetrics);
 
-      // Render conversion table
+      // Renderizar tabla de conversión
       const eqData = this.histogramMath.getEqualizationData();
       this.view.showEqualizationTable(this.currentHistogram.getFrequencies(), eqData.lut);
 
-      // Add to history drawer
+      // Agregar entrada al historial
       const originalMetrics = this.computeMetrics(this.currentHistogram);
       this.view.addHistoryEntry({
         type: 'equalize',
@@ -219,6 +269,11 @@ export class MainController {
     }
   }
 
+  /**
+   * Maneja la expansión (normalización Min-Max) del histograma de la imagen cargada.
+   * Ejecuta el caso de uso de expansión, actualiza la UI con el resultado,
+   * renderiza el histograma de resultado y registra la operación en el historial.
+   */
   handleExpand() {
     try {
       this.lastOperation = 'expand';
@@ -232,14 +287,14 @@ export class MainController {
       this.view.showMathButton();
       this.view.showResultHistogram();
 
-      // Dispatch processed state change event
+      // Despachar evento de cambio de estado procesado
       this.view.workspace.dispatchEvent(new CustomEvent('on-processed-state-changed', {
         bubbles: true,
         composed: true,
         detail: { processed: true }
       }));
 
-      // Update thumbnail from processed canvas
+      // Actualizar miniatura desde el canvas procesado
       const processedCanvas = this.view.workspace.getProcessedCanvas();
       this.view.updateThumbnail(processedCanvas);
 
@@ -248,15 +303,15 @@ export class MainController {
         newHistogram
       );
 
-      // Show result histogram metrics
+      // Mostrar métricas del histograma de resultado
       const resultMetrics = this.computeMetrics(newHistogram);
       this.view.showMetrics('result-metrics', resultMetrics);
 
-      // Render expansion procedure details
+      // Renderizar detalles del procedimiento de expansión
       const expData = this.histogramMath.getExpansionData();
       this.view.showExpansionProcedure(this.currentHistogram.getFrequencies(), expData.lut);
 
-      // Add to history drawer
+      // Agregar entrada al historial
       const originalMetrics = this.computeMetrics(this.currentHistogram);
       this.view.addHistoryEntry({
         type: 'expand',
@@ -272,6 +327,10 @@ export class MainController {
     }
   }
 
+  /**
+   * Maneja la solicitud de mostrar ecuaciones matemáticas.
+   * Cambia a la pestaña correspondiente según la última operación ejecutada.
+   */
   handleShowMath() {
     if (this.lastOperation === 'expand') {
       this.view.switchToMathExpTab();
@@ -280,6 +339,10 @@ export class MainController {
     }
   }
 
+  /**
+   * Maneja la visualización de errores delegando a la vista.
+   * @param {string} message - Mensaje de error a mostrar
+   */
   handleError(message) {
     this.view.showError(message);
   }

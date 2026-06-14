@@ -1,3 +1,22 @@
+/**
+ * ==========================================
+ * COMPOSITION ROOT (Entry Point)
+ * ==========================================
+ * Punto de entrada principal de la aplicación GrayScale Studio.
+ * Orquesta la inyección de dependencias siguiendo los principios de
+ * Clean Architecture / DDD. Espera a que OpenCV.js (WebAssembly) esté
+ * completamente cargado antes de inicializar la aplicación.
+ *
+ * Flujo de inicialización:
+ * 1. ThemeManager.init() — Restaura el tema del usuario
+ * 2. Espera a que OpenCV.js esté listo (cv.Mat disponible)
+ * 3. Oculta el overlay de carga
+ * 4. Inyecta dependencias: View → UseCases → Processor → Controller
+ * 5. Inicializa el Konami Code (Easter Egg)
+ *
+ * @module src/main
+ */
+
 import { MainView } from "./presentation/views/MainView.js";
 import { MainController } from "./presentation/controllers/MainController.js";
 import { LoadAndValidateImageUseCase } from "./application/LoadAndValidateImageUseCase.js";
@@ -8,13 +27,10 @@ import { OpenCvImageProcessor } from "./infrastructure/opencv/OpenCvImageProcess
 import { ThemeManager } from "./shared/utils/ThemeManager.js";
 import "./presentation/components/index.js";
 import "./shared/styles/main.css";
-
 /**
- * ==========================================
- * COMPOSITION ROOT (ENTRY POINT BASE)
- * ==========================================
- * Orquesta la inyección de dependencias una vez
- * que WebAssembly (OpenCV.js) asienta en memoria.
+ * Inicializa la aplicación GrayScale Studio.
+ * Espera a que OpenCV.js esté completamente cargado en memoria,
+ * luego inyecta todas las dependencias y crea el controlador principal.
  */
 function bootstrapApp() {
   ThemeManager.init();
@@ -52,8 +68,8 @@ function bootstrapApp() {
 }
 
 /**
- * Detects the Konami Code sequence (Up Up Down Down Left Right Left Right B A)
- * then triggers a screen explosion effect and loads a retro CRT terminal with Snake.
+ * Detecta la secuencia del Código Konami (↑↑↓↓←→←→BA)
+ * y activa el efecto de explosión con terminal retro y juego Snake.
  */
 function initKonamiCode() {
   const konamiPattern = [
@@ -83,7 +99,8 @@ function initKonamiCode() {
 }
 
 /**
- * Full-page explosion effect that clears the DOM and shows a retro CRT terminal.
+ * Efecto de explosión de pantalla completa que limpia el DOM y muestra
+ * una terminal retro con estilo CRT y el minijuego de Snake.
  */
 function triggerExplosionEffect() {
   // --- 1. Inject explosion CSS ---
@@ -280,7 +297,8 @@ function triggerExplosionEffect() {
 }
 
 /**
- * Retro Snake minigame rendered on a canvas.
+ * Minijuego retro de Snake renderizado en un canvas.
+ * Soporta controles de flechas y reinicio con Enter.
  */
 function initSnakeGame() {
   const canvas = document.getElementById('retro-snake-canvas');
