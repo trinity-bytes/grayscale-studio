@@ -7,12 +7,31 @@ export class MainView {
     this.workspace = document.getElementById("main-workspace");
     this.analysisPanel = document.getElementById("analysis-panel");
     this.errorAlert = document.getElementById("main-error-alert");
+    this.historyDrawer = document.getElementById("history-drawer");
 
     // Create a hidden image element for OpenCV to read base64 data
     this.hiddenImage = document.createElement("img");
     this.hiddenImage.id = "hidden-source-image";
     this.hiddenImage.style.display = "none";
     document.body.appendChild(this.hiddenImage);
+
+    this._setupNavListeners();
+  }
+
+  _setupNavListeners() {
+    if (this.topNavBar) {
+      this.topNavBar.addEventListener('on-show-analysis', () => {
+        this.focusAnalysisPanel();
+      });
+      this.topNavBar.addEventListener('on-show-history', () => {
+        this.openHistory();
+      });
+      this.topNavBar.addEventListener('on-show-workspace', () => {
+        if (this.workspace) {
+          this.workspace.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    }
   }
 
   // Bind methods
@@ -184,5 +203,35 @@ export class MainView {
 
   hideHistogramContainers() {
     this.analysisPanel.hideHistogramContainers();
+  }
+
+  showEqualizationTable(frequencies, lut) {
+    this.analysisPanel.showEqualizationTable(frequencies, lut);
+  }
+
+  showExpansionProcedure(frequencies, lut) {
+    this.analysisPanel.showExpansionProcedure(frequencies, lut);
+  }
+
+  focusAnalysisPanel() {
+    if (this.analysisPanel) {
+      this.analysisPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.analysisPanel.classList.add('animate-pulse-highlight');
+      setTimeout(() => {
+        this.analysisPanel.classList.remove('animate-pulse-highlight');
+      }, 1500);
+    }
+  }
+
+  openHistory() {
+    if (this.historyDrawer) {
+      this.historyDrawer.open();
+    }
+  }
+
+  addHistoryEntry(data) {
+    if (this.historyDrawer) {
+      this.historyDrawer.addEntry(data);
+    }
   }
 }

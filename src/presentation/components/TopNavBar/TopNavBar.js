@@ -12,6 +12,21 @@ export class TopNavBar extends HTMLElement {
       ThemeManager.toggle();
       this._syncThemeIcon();
     });
+
+    this.querySelector('#nav-workspace').addEventListener('click', (e) => {
+      e.preventDefault();
+      this.dispatchEvent(new CustomEvent('on-show-workspace', { bubbles: true, composed: true }));
+    });
+
+    this.querySelector('#nav-analysis').addEventListener('click', (e) => {
+      e.preventDefault();
+      this.dispatchEvent(new CustomEvent('on-show-analysis', { bubbles: true, composed: true }));
+    });
+
+    this.querySelector('#nav-history').addEventListener('click', (e) => {
+      e.preventDefault();
+      this.dispatchEvent(new CustomEvent('on-show-history', { bubbles: true, composed: true }));
+    });
   }
 
   _syncThemeIcon() {

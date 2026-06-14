@@ -68,3 +68,38 @@
   font-style: italic;
   opacity: 0.7;
 }
+
+/* Conversion Table Styling */
+.conversion-table {
+  border-spacing: 0;
+  width: 100%;
+}
+
+.conversion-table th {
+  font-weight: 600;
+  color: var(--surface-text-muted, #737688);
+}
+
+.conversion-table th,
+.conversion-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--outline-variant, rgba(115, 118, 136, 0.15));
+  text-align: center;
+}
+
+.conversion-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.conversion-table tr {
+  transition: background-color 0.2s ease;
+}
+
+.conversion-table tbody tr:hover {
+  background-color: rgba(var(--primary-rgb, 0, 87, 255), 0.05);
+}
+
+.dark .conversion-table tbody tr:hover {
+  background-color: rgba(var(--primary-rgb, 182, 196, 255), 0.1);
+}
+
