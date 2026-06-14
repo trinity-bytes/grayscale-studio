@@ -1,6 +1,6 @@
 {
   "name": "grayscale-studio",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "A web application to process and enhance grayscale images with professional precision",
   "main": "index.js",
   "scripts": {
