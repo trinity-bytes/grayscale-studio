@@ -1,7 +1,14 @@
 /* =============================================
- * LAYOUT — Global body and base layout styles
+ * LAYOUT.CSS — Layout Global y Estilos Base del Body
  * =============================================
- */
+ * Estilos de layout global: imagen de fondo del body, overlay de carga inicial,
+ * fondo de canvas en modo oscuro, animación del isotipo de carga y overrides
+ * de colores de texto para modo oscuro cuando Tailwind CDN no los resuelve.
+ *
+ * Componentes afectados: body, #loader-overlay, #main-canvas, #processed-canvas,
+ *                       .loader-isotipo, clases de texto semánticas (.text-on-surface, etc.)
+ * Convenciones: Las animaciones usan @keyframes. Los overrides de texto en modo
+ *               oscuro usan !important porque Tailwind CDN no procesa clases estáticas.
 
 body {
   background-image: url("/assets/images/pok-rie-3.jpg");

@@ -1,4 +1,15 @@
-/* Scoped styles for WorkspaceDropZone */
+/* =============================================
+ * WORKSPACEDROPZONE.CSS — Estilos de la Zona de Arrastre del Workspace
+ * =============================================
+ * Estilos scoped para el componente WorkspaceDropZone Web Component. Define
+ * el layout del host (flex column), toolbar de operaciones con botones
+ * Ecualizar/Expansión, y sobrescrituras de modo oscuro para el panel de
+ * herramientas y sub-panels de vidrio.
+ *
+ * Componentes afectados: <workspace-drop-zone>, :host, #workspace-toolbar
+ * Convenciones: Se usa :host para layout del Shadow DOM. Los botones deshabilitados
+ *               usan opacity: 0.5 y cursor: not-allowed. El hover levita el botón
+ *               con translateY(-1px).
 :host {
   display: flex;
   flex-direction: column;

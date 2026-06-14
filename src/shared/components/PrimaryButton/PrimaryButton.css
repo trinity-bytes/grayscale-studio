@@ -1,4 +1,15 @@
-/* Semantic BEM scoped styles for PrimaryButton */
+/* =============================================
+ * PRIMARYBUTTON.CSS — Estilos del Botón Primario Reutilizable
+ * =============================================
+ * Estilos scoped para el componente PrimaryButton Web Component. Define
+ * comportamiento de estado deshabilitado (opacity reducido, cursor not-allowed)
+ * y efecto hover que usa la variable --color-primary-container como color de
+ * fondo alternativo.
+ *
+ * Componentes afectados: <primary-button>, .primary-button-root
+ * Convenciones: La mayoría de estilos se manejan con Tailwind utility classes
+ *               en el template. Este archivo complementa con pseudo-clases
+ *               (:disabled, :hover) que requieren selectores CSS puros.
 .primary-button-root {
   /* Tailwind classes handle most styling, but we can add specific overrides here */
 }

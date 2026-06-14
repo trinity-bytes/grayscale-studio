@@ -1,3 +1,26 @@
+<!-- =============================================
+     GRAYSCALE STUDIO — Punto de Entrada de la Aplicación
+     =============================================
+     Aplicación web profesional para análisis y procesamiento de imágenes en
+     escala de grises, construida con Clean Architecture y Domain-Driven Design.
+
+     Funcionalidades principales:
+     - Ecualización de histogramas (CDF → LUT)
+     - Expansión lineal de contraste
+     - Visualización de histogramas originales y procesados
+     - Historial de operaciones con restauración de estados
+
+     Dependencias clave cargadas:
+     - OpenCV.js 4.8.0: Motor de procesamiento de imágenes (carga asíncrona)
+     - Chart.js: Renderizado de gráficos de histograma
+     - Tailwind CSS (CDN): Framework de estilos con modo oscuro via clase "dark"
+     - Material Symbols: Iconografía del sistema de diseño
+
+     Arquitectura:
+     - Componentes Web Components (Custom Elements)
+     - Layout responsive con guardia móvil (requiere pantalla >= md)
+     - Grid principal de 12 columnas: Info(2) | Workspace(7) | Analysis(3)
+-->
 <!doctype html>
 <html lang="es">
   <head>

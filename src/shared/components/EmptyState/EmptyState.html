@@ -1,3 +1,15 @@
+<!-- =============================================
+     EMPTYSTATE — Componente de Estado Vacío Reutilizable
+     =============================================
+     Template del componente que renderiza un placeholder centrado con icono,
+     título y descripción para indicar ausencia de datos. Incluye un slot
+     para contenido adicional (botones, enlaces, etc.).
+
+     Componente: <empty-state>
+     Slots: default — contenido adicional debajo de la descripción
+     Atributos: icon (string), title (string), description (string) —
+                establecidos programáticamente
+-->
 <div class="flex flex-col items-center justify-center gap-sm py-lg text-center">
   <span class="material-symbols-outlined text-[40px] text-secondary empty-icon" style="font-variation-settings: 'FILL' 0;"></span>
   <h3 class="font-headline-md text-base text-on-surface empty-title"></h3>

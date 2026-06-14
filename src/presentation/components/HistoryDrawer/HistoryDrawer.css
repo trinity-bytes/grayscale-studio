@@ -1,4 +1,18 @@
-.history-drawer-overlay {
+/* =============================================
+ * HISTORYDRAWER.CSS — Estilos del Cajón de Historial de Operaciones
+ * =============================================
+ * Estilos scoped para el componente HistoryDrawer Web Component. Define el
+ * overlay semitransparente, el cajón lateral deslizante (drawer) de 400px,
+ * tarjetas de operaciones (history-card), badges de tipo de operación
+ * (equalize/expand), grid de métricas operacionales y animación de highlight
+ * para la imagen principal al restaurar un estado.
+ *
+ * Componentes afectados: <history-drawer>, .history-drawer-overlay,
+ *                       .history-drawer-container, .history-card,
+ *                       .history-badge, .history-metrics-grid
+ * Convenciones: Animaciones con cubic-bezier(0.4, 0, 0.2, 1) para transiciones
+ *               suaves. Los badges se colorean por tipo de operación. Soporte
+ *               completo de modo oscuro con variantes .dark.
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);

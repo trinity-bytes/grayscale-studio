@@ -1,9 +1,13 @@
 /* =============================================
- * MAIN STYLESHEET — Aggregator
+ * MAIN.CSS — Agregador de Estilos Compartidos
  * =============================================
- * Single entry point that imports all shared styles.
- * Imported via main.js so Vite bundles them.
- */
+ * Punto de entrada único que importa todos los estilos compartidos del proyecto.
+ * Se importa desde main.js para que Vite los empaquete en el bundle final.
+ *
+ * Componentes afectados: Todos los componentes de la aplicación
+ * Convenciones: Este archivo no contiene reglas CSS propias, solo orquesta
+ *               la importación de módulos de estilos en orden: tipografía,
+ *               efectos, cursores y layout.
 
 @import './typography.css';
 @import './effects.css';

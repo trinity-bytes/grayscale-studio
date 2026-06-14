@@ -1,8 +1,13 @@
 /* =============================================
- * TYPOGRAPHY — @font-face declarations
+ * TYPOGRAPHY.CSS — Declaraciones de Fuentes Tipográficas
  * =============================================
- * Local Poppins font family loaded from /assets/fonts/
- */
+ * Define las declaraciones @font-face para la familia tipográfica Poppins.
+ * Las fuentes se cargan localmente desde /assets/fonts/ para mejor rendimiento
+ * y consistencia. Se usa font-display: swap para evitar bloqueo de renderizado.
+ *
+ * Componentes afectados: Todos los componentes que utilicen la familia Poppins
+ * Convenciones: Pesos soportados: 300 (Light), 400 (Regular, Italic),
+ *               500 (Medium, Italic), 600 (SemiBold), 700 (Bold), 800 (ExtraBold)
 
 @font-face {
   font-family: 'Poppins';

@@ -1,8 +1,14 @@
 /* =============================================
- * CURSORS — Custom cursor overrides
+ * CURSORS.CSS — Sobrescritura de Cursores Personalizados
  * =============================================
- * Uses custom SVG cursors from /assets/cursors/
- */
+ * Define cursores personalizados usando archivos SVG desde /assets/cursors/.
+ * Reemplaza los cursores del sistema para mantener coherencia visual con la
+ * identidad de marca de GrayScale Studio.
+ *
+ * Componentes afectados: body (cursor general), enlaces y botones (pointer),
+ *                       elementos arrastrables y .grab-cursor (grab)
+ * Convenciones: Los cursores SVG incluyen hotspot explícito (x, y) como
+ *               respaldo se usa cursor nativo del sistema.
 
 body {
   cursor: url('/assets/cursors/cursor.svg') 4 4, default;

@@ -1,1 +1,10 @@
-/* Scoped styles for ImageInfoPanel */
+/* =============================================
+ * IMAGEINFOPANEL.CSS — Estilos del Panel de Información de Imagen
+ * =============================================
+ * Estilos scoped para el componente ImageInfoPanel Web Component. Actualmente
+ * este archivo está vacío porque el componente se estiliza completamente
+ * con clases de Tailwind utility inline en el template HTML.
+ *
+ * Componentes afectados: <image-info-panel>
+ * Convenciones: Reservado para futuros estilos custom que no se puedan
+ *               expresar con utilidades Tailwind.

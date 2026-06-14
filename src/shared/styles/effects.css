@@ -1,8 +1,15 @@
 /* =============================================
- * EFFECTS — Glassmorphism panels
+ * EFFECTS.CSS — Efectos Glassmorphism y Tokens Semánticos
  * =============================================
- * Reusable glass panel classes used across the app.
- */
+ * Define variables CSS personalizadas (custom properties) para el efecto
+ * glassmorphism (paneles translúcidos con backdrop-filter) y tokens de color
+ * semánticos del dashboard. Incluye variantes para modo claro y oscuro.
+ *
+ * Componentes afectados: Todos los paneles que usan .glass-panel o
+ *                       .glass-sub-panel (AnalysisPanel, ErrorAlert,
+ *                       ImageInfoPanel, WorkspaceDropZone, etc.)
+ * Convenciones: Los tokens (--surface-bg, --surface-text, etc.) se usan
+ *               tanto en CSS directo como en clases de Tailwind.
 
 :root {
   /* Glass panels — light mode */

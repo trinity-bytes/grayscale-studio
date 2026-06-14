@@ -1,4 +1,14 @@
-/* Scoped styles for AnalysisPanel */
+/* =============================================
+ * ANALYSISPANEL.CSS — Estilos del Panel de Análisis
+ * =============================================
+ * Estilos scoped para el componente AnalysisPanel Web Component. Define los
+ * estilos de pestañas (tabs), grid de métricas, bloques de ecuaciones y
+ * tablas de conversión usadas en las vistas Visual, Ecuaciones y Explicación.
+ *
+ * Componentes afectados: <analysis-panel>
+ * Convenciones: Clases BEM scoped. Se usan variables CSS heredadas de
+ *               effects.css (--surface-text, --primary-rgb, etc.). Las métricas
+ *               usan grid de 4 columnas con unidades rem para tamaños reducidos.
 .tab-btn {
   cursor: pointer;
   transition: all 0.2s ease;

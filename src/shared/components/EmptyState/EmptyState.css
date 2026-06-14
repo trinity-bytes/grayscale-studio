@@ -1,4 +1,13 @@
-/* EmptyState scoped styles */
+/* =============================================
+ * EMPTYSTATE.CSS — Estilos del Componente de Estado Vacío
+ * =============================================
+ * Estilos scoped para el componente EmptyState Web Component. Establece una
+ * altura mínima de 100px para el contenedor raíz para evitar saltos de layout
+ * cuando se muestra un estado vacío placeholder.
+ *
+ * Componentes afectados: <empty-state>, .empty-state-root
+ * Convenciones: Altura mínima en px para consistencia visual. La mayoría de
+ *               estilos se aplican via Tailwind utility classes en el template.
 .empty-state-root {
   min-height: 100px;
 }
