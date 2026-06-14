@@ -10,6 +10,8 @@
  * Convenciones: Se usa :host para layout del Shadow DOM. Los botones deshabilitados
  *               usan opacity: 0.5 y cursor: not-allowed. El hover levita el botón
  *               con translateY(-1px).
+ */
+
 :host {
   display: flex;
   flex-direction: column;

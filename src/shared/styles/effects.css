@@ -10,6 +10,7 @@
  *                       ImageInfoPanel, WorkspaceDropZone, etc.)
  * Convenciones: Los tokens (--surface-bg, --surface-text, etc.) se usan
  *               tanto en CSS directo como en clases de Tailwind.
+ */
 
 :root {
   /* Glass panels — light mode */

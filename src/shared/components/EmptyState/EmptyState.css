@@ -8,6 +8,8 @@
  * Componentes afectados: <empty-state>, .empty-state-root
  * Convenciones: Altura mínima en px para consistencia visual. La mayoría de
  *               estilos se aplican via Tailwind utility classes en el template.
+ */
+
 .empty-state-root {
   min-height: 100px;
 }

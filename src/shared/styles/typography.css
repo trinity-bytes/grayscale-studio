@@ -8,6 +8,7 @@
  * Componentes afectados: Todos los componentes que utilicen la familia Poppins
  * Convenciones: Pesos soportados: 300 (Light), 400 (Regular, Italic),
  *               500 (Medium, Italic), 600 (SemiBold), 700 (Bold), 800 (ExtraBold)
+ */
 
 @font-face {
   font-family: 'Poppins';

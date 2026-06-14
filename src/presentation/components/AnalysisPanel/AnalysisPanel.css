@@ -9,6 +9,8 @@
  * Convenciones: Clases BEM scoped. Se usan variables CSS heredadas de
  *               effects.css (--surface-text, --primary-rgb, etc.). Las métricas
  *               usan grid de 4 columnas con unidades rem para tamaños reducidos.
+ */
+
 .tab-btn {
   cursor: pointer;
   transition: all 0.2s ease;

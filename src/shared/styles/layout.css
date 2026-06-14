@@ -9,6 +9,7 @@
  *                       .loader-isotipo, clases de texto semánticas (.text-on-surface, etc.)
  * Convenciones: Las animaciones usan @keyframes. Los overrides de texto en modo
  *               oscuro usan !important porque Tailwind CDN no procesa clases estáticas.
+ */
 
 body {
   background-image: url("/assets/images/pok-rie-3.jpg");
