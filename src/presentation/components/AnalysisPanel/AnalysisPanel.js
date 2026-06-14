@@ -37,6 +37,10 @@ export class AnalysisPanel extends HTMLElement {
       if (targetContent) {
         targetContent.classList.remove('hidden');
         targetContent.classList.add('flex');
+        // Force Chart.js to recalculate canvas sizes after the tab becomes visible
+        requestAnimationFrame(() => {
+          window.dispatchEvent(new Event('resize'));
+        });
       }
     };
 
@@ -195,6 +199,107 @@ export class AnalysisPanel extends HTMLElement {
     const histogramContainer = this.querySelector('#result-histogram-container');
     if (emptyState) emptyState.classList.remove('hidden');
     if (histogramContainer) histogramContainer.classList.add('hidden');
+
+    const eqTableContainer = this.querySelector('#eq-conversion-table-container');
+    const expProcContainer = this.querySelector('#exp-procedure-container');
+    if (eqTableContainer) eqTableContainer.classList.add('hidden');
+    if (expProcContainer) expProcContainer.classList.add('hidden');
+  }
+
+  /**
+   * Render the step-by-step conversion table for equalization.
+   * @param {number[]} frequencies
+   * @param {number[]} lut
+   */
+  showEqualizationTable(frequencies, lut) {
+    const tableBody = this.querySelector('#eq-conversion-table-body');
+    const container = this.querySelector('#eq-conversion-table-container');
+    if (!tableBody || !container) return;
+
+    const totalPixels = frequencies.reduce((a, b) => a + b, 0);
+    let cumulativeSum = 0;
+    let html = '';
+
+    for (let i = 0; i < 256; i++) {
+      const freq = frequencies[i];
+      cumulativeSum += freq;
+      
+      if (freq > 0) {
+        const pdf = totalPixels > 0 ? (freq / totalPixels) : 0;
+        const cdf = totalPixels > 0 ? (cumulativeSum / totalPixels) : 0;
+        const mapped = lut[i];
+
+        html += `
+          <tr class="hover:bg-surface-variant/40">
+            <td class="font-semibold text-on-surface p-2">${i}</td>
+            <td class="p-2">${freq}</td>
+            <td class="p-2">${pdf.toFixed(4)}</td>
+            <td class="p-2">${cdf.toFixed(4)}</td>
+            <td class="font-semibold text-primary dark:text-inverse-primary p-2">${mapped}</td>
+          </tr>
+        `;
+      }
+    }
+
+    tableBody.innerHTML = html;
+    container.classList.remove('hidden');
+  }
+
+  /**
+   * Render the step-by-step expansion procedure details.
+   * @param {number[]} frequencies
+   * @param {number[]} lut
+   */
+  showExpansionProcedure(frequencies, lut) {
+    const minValEl = this.querySelector('#exp-min-val');
+    const maxValEl = this.querySelector('#exp-max-val');
+    const rangeValEl = this.querySelector('#exp-range-val');
+    const scaleValEl = this.querySelector('#exp-scale-val');
+    const stepsEl = this.querySelector('#exp-procedure-steps');
+    const container = this.querySelector('#exp-procedure-container');
+
+    if (!minValEl || !maxValEl || !rangeValEl || !scaleValEl || !stepsEl || !container) return;
+
+    let min = 0;
+    while (min < 256 && frequencies[min] === 0) min++;
+
+    let max = 255;
+    while (max >= 0 && frequencies[max] === 0) max--;
+
+    if (min >= max) {
+      minValEl.textContent = min;
+      maxValEl.textContent = min;
+      rangeValEl.textContent = '0';
+      scaleValEl.textContent = '1.0000';
+      stepsEl.innerHTML = `<li>La imagen tiene intensidad uniforme (${min}). No requiere expansión.</li>`;
+      container.classList.remove('hidden');
+      return;
+    }
+
+    const range = max - min;
+    const factor = 255 / range;
+
+    minValEl.textContent = min;
+    maxValEl.textContent = max;
+    rangeValEl.textContent = range;
+    scaleValEl.textContent = factor.toFixed(4);
+
+    let html = '';
+    for (let i = 0; i < 256; i++) {
+      if (frequencies[i] > 0) {
+        const mapped = lut[i];
+        html += `
+          <li>
+            Nivel <span class="font-semibold">${i}</span>: 
+            round((${i} - ${min}) × ${factor.toFixed(4)}) = 
+            <span class="font-semibold text-primary dark:text-inverse-primary">${mapped}</span>
+          </li>
+        `;
+      }
+    }
+
+    stepsEl.innerHTML = html;
+    container.classList.remove('hidden');
   }
 }
 

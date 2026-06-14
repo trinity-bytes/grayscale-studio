@@ -11,6 +11,7 @@ export class MainController {
 
     this.currentImageModel = null;
     this.currentHistogram = null;
+    this.currentFilename = null;
     this.lastOperation = null;
 
     this.init();
@@ -80,6 +81,7 @@ export class MainController {
       this.view.resetToOriginal();
       this.view.hideResultHistogram();
       this.lastOperation = null;
+      this.currentFilename = file.name;
       
       // Load file as base64
       const base64Data = await this.loadUseCase.execute(file);
@@ -196,6 +198,19 @@ export class MainController {
       // Show result histogram metrics
       const resultMetrics = this.computeMetrics(newHistogram);
       this.view.showMetrics('result-metrics', resultMetrics);
+
+      // Render conversion table
+      const eqData = this.histogramMath.getEqualizationData();
+      this.view.showEqualizationTable(this.currentHistogram.getFrequencies(), eqData.lut);
+
+      // Add to history drawer
+      const originalMetrics = this.computeMetrics(this.currentHistogram);
+      this.view.addHistoryEntry({
+        type: 'equalize',
+        filename: this.currentFilename,
+        metricsBefore: originalMetrics,
+        metricsAfter: resultMetrics
+      });
       
       this.view.switchToVisualTab();
     } catch (error) {
@@ -236,6 +251,19 @@ export class MainController {
       // Show result histogram metrics
       const resultMetrics = this.computeMetrics(newHistogram);
       this.view.showMetrics('result-metrics', resultMetrics);
+
+      // Render expansion procedure details
+      const expData = this.histogramMath.getExpansionData();
+      this.view.showExpansionProcedure(this.currentHistogram.getFrequencies(), expData.lut);
+
+      // Add to history drawer
+      const originalMetrics = this.computeMetrics(this.currentHistogram);
+      this.view.addHistoryEntry({
+        type: 'expand',
+        filename: this.currentFilename,
+        metricsBefore: originalMetrics,
+        metricsAfter: resultMetrics
+      });
 
       this.view.switchToVisualTab();
     } catch (error) {

@@ -1,0 +1,36 @@
+<div id="history-drawer-overlay" class="history-drawer-overlay"></div>
+<div id="history-drawer-container" class="history-drawer-container">
+  <!-- Header -->
+  <div class="flex items-center justify-between p-md border-b border-outline-variant">
+    <div class="flex items-center gap-sm">
+      <span class="material-symbols-outlined text-primary dark:text-inverse-primary">history</span>
+      <h3 class="font-headline-md text-base font-semibold">Historial de Operaciones</h3>
+    </div>
+    <button id="history-close-btn" class="p-xs rounded-lg hover:bg-surface-variant hover:text-on-surface-variant transition-colors cursor-pointer flex items-center justify-center" aria-label="Cerrar Historial">
+      <span class="material-symbols-outlined text-lg">close</span>
+    </button>
+  </div>
+
+  <!-- Scrollable List Content -->
+  <div class="flex-1 overflow-y-auto p-md flex flex-col gap-sm" id="history-content-area">
+    <!-- Empty State -->
+    <div id="history-empty-state" class="flex flex-col items-center justify-center text-center gap-sm my-auto py-xl">
+      <span class="material-symbols-outlined text-on-surface-variant text-4xl opacity-50" style="font-variation-settings: 'FILL' 0;">history</span>
+      <h4 class="font-semibold text-sm text-on-surface">No hay operaciones aún</h4>
+      <p class="text-xs text-on-surface-variant max-w-[240px]">Realiza ecualizaciones o expansiones de contraste en tus imágenes para ver el historial aquí.</p>
+    </div>
+
+    <!-- Cards list -->
+    <div id="history-list" class="hidden flex flex-col gap-sm">
+      <!-- Cards dynamically added here -->
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div id="history-footer" class="hidden p-md border-t border-outline-variant bg-surface-variant/10">
+    <button id="history-clear-btn" class="w-full py-2 bg-error-container text-on-error-container hover:bg-error-container/80 transition-colors text-xs font-semibold rounded-lg flex items-center justify-center gap-xs cursor-pointer">
+      <span class="material-symbols-outlined text-sm">delete_sweep</span>
+      Limpiar Historial
+    </button>
+  </div>
+</div>

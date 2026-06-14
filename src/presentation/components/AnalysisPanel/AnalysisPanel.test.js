@@ -22,8 +22,8 @@ describe('AnalysisPanel — Rendering', () => {
     const tabs = panel.querySelectorAll('.tab-btn');
     expect(tabs).toHaveLength(3);
     expect(tabs[0].textContent.trim()).toBe('Visual');
-    expect(tabs[1].textContent.trim()).toBe('Math: Eq');
-    expect(tabs[2].textContent.trim()).toBe('Math: Exp');
+    expect(tabs[1].textContent.trim()).toBe('Ecuaciones');
+    expect(tabs[2].textContent.trim()).toBe('Explicación');
   });
 
   it('renders 3 tab content panels', () => {
@@ -177,5 +177,50 @@ describe('AnalysisPanel — Canvas getters', () => {
     const canvas = panel.getResultCanvas();
     expect(canvas).not.toBeNull();
     expect(canvas.id).toBe('result-histogram-canvas');
+  });
+});
+
+describe('AnalysisPanel — Conversion table and procedure rendering', () => {
+  let panel;
+  const sampleFreqs = new Array(256).fill(0);
+  sampleFreqs[10] = 50;
+  sampleFreqs[100] = 150;
+  
+  const sampleLut = new Array(256).fill(0);
+  sampleLut[10] = 0;
+  sampleLut[100] = 255;
+
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    panel = createPanel();
+  });
+
+  it('showEqualizationTable renders non-zero intensity levels', () => {
+    panel.showEqualizationTable(sampleFreqs, sampleLut);
+    
+    const rows = panel.querySelectorAll('#eq-conversion-table-body tr');
+    expect(rows).toHaveLength(2); // Only intensities 10 and 100 have freqs > 0
+    
+    const firstRowCols = rows[0].querySelectorAll('td');
+    expect(firstRowCols[0].textContent.trim()).toBe('10');
+    expect(firstRowCols[1].textContent.trim()).toBe('50');
+    expect(firstRowCols[4].textContent.trim()).toBe('0');
+  });
+
+  it('showExpansionProcedure renders min, max, range, scale, and mapping details', () => {
+    panel.showExpansionProcedure(sampleFreqs, sampleLut);
+    
+    const minVal = panel.querySelector('#exp-min-val').textContent.trim();
+    const maxVal = panel.querySelector('#exp-max-val').textContent.trim();
+    const rangeVal = panel.querySelector('#exp-range-val').textContent.trim();
+    const scaleVal = panel.querySelector('#exp-scale-val').textContent.trim();
+    
+    expect(minVal).toBe('10');
+    expect(maxVal).toBe('100');
+    expect(rangeVal).toBe('90');
+    expect(scaleVal).toBe((255 / 90).toFixed(4));
+    
+    const steps = panel.querySelectorAll('#exp-procedure-steps li');
+    expect(steps).toHaveLength(2);
   });
 });
