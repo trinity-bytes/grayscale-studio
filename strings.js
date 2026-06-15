@@ -55,7 +55,7 @@ export const strings = {
   },
 
   errors: {
-    colorImage: 'Imagen a color detectada. Por favor sube una imagen en escala de grises.',
+    colorImage: 'Imagen a color detectada. Ha sido convertida a escala de grises automáticamente.',
     processingFailed: 'Error al procesar imagen con OpenCV.',
     loadFailed: 'No se pudo cargar el archivo.',
     equalizeFailed: 'Error al ecualizar la imagen.',
