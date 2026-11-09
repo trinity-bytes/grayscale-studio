@@ -49,6 +49,11 @@ References: [versioned equalizeHist implementation](https://github.com/opencv/op
 
 ## Independent large-image correction
 
-Independent verification found a 4096×4097 fixture with counts 4095/3190961/13586256 at 0/128/255. Native OpenCV maps 128 to49; converting the denominator to float32 only after division incorrectly produced48. The corrected expression converts `N-Hmin` before division and now matches49.
+Independent verification found a 4096×4097 fixture with counts 4095/3190961/13586256 at 0/128/255. Native OpenCV maps 128 to **49**; converting the denominator to float32 only after division incorrectly produced **48**. The corrected expression converts `N-Hmin` before division and now matches **49**.
 
-The same check exposed float32 histogram-bin precision: 16,781,311 pixels at128 plus one at200 yielded native histogram mass16,781,313 rather than16,781,312. The exceptional-bin recount now preserves the actual integer frequencies. The real checker covers both contiguous data and padded ROI rows, and compares33,562,624 additional large-image equalization pixels without creating boxed arrays of that size.
+The same check exposed float32 histogram-bin precision: 16,781,311 pixels at128 plus one at200 yielded native histogram mass16,781,313 rather than16,781,312. The exceptional-bin recount now preserves the actual integer frequencies. The real checker covers both contiguous data and padded ROI rows, and compares **33,562,624** additional large-image equalization pixels without creating boxed arrays of that size.
+
+
+## Final verification
+
+Corrected frozen candidate `d884f6e` passed the independent scoped recheck of the reported large-image blocker and histogram precision advisory. S1–S4 pass within the documented coverage; no reported blocker remains. Parent full suite: **167 tests across 13 files pass**; production build and CRLF-aware diff checks pass. Independent focused recheck: **95 tests**, original real large-image reproductions, padded ROI histogram mass, and the complete real-engine command pass. No production source changed after recheck. No dependency installation, interface redesign or remote publishing occurred.
