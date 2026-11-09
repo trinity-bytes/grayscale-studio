@@ -1,0 +1,28 @@
+# Match educational histogram mathematics to image processing
+Branch: `refactor/codebase-cleanup`; baseline `6db3655`. Scope: numerical corrections only, no interface redesign.
+Delivery: integrated single-pr feature branch with coherent local commits, per user's delegated structure choice. Forecast: 700–1100 authored changed lines including real-engine tests/docs. Runner: Vitest plus a serial, local OpenCV 4.8.0 fixture check; no dependency installation or remote publishing.
+
+## Specs
+
+S1. User authorized implementation: "vava, lo puedes aplicar por tu cuenta?" in response to the proposed correction of the histogram's `[0, 256)` range, normalized CDF-min equalization, quantization/edge cases, and pixel-by-pixel real-OpenCV tests.
+S2. Accepted proposal: "Recomiendo conservar OpenCV como referencia" and "hacer que la explicación matemática describa exactamente la transformación aplicada a los píxeles". Preserve native OpenCV transform results for supported 8-bit images, including constant-image behavior; correct educational formulas and histogram endpoint handling. Source-derived expectations are not real-engine proof.
+S3. Shared LUT is conditional: "podríamos aplicar una única LUT tanto a la imagen como a las tablas mediante cv.LUT" and "primero hay que demostrar que conserva los resultados esperados." Implement only if real-engine differential fixtures establish exact agreement. Otherwise keep native transforms and report the concrete numerical blocker, not an approximation.
+S4. Existing isolation remains: "trabaja en una rama aparte". Preserve untracked `PRODUCT.md` and `design-plans/`, previous cleanup and UI layout. No dependency upgrades, install, push, PR or merge.
+
+## Tasks
+
+- T1 [S1,S2,S3] delegated read-only runtime/quantization exploration; complete: official runtime acquired (SHA256 806cb5646afa6fa946b736afa1beaf1443bdfda718404d75f9794ddc2c10b1cc); exact float32/ties-even mapped. 1000 fixtures pass; all 32896 expansion min/max pairs and 2829056 pixel comparisons pass.
+- T2 [S1,S2] inline; implemented: endpoint test RED1/GREEN73; domain RED9/GREEN19; corrected exact CDF-min/float32/ties-even semantics and flat expansion, raw CDF preserved. Risk item 3 (shared mathematical outputs).
+- T3 [S2,S3] inline; implemented: retain native transforms because shipped build lacks cv.LUT; align educational LUT with exact observed semantics and enforce real-engine equality; retain scoped OpenCV ownership and unchanged adapter/use-case signatures; update existing educational explanations/docs without redesign. Risk item 3.
+- T4 [S1-S4] independent verification; in progress: real runtime checker PASS (32896 ranges/2829056 pixels, 1010 equalization fixtures, 50 adapter cases); full164 tests/build PASS. Independent verifier pending. Risk item 3, plus item 5 if verification command tooling changes.
+
+## Log
+
+L1. User request: "vava, lo puedes aplicar por tu cuenta?". Accepted preceding proposal: preserve OpenCV reference, fix `[0,256)` histogram, normalized CDF-min equalization and quantization/edge cases, verify pixels/histogram mass with real engine; share cv.LUT only after proof.
+L2. Previous structural cleanup complete at 6db3655: 156 tests/build PASS and independent verifier PASS. Numerical mismatch deliberately untouched until this authorization. CodeGraph unavailable earlier session; use mapped source directly.
+L3. Explorer is mapping engine quantization to decide whether a shared pure-domain LUT can preserve exact native behavior. Public source shows float32 equalization and potential normalization rounding details; do not assume JavaScript Math.round. Initial sandbox curl could not resolve public runtime host; parent requested scoped elevated download of the same official versioned OpenCV.js used by index.html into external scratch. No credentials, uploads or remote execution.
+
+L4. Runtime acquired without installation. Worker exact evidence: equalization uses float32 scale and product then ties-even; expansion uses separate float32 multiply/add, with shift rounded from double scale rather than rounded scale. Constant equalization preserves intensity; constant expansion becomes zero. Native cv.LUT export is absent. Decision: keep native transforms (avoid an unbenchmarked per-pixel JS replacement), align pure educational LUTs and add mandatory explicit real-runtime verification command. No dependency/engine build change. Histogram range unit RED 1/73 then GREEN73. Worker scratch /tmp/grayscale-opencv-numeric.D1r7D7 retained temporarily for proof.
+
+L5. Domain and endpoint implementation complete. Real script scripts/verify-opencv.mjs hashes fixture before execution, never auto-downloads/installs or silently skips. Own actual run passed all32896 expansion ranges (2829056 pixels),1010 equalization fixtures and50 single-channel/RGBA adapter cases with exact bytes/histogram mass. Help succeeds; unknown option/mismatched runtime fail exit1 before execution. This fixture has no cv.LUT; native transforms intentionally retained.
+L6. Existing educational layout unchanged; formulas now explain exact count-based float32 scaling and ties-even, expansion parameters come from HistogramMath, constant expansion explicitly maps0 and missing data is no longer called uniform256. Panel RED4/GREEN20. Full Vitest164/164, buildPASS and CRLF-aware whitespace checkPASS. Mathematical cases changed intentionally; native transform algorithms/signatures remain unchanged.
