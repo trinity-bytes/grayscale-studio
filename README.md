@@ -38,7 +38,7 @@
 
 **GrayScale Studio** es una herramienta web diseñada para procesar imágenes en blanco y negro (JPG/JPEG/PNG). Validando matemáticamente que la imagen carezca de canales de color, el sistema extrae las frecuencias de intensidades (0-255), renderiza el histograma original y permite aplicar transformaciones de contraste:
 
-- **Ecualización** (no lineal): redistribución plana de intensidades mediante CDF.
+- **Ecualización** (no lineal): redistribución mediante CDF normalizada por el primer acumulado no nulo.
 - **Expansión** (lineal): estiramiento del rango dinámico Min-Max.
 
 El proyecto está construido con **Vanilla JavaScript** (Web Components), **OpenCV.js** para procesamiento de imagen, **Chart.js** para visualización de histogramas, **Tailwind CSS** para estilos, y **Vite** como bundler.
@@ -205,3 +205,14 @@ La documentación completa del proyecto está en [`public/docs/`](public/docs/):
 ## Licencia
 
 ISC
+
+
+### Verificación matemática con OpenCV real
+
+La suite de Vitest no sustituye la comparación numérica con el motor. Ejecute el verificador explícito con el fixture oficial OpenCV.js 4.8.0 guardado fuera del repositorio:
+
+```bash
+node scripts/verify-opencv.mjs --runtime /absolute/path/to/opencv.cjs
+```
+
+No instala dependencias ni descarga archivos automáticamente. Rechaza un fixture con hash distinto y falla si hay diferencias de píxeles o histogramas. Instrucciones, hash y alcance en [la verificación numérica](docs/audits/numerical-consistency.md).

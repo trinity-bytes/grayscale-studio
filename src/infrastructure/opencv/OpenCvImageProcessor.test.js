@@ -77,7 +77,7 @@ describe('OpenCV allocation ownership', () => {
     expectReleased(context);
     expect(result.getHistogram().getFrequencies()).toEqual(frequencies);
     expect(context.cv.imshow).toHaveBeenCalledWith('target', expect.any(Object));
-    expect(context.cv.calcHist).toHaveBeenCalledWith(expect.any(Object), [0], expect.any(Object), expect.any(Object), [256], [0, 255], false);
+    expect(context.cv.calcHist).toHaveBeenCalledWith(expect.any(Object), [0], expect.any(Object), expect.any(Object), [256], [0, 256], false);
   });
 
   it.each(['applyEqualization', 'applyExpansion'])('%s preserves transform parameters and returns usable histogram data', (method) => {

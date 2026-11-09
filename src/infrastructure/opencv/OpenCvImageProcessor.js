@@ -100,7 +100,7 @@ export class OpenCvImageProcessor {
       const hist = own(new cv.Mat());
       const matVec = own(new cv.MatVector());
       matVec.push_back(mat);
-      cv.calcHist(matVec, [0], mask, hist, [256], [0, 255], false);
+      cv.calcHist(matVec, [0], mask, hist, [256], [0, 256], false);
       const frequencies = Array.from({ length: 256 }, (_, i) => hist.floatAt(i, 0));
       return new HistogramModel(frequencies);
     });

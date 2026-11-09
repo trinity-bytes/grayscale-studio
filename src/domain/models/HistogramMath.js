@@ -1,3 +1,12 @@
+/** Saturated 8-bit conversion: nearest integer, with exact half ties to even. */
+function quantize8(value) {
+  if (value <= 0) return 0;
+  if (value >= 255) return 255;
+  const lower = Math.floor(value);
+  if (value - lower === 0.5) return lower % 2 === 0 ? lower : lower + 1;
+  return Math.round(value);
+}
+
 /**
  * ==========================================
  * HISTOGRAM MATH (Domain Value-Object)
@@ -31,67 +40,52 @@ export class HistogramMath {
   }
 
   /**
-   * Calcula la ecualización global del histograma.
-   * Construye la Función de Distribución Acumulada (CDF) normalizada y
-   * la tabla de búsqueda (LUT) de ecualización que mapea cada nivel de entrada
-   * a su nivel de salida correspondiente.
-   * - CDF normalizado: CDF[i] = sumaAcumulada(i) / totalPíxeles (rango [0, 1])
-   * - LUT ecualización: round(CDF[i] * 255) (rango [0, 255])
+   * Keep the raw normalized CDF for teaching, but normalize the LUT by its
+   * first occupied bin. Float32 operation order and ties-to-even match the
+   * pinned OpenCV 4.8.0 runtime (verified against real engine fixtures).
    */
   computeEqualization() {
-    /** @type {number[]} Función de Distribución Acumulada normalizada [0, 1] */
     this.cdf = new Array(256).fill(0);
-
-    /** @type {number[]} Tabla de búsqueda de ecualización [0, 255] */
     this.equalizationLut = new Array(256).fill(0);
-
-    let cumulativeSum = 0;
+    let cumulative = 0;
     for (let i = 0; i < 256; i++) {
-      cumulativeSum += this.frequencies[i];
-      // CDF normalizado [0, 1]
-      this.cdf[i] = this.totalPixels > 0 ? cumulativeSum / this.totalPixels : 0;
-      // Mapeado a rango [0, 255]
-      this.equalizationLut[i] = Math.round(this.cdf[i] * 255);
+      cumulative += this.frequencies[i];
+      this.cdf[i] = this.totalPixels > 0 ? cumulative / this.totalPixels : 0;
+    }
+    if (this.totalPixels === 0) return;
+    const first = this.frequencies.findIndex(count => count > 0);
+    const firstCount = this.frequencies[first];
+    if (firstCount === this.totalPixels) {
+      this.equalizationLut = this.labels.slice();
+      return;
+    }
+    const scale = Math.fround(255 / (this.totalPixels - firstCount));
+    cumulative = 0;
+    for (let i = first + 1; i < 256; i++) {
+      cumulative += this.frequencies[i];
+      this.equalizationLut[i] = quantize8(Math.fround(Math.fround(cumulative) * scale));
     }
   }
 
   /**
-   * Calcula la expansión (estiramiento lineal Min-Max) del histograma.
-   * Encuentra los valores mínimos y máximos de intensidad con frecuencia no nula,
-   * y construye una tabla de búsqueda lineal que redistribuye el rango completo [0, 255].
-   * - Para i <= min: LUT[i] = 0
-   * - Para i >= max: LUT[i] = 255
-   * - Para min < i < max: LUT[i] = round((i - min) * 255 / (max - min))
+   * Match native 8-bit Min-Max normalization, including constant images.
+   * The shift is rounded from the double-precision scale, not from its
+   * float32 representation. Multiply and add each round separately.
    */
   computeExpansion() {
-    /** @type {number[]} Tabla de búsqueda de expansión [0, 255] */
     this.expansionLut = new Array(256).fill(0);
-
-    // Encuentra el primer nivel de intensidad con frecuencia no nula
-    let min = 0;
-    while (min < 256 && this.frequencies[min] === 0) min++;
-
-    // Encuentra el último nivel de intensidad con frecuencia no nula
-    let max = 255;
-    while (max >= 0 && this.frequencies[max] === 0) max--;
-
-    // Caso borde: imagen plana o sin datos
-    if (min >= max) {
-      for (let i = 0; i < 256; i++) {
-        this.expansionLut[i] = i;
-      }
-      return;
-    }
-
+    this.expansionMin = this.frequencies.findIndex(count => count > 0);
+    this.expansionMax = this.frequencies.findLastIndex(count => count > 0);
+    this.expansionScale = 0;
+    this.expansionShift = 0;
+    if (this.totalPixels === 0) return;
+    const range = this.expansionMax - this.expansionMin;
+    const scale = range > 0 ? 255 / range : 0;
+    this.expansionScale = Math.fround(scale);
+    this.expansionShift = Math.fround(-this.expansionMin * scale);
     for (let i = 0; i < 256; i++) {
-      if (i <= min) {
-        this.expansionLut[i] = 0;
-      } else if (i >= max) {
-        this.expansionLut[i] = 255;
-      } else {
-        // Mapeo lineal: (i - min) * 255 / (max - min)
-        this.expansionLut[i] = Math.round(((i - min) * 255) / (max - min));
-      }
+      const product = Math.fround(i * this.expansionScale);
+      this.expansionLut[i] = quantize8(Math.fround(product + this.expansionShift));
     }
   }
 
@@ -108,11 +102,15 @@ export class HistogramMath {
 
   /**
    * Retorna los datos de expansión para visualización educativa.
-   * @returns {{ lut: number[] }} Objeto con la LUT de expansión
+   * @returns {{ lut: number[], min: number, max: number, scale: number, shift: number }} LUT y parámetros nativos; min/max son -1 sin píxeles
    */
   getExpansionData() {
     return {
-      lut: this.expansionLut
+      lut: this.expansionLut,
+      min: this.expansionMin,
+      max: this.expansionMax,
+      scale: this.expansionScale,
+      shift: this.expansionShift,
     };
   }
 }
