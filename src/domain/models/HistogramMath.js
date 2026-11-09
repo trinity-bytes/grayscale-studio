@@ -41,7 +41,8 @@ export class HistogramMath {
 
   /**
    * Keep the raw normalized CDF for teaching, but normalize the LUT by its
-   * first occupied bin. Float32 operation order and ties-to-even match the
+   * first occupied bin. The integer denominator converts to float32 before
+   * division, just as in native C++. Float32 operation order and ties-to-even match the
    * pinned OpenCV 4.8.0 runtime (verified against real engine fixtures).
    */
   computeEqualization() {
@@ -59,7 +60,7 @@ export class HistogramMath {
       this.equalizationLut = this.labels.slice();
       return;
     }
-    const scale = Math.fround(255 / (this.totalPixels - firstCount));
+    const scale = Math.fround(255 / Math.fround(this.totalPixels - firstCount));
     cumulative = 0;
     for (let i = first + 1; i < 256; i++) {
       cumulative += this.frequencies[i];

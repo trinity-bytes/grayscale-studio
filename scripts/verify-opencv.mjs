@@ -93,6 +93,62 @@ function verifyAdapter(cv, pixels, channels = 1) {
   }
 }
 
+function verifyLargeImagePrecision(cv) {
+  const rows = 4096;
+  const cols = 4097;
+  const size = rows * cols;
+  const processor = new OpenCvImageProcessor();
+  const source = new cv.Mat(rows, cols, cv.CV_8UC1);
+  const output = new cv.Mat();
+  let compared = 0;
+  try {
+    for (const bins of [
+      [[0, 4095], [128, 3190961], [255, 13586256]],
+      [[128, size - 1], [200, 1]],
+    ]) {
+      const expected = new Array(256).fill(0);
+      let start = 0;
+      for (const [value, count] of bins) {
+        source.data.fill(value, start, start + count);
+        expected[value] = count;
+        start += count;
+      }
+      const histogram = processor.extractHistogram(source);
+      assert.deepEqual(histogram.getFrequencies(), expected, 'Large bins must retain exact integer counts');
+      const lut = new HistogramMath(histogram).getEqualizationData().lut;
+      cv.equalizeHist(source, output);
+      const sourceBytes = source.data;
+      const outputBytes = output.data;
+      for (let i = 0; i < size; i++) {
+        if (lut[sourceBytes[i]] !== outputBytes[i]) throw new Error(`Large-image equalization mismatch at pixel ${i}`);
+      }
+      compared += size;
+    }
+  } finally {
+    source.delete();
+    output.delete();
+  }
+  const padded = new cv.Mat(rows, cols + 1, cv.CV_8UC1);
+  let roi;
+  try {
+    const paddedBytes = padded.data;
+    paddedBytes.fill(128);
+    for (let row = 0; row < rows; row++) paddedBytes[row * (cols + 1) + cols] = 42;
+    paddedBytes[(rows - 1) * (cols + 1) + cols - 1] = 200;
+    roi = padded.roi(new cv.Rect(0, 0, cols, rows));
+    assert.equal(roi.isContinuous(), false);
+    const frequencies = processor.extractHistogram(roi).getFrequencies();
+    assert.equal(frequencies[128], size - 1);
+    assert.equal(frequencies[200], 1);
+    assert.equal(frequencies[42], 0, 'Row padding must not contribute to histogram');
+    assert.equal(frequencies.reduce((sum, count) => sum + count, 0), size);
+  } finally {
+    roi?.delete();
+    padded.delete();
+  }
+  return compared;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   if (args.length === 1 && args[0] === '--help') {
@@ -132,10 +188,11 @@ async function main() {
       adapterCases++;
     }
   }
+  const largeImagePixelComparisons = verifyLargeImagePrecision(cv);
   console.log(JSON.stringify({
     status: 'pass', version: '4.8.0', sha256: digest,
     expansionRanges, expansionPixelComparisons: expansionPixels,
-    equalizationFixtures: fixtures.length, adapterCases,
+    equalizationFixtures: fixtures.length, adapterCases, largeImagePixelComparisons,
     lutExportAvailable: typeof cv.LUT === 'function',
   }));
 }

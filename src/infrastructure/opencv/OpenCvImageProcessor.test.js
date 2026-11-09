@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { OpenCvImageProcessor } from './OpenCvImageProcessor.js';
 
-function createOpenCv({ failAt, channelCount = 4, mean = 0 } = {}) {
+function createOpenCv({ failAt, channelCount = 4, mean = 0, histogramValues } = {}) {
   const allocated = [];
   const counts = new Map();
   const hit = (name) => {
@@ -21,7 +21,7 @@ function createOpenCv({ failAt, channelCount = 4, mean = 0 } = {}) {
       floatAt(index) {
         hit('floatAt');
         if (this.deleted) throw new Error('read after delete');
-        return index === 0 ? 1 : index === 255 ? 3 : 0;
+        return histogramValues ? histogramValues[index] : index === 0 ? 1 : index === 255 ? 3 : 0;
       },
       delete: vi.fn(function () { this.deleted = true; }),
     };
@@ -148,4 +148,33 @@ describe('OpenCV allocation ownership', () => {
       expectReleased(context);
     });
   }
+});
+
+describe('OpenCV histogram integer precision', () => {
+  it.each([true, false])('recounts potentially rounded large bins exactly (continuous=%s)', continuous => {
+    const rows = 4096;
+    const cols = 4097;
+    const count = rows * cols;
+    const rounded = new Array(256).fill(0);
+    rounded[128] = Math.fround(count - 1);
+    rounded[200] = 1;
+    const context = createOpenCv({ channelCount: 1, histogramValues: rounded });
+    const stride = continuous ? cols : cols + 1;
+    const data = new Uint8Array(rows * stride).fill(128);
+    data[(rows - 1) * stride + cols - 1] = 200;
+    if (!continuous) {
+      for (let row = 0; row < rows; row++) data[row * stride + cols] = 42;
+    }
+    Object.assign(context.borrowed, {
+      rows, cols, data,
+      isContinuous: () => continuous,
+      ucharPtr: row => data.subarray(row * stride, (row + 1) * stride),
+    });
+    const frequencies = new OpenCvImageProcessor().extractHistogram(context.borrowed).getFrequencies();
+    expect(frequencies[128]).toBe(count - 1);
+    expect(frequencies[200]).toBe(1);
+    expect(frequencies[42]).toBe(0);
+    expect(frequencies.reduce((sum, value) => sum + value, 0)).toBe(count);
+    expectReleased(context);
+  });
 });

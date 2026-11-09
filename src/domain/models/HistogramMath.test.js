@@ -277,3 +277,15 @@ describe('HistogramMath — native float32 expansion', () => {
     expect(pixels.map(value => lut[value])).toEqual(expected);
   });
 });
+
+describe('HistogramMath — large-image operand conversion', () => {
+  it('rounds the native float32 denominator before equalization division', () => {
+    const frequencies = new Array(256).fill(0);
+    frequencies[0] = 4095;
+    frequencies[128] = 3190961;
+    frequencies[255] = 13586256;
+    const { lut } = new HistogramMath(makeModel(frequencies)).getEqualizationData();
+    // Native equalizeHist on a 4096 × 4097 image maps this occupied level to49.
+    expect(lut[128]).toBe(49);
+  });
+});

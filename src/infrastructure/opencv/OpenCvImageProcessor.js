@@ -102,6 +102,21 @@ export class OpenCvImageProcessor {
       matVec.push_back(mat);
       cv.calcHist(matVec, [0], mask, hist, [256], [0, 256], false);
       const frequencies = Array.from({ length: 256 }, (_, i) => hist.floatAt(i, 0));
+      // calcHist returns float32 counts. A bin at/above 2^24 may have lost
+      // integer units; recount only that exceptional case from 8-bit pixels.
+      if (frequencies.some(count => count >= 2 ** 24)) {
+        frequencies.fill(0);
+        if (mat.isContinuous()) {
+          const pixels = mat.data;
+          for (let i = 0; i < mat.rows * mat.cols; i++) frequencies[pixels[i]]++;
+        } else {
+          // ucharPtr includes row padding: count columns, not the whole view.
+          for (let row = 0; row < mat.rows; row++) {
+            const pixels = mat.ucharPtr(row);
+            for (let col = 0; col < mat.cols; col++) frequencies[pixels[col]]++;
+          }
+        }
+      }
       return new HistogramModel(frequencies);
     });
   }

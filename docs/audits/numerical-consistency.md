@@ -19,8 +19,8 @@ Expected runtime: 9,991,739 bytes; SHA256 `806cb5646afa6fa946b736afa1beaf1443bdf
 
 ## Exact semantics
 
-- **Histogram:** 256 bins over `[0,256)`, including white pixels at 255. Bin frequencies must sum to the image's pixel count.
-- **Equalization:** with integer cumulative count H, first occupied count Hmin and total N, scale is `f32(255/(N-Hmin))`. The output is `Q8(f32(f32(H-Hmin)*scale))`, with zero below the first occupied intensity. Constant images retain their original intensity. Empty data yields a zero LUT.
+- **Histogram:** 256 bins over `[0,256)`, including white pixels at 255. Native float32 bins at/above 2^24 trigger an exact recount from grayscale pixels, preserving integer mass even for large images. Noncontinuous matrices are read row-by-row without including padding. Smaller histograms keep the native fast path.
+- **Equalization:** with integer cumulative count H, first occupied count Hmin and total N, scale is `f32(255/f32(N-Hmin))`. The output is `Q8(f32(f32(H-Hmin)*scale))`, with zero below the first occupied intensity. Constant images retain their original intensity. Empty data yields a zero LUT.
 - **Expansion:** compute double scale `255/(max-min)`, then float32 scale and shift `f32(-min*doubleScale)`. Evaluate `Q8(f32(f32(input*scale)+shift))`. Constant images normalize to zero; empty educational data has no occupied min/max.
 - **Quantization:** Q8 saturates to [0,255] and rounds nearest with exact half ties to the even integer. `Math.round`, reordered arithmetic and rounding a displayed four-digit factor are not equivalent to this engine.
 
@@ -45,3 +45,10 @@ The real-engine command compares every supported occupied intensity for every 8-
 Only DOM `imread`/`imshow` boundaries are replaced in the adapter harness; matrices, grayscale conversion, channel checks, equalization, normalization and histogram extraction execute the actual WebAssembly runtime. This is not a browser screenshot/rendering proof or a guarantee about other OpenCV builds. Existing unit ownership tests continue to cover cleanup on failures.
 
 References: [versioned equalizeHist implementation](https://github.com/opencv/opencv/blob/4.8.0/modules/imgproc/src/histogram.cpp#L3239-L3254), [official histogram range documentation](https://docs.opencv.org/4.8.0/d1/db7/tutorial_py_histogram_begins.html).
+
+
+## Independent large-image correction
+
+Independent verification found a 4096×4097 fixture with counts 4095/3190961/13586256 at 0/128/255. Native OpenCV maps 128 to49; converting the denominator to float32 only after division incorrectly produced48. The corrected expression converts `N-Hmin` before division and now matches49.
+
+The same check exposed float32 histogram-bin precision: 16,781,311 pixels at128 plus one at200 yielded native histogram mass16,781,313 rather than16,781,312. The exceptional-bin recount now preserves the actual integer frequencies. The real checker covers both contiguous data and padded ROI rows, and compares33,562,624 additional large-image equalization pixels without creating boxed arrays of that size.

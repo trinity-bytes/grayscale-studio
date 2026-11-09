@@ -63,7 +63,7 @@
       <div class="equation-title font-label-md mb-1">Función de Distribución Acumulada (CDF)</div>
       <div class="equation-formula">CDF(i) = Σ<sub>k=0</sub><sup>i</sup> h(k) / N</div>
       <div class="equation-title font-label-md mb-1 mt-2">Mapeo de Ecualización</div>
-      <div class="equation-formula">LUT(i) = Q8(f32(f32(H(i) - Hmin) × f32(255 / (N - Hmin))))</div>
+      <div class="equation-formula">LUT(i) = Q8(f32(f32(H(i) - Hmin) × f32(255 / f32(N - Hmin))))</div>
       <div class="equation-note mt-1">H(i) es el conteo acumulado; Hmin es el primer acumulado no nulo y CDFmin = Hmin / N. N = total de píxeles. Q8: entero más cercano con empates al par y saturación [0, 255]. OpenCV evalúa escala y producto en float32. Si la imagen es uniforme, la ecualización conserva su intensidad.</div>
     </div>
     

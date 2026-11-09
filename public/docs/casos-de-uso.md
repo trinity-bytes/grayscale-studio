@@ -169,7 +169,7 @@ PDF(k) = nk / N           (donde nk = frecuencia del nivel k, N = total pixeles)
 CDF(k) = sum(PDF(0..k))   (distribucion acumulada)
 H(k) = sum(n0..nk)        (conteo acumulado entero)
 Hmin = primer conteo acumulado no nulo
-escala = f32(255 / (N - Hmin))
+escala = f32(255 / f32(N - Hmin))
 LUT(k) = Q8(f32(f32(max(0, H(k) - Hmin)) * escala))
 ```
 
