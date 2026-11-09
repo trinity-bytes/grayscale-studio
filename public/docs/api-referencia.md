@@ -88,7 +88,7 @@ class HistogramMath {
   /** @returns {{ cdf: number[], lut: number[] }} Datos de ecualizacion */
   getEqualizationData()
 
-  /** @returns {{ lut: number[] }} Datos de expansion */
+  /** @returns {{ lut: number[], min: number, max: number, scale: number, shift: number }} Datos de expansion */
   getExpansionData()
 }
 ```
@@ -102,7 +102,9 @@ class HistogramMath {
 | `totalPixels` | `number` | Total de pixeles |
 | `cdf` | `number[]` | CDF normalizada [0, 1] |
 | `equalizationLut` | `number[]` | LUT de ecualizacion [0, 255] |
-| `expansionLut` | `number[]` | LUT de expansion [0, 255] |
+| `expansionLut` | `number[]` | LUT de expansion [0, 255], con cuantización nativa |
+
+Las LUT reproducen el motor OpenCV.js 4.8.0: ecualización normalizada por el primer acumulado no nulo; expansión con operaciones float32 separadas; conversión saturada con empates al par. La CDF sigue siendo el acumulado normalizado sin restar el mínimo. Una imagen uniforme conserva su intensidad al ecualizar y pasa a cero al expandir. `min`/`max` son -1 sin datos.
 
 ---
 
@@ -436,7 +438,7 @@ export const ThemeManager = {
 | `HistogramModel` | `getFrequencies()` | — | `number[]` |
 | `HistogramModel` | `getLabels()` | — | `number[]` |
 | `HistogramMath` | `getEqualizationData()` | — | `{ cdf, lut }` |
-| `HistogramMath` | `getExpansionData()` | — | `{ lut }` |
+| `HistogramMath` | `getExpansionData()` | — | `{ lut, min, max, scale, shift }` |
 | `LoadAndValidateImageUseCase` | `execute()` | `File` | `Promise<string>` |
 | `LoadAndValidateImageUseCase` | `executeMathematicalExtraction()` | `string, string` | `ImageModel` |
 | `EqualizeImageUseCase` | `execute()` | `string, string` | `HistogramModel` |

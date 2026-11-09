@@ -224,3 +224,48 @@ describe('AnalysisPanel — Conversion table and procedure rendering', () => {
     expect(steps).toHaveLength(2);
   });
 });
+
+describe('AnalysisPanel — native numerical semantics', () => {
+  beforeEach(() => { document.body.innerHTML = ''; });
+
+  it('explains CDF-min normalization and ties-to-even instead of raw CDF scaling', () => {
+    const panel = createPanel();
+    const equation = panel.querySelector('#tab-math-eq').textContent;
+    expect(equation).toContain('CDFmin');
+    expect(equation).toContain('Q8');
+    expect(equation).toContain('empates al par');
+    expect(equation).not.toContain('round(CDF(i)');
+  });
+
+  it('explains native constant-image normalization to zero', () => {
+    const panel = createPanel();
+    const frequencies = new Array(256).fill(0);
+    frequencies[128] = 3;
+    panel.showExpansionProcedure(frequencies, new Array(256).fill(0));
+    expect(panel.querySelector('#exp-min-val').textContent).toBe('128');
+    expect(panel.querySelector('#exp-max-val').textContent).toBe('128');
+    expect(panel.querySelector('#exp-scale-val').textContent).toBe('0.0000');
+    expect(panel.querySelector('#exp-procedure-steps').textContent).toContain('intensidad 0');
+  });
+
+  it('does not describe missing data as a uniform image at intensity 256', () => {
+    const panel = createPanel();
+    panel.showExpansionProcedure(new Array(256).fill(0), new Array(256).fill(0));
+    expect(panel.querySelector('#exp-procedure-steps').textContent).toContain('Sin datos');
+    expect(panel.querySelector('#exp-min-val').textContent).toBe('—');
+  });
+
+  it('does not describe a native float32 result with a contradictory double-precision formula', () => {
+    const panel = createPanel();
+    const frequencies = new Array(256).fill(0);
+    [196, 203, 210].forEach(value => { frequencies[value] = 1; });
+    const lut = new Array(256).fill(0);
+    lut[203] = 127;
+    lut[210] = 255;
+    panel.showExpansionProcedure(frequencies, lut);
+    const explanation = panel.querySelector('#exp-procedure-steps').textContent;
+    expect(explanation).toContain('127');
+    expect(explanation).toContain('Q8');
+    expect(explanation).not.toContain('round(');
+  });
+});

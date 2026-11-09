@@ -60,3 +60,8 @@ The adapter also retains its baseline `calcHist` range `[0, 255]`. Numerical cha
 Independent isolated verification of candidate `4c801fc` against baseline `4107014` passed all three specs without functional blockers: 149 tests, build, 7 extra component-integration/security probes, 8 controller differentials and 16 adapter differentials. Its documentation advisory was resolved by updating the published constructor/view/thumbnail examples. The integration probes are retained in `src/presentation/Studio.integration.test.js` (commit `a56a823`).
 
 Final suite: **156 tests across 13 files pass**. Production build and CRLF-aware working-tree/full-range whitespace checks pass. No production source changed after the independently verified candidate. Browser pixel rendering and real WASM numerical equivalence were not tested. RDD stayed disabled; functional verification is not a publishing or merge authorization.
+
+
+## Numerical follow-up resolution
+
+The historical numerical follow-up above is resolved by the subsequent authorized numerical correction. See [the current numerical verification](numerical-consistency.md) for corrected endpoint/CDF/quantization semantics, real WASM fixtures and explicit proof limits. Native transforms remain unchanged because the shipped build lacks cv.LUT.
