@@ -70,33 +70,39 @@ export class ImageInfoPanel extends HTMLElement {
    * @param {string} dataUrl - Cadena data URL de la imagen a mostrar como miniatura
    */
   setThumbnail(dataUrl) {
+    const revision = this.thumbnailRevision = (this.thumbnailRevision || 0) + 1;
     const container = this.querySelector('#thumbnail-container');
-    const canvas = this.querySelector('#thumbnail-canvas');
-    if (!container || !canvas) return;
-
+    if (!container) return;
     if (!dataUrl) {
       container.classList.add('hidden');
       return;
     }
+    const image = new Image();
+    image.onload = () => {
+      if (revision !== this.thumbnailRevision) return;
+      this.setThumbnailFromCanvas(image);
+    };
+    image.onerror = () => {
+      if (revision === this.thumbnailRevision) container.classList.add('hidden');
+    };
+    image.src = dataUrl;
+  }
 
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        container.classList.add('hidden');
-        return;
-      }
-      const img = new Image();
-      img.onload = () => {
-        const ctx = canvas.getContext('2d');
-        // Escalar a un ancho máximo de 120px
-        const maxW = 120;
-        const scale = Math.min(1, maxW / img.width);
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        container.classList.remove('hidden');
-      };
-      img.src = URL.createObjectURL(blob);
-    }, 'image/png');
+  /** Draw an existing image/canvas directly; avoid encoding, FileReader and object URLs. */
+  setThumbnailFromCanvas(source) {
+    this.thumbnailRevision = (this.thumbnailRevision || 0) + 1;
+    const container = this.querySelector('#thumbnail-container');
+    const canvas = this.querySelector('#thumbnail-canvas');
+    if (!container || !canvas) return;
+    if (!source || !source.width || !source.height) {
+      container.classList.add('hidden');
+      return;
+    }
+    const scale = Math.min(1, 120 / source.width);
+    canvas.width = Math.max(1, Math.round(source.width * scale));
+    canvas.height = Math.max(1, Math.round(source.height * scale));
+    canvas.getContext('2d').drawImage(source, 0, 0, canvas.width, canvas.height);
+    container.classList.remove('hidden');
   }
 
   /**
@@ -104,6 +110,7 @@ export class ImageInfoPanel extends HTMLElement {
    * Restaura el estado vacío inicial.
    */
   clear() {
+    this.thumbnailRevision = (this.thumbnailRevision || 0) + 1;
     this.updateInfo('-', '-', '-', '-');
     const container = this.querySelector('#thumbnail-container');
     if (container) container.classList.add('hidden');
