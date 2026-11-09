@@ -53,3 +53,10 @@ Agree the delivery chain before work-unit commits; then fix history rendering/va
 The educational equalization LUT uses raw CDF scaling; the OpenCV 4.8.0 reference implementation subtracts the first occupied-bin count and handles constant images separately. This is confirmed by [the versioned OpenCV source](https://github.com/opencv/opencv/blob/4.8.0/modules/imgproc/src/histogram.cpp#L3239-L3254). For counts 2048/1024/512/512 at intensities 80/112/144/176, the current educational mapping is 128/191/223/255; applying the reference normalization yields 0/128/191/255. These are source-derived expectations, not a measurement of the shipped WebAssembly runtime.
 
 The adapter also retains its baseline `calcHist` range `[0, 255]`. Numerical changes (including endpoint handling and constant-image expansion) need real engine fixtures before claiming agreement between pixels, histogram and educational tables. No local OpenCV runtime/Python cv2 was available for that experiment; no package or binary was installed. Mocked ownership tests and differential adapter tests do NOT establish numerical equivalence. Keep this explicit follow-up separate from adopting the new interface.
+
+
+## Final verification
+
+Independent isolated verification of candidate `4c801fc` against baseline `4107014` passed all three specs without functional blockers: 149 tests, build, 7 extra component-integration/security probes, 8 controller differentials and 16 adapter differentials. Its documentation advisory was resolved by updating the published constructor/view/thumbnail examples. The integration probes are retained in `src/presentation/Studio.integration.test.js` (commit `a56a823`).
+
+Final suite: **156 tests across 13 files pass**. Production build and CRLF-aware working-tree/full-range whitespace checks pass. No production source changed after the independently verified candidate. Browser pixel rendering and real WASM numerical equivalence were not tested. RDD stayed disabled; functional verification is not a publishing or merge authorization.
