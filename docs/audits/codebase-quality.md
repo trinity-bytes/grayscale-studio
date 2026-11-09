@@ -1,6 +1,6 @@
 # Code quality audit
 
-The existing layered vanilla JavaScript application is worth preserving. Its main problems are unsafe rendering, incomplete resource ownership, async loading ownership, and orchestration duplication—not a need for a framework rewrite. No cleanup implementation has started.
+The existing layered vanilla JavaScript application is worth preserving. Its main problems are unsafe rendering, incomplete resource ownership, async loading ownership, and orchestration duplication—not a need for a framework rewrite. Cleanup implementation is tracked in `odd/tasks/codebase-cleanup.md`; the findings below describe the audited baseline, not the current fixed state.
 
 ## Evidence and priorities
 
@@ -36,3 +36,20 @@ Preserve current UI, image-processing behavior, storage keys/formats, existing K
 ## Next step
 
 Agree the delivery chain before work-unit commits; then fix history rendering/validation, resource ownership, loading lifecycle, orchestration boundaries, and startup resilience in coherent units with tests. Mathematical behavior changes require evidence and a separate explicit decision if they alter expected outputs.
+
+
+## Cleanup results
+
+- History external values use text/property assignment, validated reads preserve valid entries and storage format, and no storage rewrite occurs during load.
+- OpenCV allocations are scoped and released on success, thrown processing calls and failed later allocations; channel wrappers are independently released and borrowed matrices stay caller-owned.
+- Image reads and decodes have request ownership, stale completions cannot replace a later choice, and decode/read/extraction errors clear analytical state.
+- Controller operations share one successful-completion path. Statistics live in a pure domain module. The view façade owns component/DOM transitions. File reading is injected at the composition root rather than imported by application code. `LoadAndValidateImageUseCase` now requires `(processor, fileReader)`; the app composition root and tests supply the existing `BrowserFileReader` adapter. This is an internal constructor change, not a new framework.
+- Thumbnail audit found the old `setThumbnail(dataUrl)` ignored its argument and encoded its own existing canvas. The application now draws the actual source canvas directly: no full-image PNG encoding, FileReader roundtrip or object URL. The existing data-URL method is retained and correctly uses its input with stale-load protection.
+- Theme selection survives denied storage. Startup polling stops after 30 seconds, retains the blocking overlay and shows a reload instruction instead of waiting indefinitely.
+- Histogram arrays and metadata retain their existing shared-reference semantics; inaccurate immutability comments were corrected rather than silently breaking consumers.
+
+## Numerical follow-up (not changed in this structural cleanup)
+
+The educational equalization LUT uses raw CDF scaling; the OpenCV 4.8.0 reference implementation subtracts the first occupied-bin count and handles constant images separately. This is confirmed by [the versioned OpenCV source](https://github.com/opencv/opencv/blob/4.8.0/modules/imgproc/src/histogram.cpp#L3239-L3254). For counts 2048/1024/512/512 at intensities 80/112/144/176, the current educational mapping is 128/191/223/255; applying the reference normalization yields 0/128/191/255. These are source-derived expectations, not a measurement of the shipped WebAssembly runtime.
+
+The adapter also retains its baseline `calcHist` range `[0, 255]`. Numerical changes (including endpoint handling and constant-image expansion) need real engine fixtures before claiming agreement between pixels, histogram and educational tables. No local OpenCV runtime/Python cv2 was available for that experiment; no package or binary was installed. Mocked ownership tests and differential adapter tests do NOT establish numerical equivalence. Keep this explicit follow-up separate from adopting the new interface.
