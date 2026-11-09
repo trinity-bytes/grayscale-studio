@@ -151,6 +151,7 @@ Panel lateral que muestra metadata de la imagen cargada: resolucion, canales, pr
   const panel = document.getElementById('image-info-panel');
   panel.updateInfo('800 x 600', '1 (Escala de Grises)', '8-bit', 'Cargado desde memoria');
   panel.setThumbnail('data:image/png;base64,...');
+  panel.setThumbnailFromCanvas(sourceCanvas); // Direct canvas-to-canvas rendering
 </script>
 ```
 

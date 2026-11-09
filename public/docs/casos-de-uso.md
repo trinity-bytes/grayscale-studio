@@ -46,10 +46,10 @@ Orquesta la carga de una imagen desde el disco del usuario hacia la memoria del 
 ### Constructor
 
 ```javascript
-constructor(loadProcessor: ILoadProcessor)
+constructor(loadProcessor: ILoadProcessor, fileReader: { readAsDataURL(file: File): Promise<string> })
 ```
 
-Depende de la interfaz `ILoadProcessor`, no de la implementacion concreta.
+Recibe el procesador `ILoadProcessor` y un puerto de lectura de archivos. El Composition Root inyecta `BrowserFileReader`; el caso de uso no importa infraestructura.
 
 ### Metodos
 
@@ -64,7 +64,7 @@ Lee el archivo del disco y lo convierte a base64.
 
 **Flujo interno**:
 1. Valida que el archivo sea una imagen (`file.type.startsWith('image/')`)
-2. Usa `BrowserFileReader.readAsDataURL()` para convertir a base64
+2. Delega en `fileReader.readAsDataURL()`, inyectado como `BrowserFileReader` en la aplicación, para convertir a base64
 3. Retorna la cadena base64
 
 **Errores posibles**:

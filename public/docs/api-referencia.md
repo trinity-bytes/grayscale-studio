@@ -147,7 +147,7 @@ class ITransformProcessor {
 
 ```javascript
 class LoadAndValidateImageUseCase {
-  constructor(loadProcessor)  // ILoadProcessor
+  constructor(loadProcessor, fileReader)  // ILoadProcessor, { readAsDataURL(file): Promise<string> }
 
   async execute(rawFile)                      // File -> Promise<string> (base64)
   executeMathematicalExtraction(tempImgId, canvasDestId)  // string, string -> ImageModel
@@ -262,7 +262,11 @@ class MainView {
   disableControls()
   showMathButton()
   hideMathButton()
-  setHiddenImageSrc(base64Data, onLoadCallback)
+  setHiddenImageSrc(base64Data, onLoadCallback, onErrorCallback)
+  cancelPendingImageLoad()
+  setWasmStatus(status)
+  updateOriginalThumbnail()
+  showProcessedResult()
   showCanvas()
   showProcessedCanvas()
   hideProcessedCanvas()
