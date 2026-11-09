@@ -4,7 +4,8 @@
  * ==========================================
  * Value-Object que encapsula la lógica relacionada a las frecuencias estadísticas
  * de una imagen en escala de grises. Sus valores definen exclusivamente atributos
- * inmutables o cuantificables, lo cual lo convierte en un Value-Object dentro del dominio.
+ * cuantificables. Mantiene la referencia original al arreglo por compatibilidad;
+ * no aplica inmutabilidad en tiempo de ejecución.
  * Contiene exactamente 256 posiciones (una por cada nivel de intensidad de 0 a 255).
  *
  * @module src/domain/models/HistogramModel
@@ -22,7 +23,7 @@ export class HistogramModel {
         "El histograma debe contener exactamente 256 niveles de intensidad.",
       );
     }
-    /** @type {number[]} Arreglo inmutable de 256 frecuencias de intensidad */
+    /** @type {number[]} Arreglo compartido de 256 frecuencias de intensidad */
     this.frequencies = frequencies;
   }
 
