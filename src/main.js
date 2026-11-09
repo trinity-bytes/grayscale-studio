@@ -22,7 +22,9 @@ import { LoadAndValidateImageUseCase } from "./application/LoadAndValidateImageU
 import { EqualizeImageUseCase } from "./application/EqualizeImageUseCase.js";
 import { ExpandImageUseCase } from "./application/ExpandImageUseCase.js";
 import { ChartJsRenderer } from "./infrastructure/chart/ChartJsRenderer.js";
+import { BrowserFileReader } from "./infrastructure/file/BrowserFileReader.js";
 import { OpenCvImageProcessor } from "./infrastructure/opencv/OpenCvImageProcessor.js";
+import { strings } from "./shared/i18n/strings.js";
 import { ThemeManager } from "./shared/utils/ThemeManager.js";
 import "./presentation/components/index.js";
 import "./shared/styles/main.css";
@@ -31,10 +33,11 @@ import "./shared/styles/main.css";
  * Espera a que OpenCV.js esté completamente cargado en memoria,
  * luego inyecta todas las dependencias y crea el controlador principal.
  */
-function bootstrapApp() {
+export function bootstrapApp() {
   ThemeManager.init();
   console.log("Inicializando aplicación GrayScale Master en capas limpias...");
 
+  const startedAt = Date.now();
   const checkOpenCvReady = setInterval(() => {
     if (typeof cv !== "undefined" && cv.Mat) {
       clearInterval(checkOpenCvReady);
@@ -48,19 +51,27 @@ function bootstrapApp() {
       const mainView = new MainView();
 
       const processor = new OpenCvImageProcessor();
-      const loadAndValidateUseCase = new LoadAndValidateImageUseCase(processor);
+      const loadAndValidateUseCase = new LoadAndValidateImageUseCase(processor, BrowserFileReader);
       const equalizeUseCase = new EqualizeImageUseCase(processor);
       const expandUseCase = new ExpandImageUseCase(processor);
       const chartRenderer = new ChartJsRenderer();
 
-      const appController = new MainController(
+      new MainController(
         mainView,
         loadAndValidateUseCase,
         equalizeUseCase,
         expandUseCase,
         chartRenderer,
       );
-
+    } else if (Date.now() - startedAt >= 30_000) {
+      clearInterval(checkOpenCvReady);
+      const overlay = document.getElementById('loader-overlay');
+      if (overlay) {
+        overlay.setAttribute('role', 'alert');
+        const message = overlay.querySelector('p');
+        if (message) message.textContent = strings.errors.engineUnavailable;
+        overlay.querySelectorAll('.animate-pulse').forEach(element => element.classList.remove('animate-pulse'));
+      }
     }
   }, 100);
 }
