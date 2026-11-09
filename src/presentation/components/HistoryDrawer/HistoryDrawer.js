@@ -1,6 +1,17 @@
 import html from './HistoryDrawer.html?raw';
 import './HistoryDrawer.css';
 
+const METRICS = [['min', 'Mín'], ['max', 'Máx'], ['mean', 'Media'], ['std', 'DesvEst']];
+
+// Storage is an external input boundary; parsing JSON alone does not validate it.
+function isHistoryEntry(entry) {
+  const validMetrics = value => value && METRICS.every(([key]) => Number.isFinite(value[key]));
+  return entry && Number.isFinite(entry.id)
+    && (entry.type === 'equalize' || entry.type === 'expand')
+    && typeof entry.filename === 'string' && typeof entry.timestamp === 'string'
+    && validMetrics(entry.metricsBefore) && validMetrics(entry.metricsAfter);
+}
+
 /**
  * ==========================================
  * HISTORY DRAWER (Presentation Component)
@@ -83,11 +94,8 @@ export class HistoryDrawer extends HTMLElement {
   loadHistory() {
     try {
       const stored = localStorage.getItem('grayscale-history');
-      if (stored) {
-        this.entries = JSON.parse(stored);
-      } else {
-        this.entries = [];
-      }
+      const parsed = stored ? JSON.parse(stored) : [];
+      this.entries = Array.isArray(parsed) ? parsed.filter(isHistoryEntry).slice(0, 20) : [];
     } catch (e) {
       console.error('Error loading history from localStorage', e);
       this.entries = [];
@@ -165,53 +173,50 @@ export class HistoryDrawer extends HTMLElement {
     this.listContainer.classList.remove('hidden');
     this.footer.classList.remove('hidden');
 
-    let html = '';
+    const cards = document.createDocumentFragment();
     this.entries.forEach(entry => {
-      const isEq = entry.type === 'equalize';
-      const badgeText = isEq ? 'Ecualizar' : 'Expansión';
-      const badgeClass = isEq ? 'equalize' : 'expand';
-
-      html += `
-        <div class="history-card">
-          <div class="history-card-header">
-            <span class="history-badge ${badgeClass}">${badgeText}</span>
-            <span class="history-time">${entry.timestamp}</span>
-          </div>
-          <div class="history-card-title text-on-surface" title="${entry.filename}">
-            ${entry.filename}
-          </div>
-          
-          <div class="history-metrics-grid">
-            <div class="history-metric-col">
-              <span class="history-metric-label">Mín</span>
-              <span class="history-metric-val text-on-surface">
-                ${entry.metricsBefore.min} <span class="history-metric-change">→</span> ${entry.metricsAfter.min}
-              </span>
-            </div>
-            <div class="history-metric-col">
-              <span class="history-metric-label">Máx</span>
-              <span class="history-metric-val text-on-surface">
-                ${entry.metricsBefore.max} <span class="history-metric-change">→</span> ${entry.metricsAfter.max}
-              </span>
-            </div>
-            <div class="history-metric-col">
-              <span class="history-metric-label">Media</span>
-              <span class="history-metric-val text-on-surface">
-                ${entry.metricsBefore.mean} <span class="history-metric-change">→</span> ${entry.metricsAfter.mean}
-              </span>
-            </div>
-            <div class="history-metric-col">
-              <span class="history-metric-label">DesvEst</span>
-              <span class="history-metric-val text-on-surface">
-                ${entry.metricsBefore.std} <span class="history-metric-change">→</span> ${entry.metricsAfter.std}
-              </span>
-            </div>
-          </div>
+      const card = document.createElement('div');
+      card.className = 'history-card';
+      // Only trusted, static markup is parsed as HTML. All external values are text.
+      card.innerHTML = `
+        <div class="history-card-header">
+          <span class="history-badge"></span>
+          <span class="history-time"></span>
         </div>
+        <div class="history-card-title text-on-surface"></div>
+        <div class="history-metrics-grid"></div>
       `;
-    });
+      const badge = card.querySelector('.history-badge');
+      const isEqualize = entry.type === 'equalize';
+      badge.classList.add(isEqualize ? 'equalize' : 'expand');
+      badge.textContent = isEqualize ? 'Ecualizar' : 'Expansión';
+      card.querySelector('.history-time').textContent = entry.timestamp;
+      const title = card.querySelector('.history-card-title');
+      title.title = entry.filename;
+      title.textContent = entry.filename;
 
-    this.listContainer.innerHTML = html;
+      const grid = card.querySelector('.history-metrics-grid');
+      for (const [key, label] of METRICS) {
+        const column = document.createElement('div');
+        column.className = 'history-metric-col';
+        column.innerHTML = `
+          <span class="history-metric-label"></span>
+          <span class="history-metric-val text-on-surface"></span>
+        `;
+        column.querySelector('.history-metric-label').textContent = label;
+        const change = document.createElement('span');
+        change.className = 'history-metric-change';
+        change.textContent = '→';
+        column.querySelector('.history-metric-val').append(
+          document.createTextNode(`${entry.metricsBefore[key]} `),
+          change,
+          document.createTextNode(` ${entry.metricsAfter[key]}`),
+        );
+        grid.appendChild(column);
+      }
+      cards.appendChild(card);
+    });
+    this.listContainer.replaceChildren(cards);
   }
 }
 
