@@ -61,9 +61,6 @@ El proyecto está construido con **Vanilla JavaScript** (Web Components), **Open
 - **Navegación activa** con indicador de estado WASM.
 - **Guardia móvil** — pantalla de "Se Requiere Pantalla Grande" en dispositivos pequeños.
 
-### Easter Egg
-- **Código Konami** (↑↑↓↓←→←→BA) — terminal retro CRT con minijuego Snake y mensaje de agradecimiento.
-
 ---
 
 ## Tecnologías
