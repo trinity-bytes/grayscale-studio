@@ -158,3 +158,19 @@ it('keeps a deferred public file selection busy through reading and decoding', a
   f.view.pendingImage.onload();
   expect(f.view.workspace.hasAttribute('aria-busy')).toBe(false);
 });
+
+it.each(['read', 'decode'])('clears busy after %s rejection through the public selection event', async stage => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  const f = setupStudio();
+  const before = storageHash();
+  if (stage === 'read') f.load.execute.mockRejectedValueOnce(new Error('read failure'));
+  f.view.workspace.emitFile(new File(['bytes'], 'rejected.png', { type: 'image/png' }));
+  expect(f.view.workspace.getAttribute('aria-busy')).toBe('true');
+  await Promise.resolve();
+  if (stage === 'decode') f.view.pendingImage.onerror();
+  expect(f.view.workspace.hasAttribute('aria-busy')).toBe(false);
+  expect(f.view.workspace.querySelector('#btn-apply').disabled).toBe(true);
+  expect(f.view.workspace.getCanvas().hidden).toBe(true);
+  expect(f.view.analysisPanel.querySelector('#selected-output').textContent).toBe('—');
+  expect(storageHash()).toBe(before);
+});
