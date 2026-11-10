@@ -1,205 +1,159 @@
 import { HistogramModel } from "../../domain/models/HistogramModel.js";
 import { ImageModel } from "../../domain/models/ImageModel.js";
-import { ILoadProcessor, IHistogramProcessor, ITransformProcessor } from "../../domain/services/ImageProcessor.js";
+
+/** Own only handles acquired in this scope; borrowed inputs remain caller-owned. */
+function withOwnedResources(operation) {
+  const resources = [];
+  const own = (resource) => {
+    resources.push(resource);
+    return resource;
+  };
+  try {
+    return operation(own);
+  } finally {
+    for (let i = resources.length - 1; i >= 0; i--) {
+      resources[i].delete();
+    }
+  }
+}
+
+function copyGrayscale(source, destination) {
+  if (source.channels() === 3 || source.channels() === 4) {
+    cv.cvtColor(source, destination, cv.COLOR_RGBA2GRAY, 0);
+  } else {
+    source.copyTo(destination);
+  }
+}
 
 /**
- * ==========================================
- * OPENCV IMAGE PROCESSOR (Infrastructure)
- * ==========================================
- * Implementación concreta de las interfaces de procesamiento de imágenes
- * que utiliza OpenCV.js (WebAssembly) para ejecutar operaciones matemáticas
- * sobre matrices de imagen. Implementa las tres interfaces ISP del dominio:
- * - ILoadProcessor: carga y validación de imágenes
- * - IHistogramProcessor: extracción de histograma
- * - ITransformProcessor: ecualización y expansión
- *
- * Cada caso de uso depende únicamente de la interfaz que necesita,
- * cumpliendo el Principio de Segregación de Interfaces (ISP).
- *
- * @module src/infrastructure/opencv/OpenCvImageProcessor
+ * OpenCV.js infrastructure adapter for loading, histogram extraction and transforms.
+ * Use cases consume its method contracts through dependency injection; JavaScript
+ * does not enforce the separate processor interface classes at runtime.
+ * Every acquired WebAssembly handle is scoped to the operation that creates it.
  */
 export class OpenCvImageProcessor {
   /**
-   * Ejecuta el pipeline matemático completo: lee la imagen desde un elemento DOM,
-   * verifica si es escala de grises, extrae metadata (dimensiones, rango de intensidad)
-   * y construye el modelo de dominio ImageModel con el histograma asociado.
-   * Gestiona la memoria WebAssembly liberando las matrices temporales al finalizar.
-   * @param {string} sourceId - ID del elemento DOM que contiene la imagen fuente
-   * @param {string} destinationId - ID del elemento canvas destino donde se dibujará la imagen en grises
-   * @returns {import('../../domain/models/ImageModel.js').ImageModel} Modelo de dominio completo con metadata, histograma y estado de grises
-   * @throws {Error} Si OpenCV no puede procesar los datos de la imagen
+   * Read, validate and render an image, returning detached domain data.
+   * @param {string} sourceId - Source image element ID
+   * @param {string} destinationId - Destination canvas ID
+   * @returns {ImageModel}
    */
   executeMathematicalPipeline(sourceId, destinationId) {
-    let mat;
-    try {
-      mat = cv.imread(sourceId);
-    } catch (e) {
-      throw new Error(
-        "OpenCV no pudo procesar los datos fuente de la imagen asíncrona.",
-      );
-    }
+    return withOwnedResources((own) => {
+      let mat;
+      try {
+        mat = own(cv.imread(sourceId));
+      } catch (error) {
+        throw new Error(
+          "OpenCV no pudo procesar los datos fuente de la imagen asíncrona.",
+        );
+      }
+      const isStrictGrayscale = this.checkIfGrayscale(mat);
+      const grayMat = own(new cv.Mat());
+      copyGrayscale(mat, grayMat);
+      cv.imshow(destinationId, grayMat);
 
-    let resultData = {
-      isStrictGrayscale: true,
-      histogramData: [],
-      metadata: {
-        totalPixels: 0,
-        width: 0,
-        height: 0,
-        minVal: 0,
-        maxVal: 0,
-      },
-    };
-
-    const isGray = this.checkIfGrayscale(mat);
-
-    if (!isGray) {
-      resultData.isStrictGrayscale = false;
-    }
-
-    let grayMat = new cv.Mat();
-    if (mat.channels() === 3 || mat.channels() === 4) {
-      cv.cvtColor(mat, grayMat, cv.COLOR_RGBA2GRAY, 0);
-    } else {
-      mat.copyTo(grayMat);
-    }
-
-    cv.imshow(destinationId, grayMat);
-
-    // Cálculo de metadatos: píxeles totales y rango min/max de intensidad
-    let minMax = cv.minMaxLoc(grayMat);
-    resultData.metadata.totalPixels = grayMat.rows * grayMat.cols;
-    resultData.metadata.width = grayMat.cols;
-    resultData.metadata.height = grayMat.rows;
-    resultData.metadata.minVal = Math.round(minMax.minVal);
-    resultData.metadata.maxVal = Math.round(minMax.maxVal);
-
-    resultData.histogramData = this.extractHistogram(grayMat);
-
-    // Liberación estricta de la memoria RAM administrada por WebAssembly
-    mat.delete();
-    grayMat.delete();
-
-    return new ImageModel(
-      resultData.isStrictGrayscale,
-      resultData.metadata,
-      resultData.histogramData,
-    );
+      const minMax = cv.minMaxLoc(grayMat);
+      const metadata = {
+        totalPixels: grayMat.rows * grayMat.cols,
+        width: grayMat.cols,
+        height: grayMat.rows,
+        minVal: Math.round(minMax.minVal),
+        maxVal: Math.round(minMax.maxVal),
+      };
+      return new ImageModel(isStrictGrayscale, metadata, this.extractHistogram(grayMat));
+    });
   }
 
   /**
-   * Verifica si una matriz de imagen es estrictamente en escala de grises.
-   * Compara los canales Rojo-Verde y Rojo-Azul; si la diferencia promedio
-   * es menor a 2.0, considera que la imagen es en grises (tolerancia para JPEG).
-   * @param {cv.Mat} mat - Matriz de imagen en formato OpenCV
-   * @returns {boolean} `true` si la imagen tiene un solo canal o los canales son prácticamente idénticos
+   * Compare RGB channels with the existing JPEG tolerance of less than 2.0.
+   * @param {cv.Mat} mat - Borrowed source matrix
+   * @returns {boolean}
    */
   checkIfGrayscale(mat) {
     if (mat.channels() === 1) return true;
-
-    let channels = new cv.MatVector();
-    cv.split(mat, channels);
-
-    let diffRG = new cv.Mat();
-    let diffRB = new cv.Mat();
-
-    cv.absdiff(channels.get(0), channels.get(1), diffRG);
-    cv.absdiff(channels.get(0), channels.get(2), diffRB);
-
-    let meanRG = cv.mean(diffRG)[0];
-    let meanRB = cv.mean(diffRB)[0];
-
-    channels.delete();
-    diffRG.delete();
-    diffRB.delete();
-
-    // Tolerancia de 2.0 para artefactos de compresión JPEG
-    return meanRG < 2.0 && meanRB < 2.0;
+    return withOwnedResources((own) => {
+      const channels = own(new cv.MatVector());
+      cv.split(mat, channels);
+      const diffRG = own(new cv.Mat());
+      const diffRB = own(new cv.Mat());
+      // MatVector.get creates handles that must be released independently.
+      const red = own(channels.get(0));
+      const green = own(channels.get(1));
+      const blue = own(channels.get(2));
+      cv.absdiff(red, green, diffRG);
+      cv.absdiff(red, blue, diffRB);
+      const meanRG = cv.mean(diffRG)[0];
+      const meanRB = cv.mean(diffRB)[0];
+      return meanRG < 2.0 && meanRB < 2.0;
+    });
   }
 
   /**
-   * Extrae el histograma de frecuencias de una matriz de imagen en escala de grises.
-   * Utiliza cv.calcHist de OpenCV para calcular las 256 frecuencias de intensidad.
-   * @param {cv.Mat} mat - Matriz de imagen en escala de grises (un solo canal)
-   * @returns {import('../../domain/models/HistogramModel.js').HistogramModel} Modelo de histograma con 256 frecuencias
+   * Copy the 256 histogram frequencies into a domain model before releasing handles.
+   * @param {cv.Mat} mat - Borrowed single-channel matrix
+   * @returns {HistogramModel}
    */
   extractHistogram(mat) {
-    let mask = new cv.Mat();
-    let hist = new cv.Mat();
-    let matVec = new cv.MatVector();
-    matVec.push_back(mat);
-
-    cv.calcHist(matVec, [0], mask, hist, [256], [0, 255], false);
-
-    let histogramData = [];
-    for (let i = 0; i < 256; i++) {
-      histogramData.push(hist.floatAt(i, 0));
-    }
-
-    mask.delete();
-    hist.delete();
-    matVec.delete();
-
-    return new HistogramModel(histogramData);
+    return withOwnedResources((own) => {
+      const mask = own(new cv.Mat());
+      const hist = own(new cv.Mat());
+      const matVec = own(new cv.MatVector());
+      matVec.push_back(mat);
+      cv.calcHist(matVec, [0], mask, hist, [256], [0, 256], false);
+      const frequencies = Array.from({ length: 256 }, (_, i) => hist.floatAt(i, 0));
+      // calcHist returns float32 counts. A bin at/above 2^24 may have lost
+      // integer units; recount only that exceptional case from 8-bit pixels.
+      if (frequencies.some(count => count >= 2 ** 24)) {
+        frequencies.fill(0);
+        if (mat.isContinuous()) {
+          const pixels = mat.data;
+          for (let i = 0; i < mat.rows * mat.cols; i++) frequencies[pixels[i]]++;
+        } else {
+          // ucharPtr includes row padding: count columns, not the whole view.
+          for (let row = 0; row < mat.rows; row++) {
+            const pixels = mat.ucharPtr(row);
+            for (let col = 0; col < mat.cols; col++) frequencies[pixels[col]]++;
+          }
+        }
+      }
+      return new HistogramModel(frequencies);
+    });
   }
 
   /**
-   * Aplica el algoritmo de ecualización global de histograma (equalizeHist de OpenCV)
-   * y renderiza el resultado en el canvas destino.
-   * Convierte la imagen a escala de grises si tiene múltiples canales antes de ecualizar.
-   * @param {string} sourceId - ID del elemento DOM que contiene la imagen de origen
-   * @param {string} destinationId - ID del elemento canvas destino donde se dibujará la imagen ecualizada
-   * @returns {import('../../domain/models/HistogramModel.js').HistogramModel} Histograma de la imagen ecualizada
+   * Equalize and render the source image with OpenCV's existing algorithm.
+   * @param {string} sourceId - Source image element ID
+   * @param {string} destinationId - Destination canvas ID
+   * @returns {HistogramModel}
    */
   applyEqualization(sourceId, destinationId) {
-    let src = cv.imread(sourceId);
-    let dst = new cv.Mat();
-
-    let grayMat = new cv.Mat();
-    if (src.channels() === 3 || src.channels() === 4) {
-      cv.cvtColor(src, grayMat, cv.COLOR_RGBA2GRAY, 0);
-    } else {
-      src.copyTo(grayMat);
-    }
-
-    cv.equalizeHist(grayMat, dst);
-    cv.imshow(destinationId, dst);
-
-    let histogramModel = this.extractHistogram(dst);
-
-    src.delete();
-    grayMat.delete();
-    dst.delete();
-    return histogramModel;
+    return this.#applyTransform(sourceId, destinationId, (source, destination) => {
+      cv.equalizeHist(source, destination);
+    });
   }
 
   /**
-   * Aplica la expansión lineal (normalización Min-Max) del histograma
-   * y renderiza el resultado en el canvas destino.
-   * Redistribuye las intensidades para aprovechar todo el rango [0, 255].
-   * @param {string} sourceId - ID del elemento DOM que contiene la imagen de origen
-   * @param {string} destinationId - ID del elemento canvas destino donde se dibujará la imagen expandida
-   * @returns {import('../../domain/models/HistogramModel.js').HistogramModel} Histograma de la imagen expandida
+   * Apply the existing Min-Max normalization and render the result.
+   * @param {string} sourceId - Source image element ID
+   * @param {string} destinationId - Destination canvas ID
+   * @returns {HistogramModel}
    */
   applyExpansion(sourceId, destinationId) {
-    let src = cv.imread(sourceId);
-    let dst = new cv.Mat();
+    return this.#applyTransform(sourceId, destinationId, (source, destination) => {
+      cv.normalize(source, destination, 0, 255, cv.NORM_MINMAX, cv.CV_8UC1);
+    });
+  }
 
-    let grayMat = new cv.Mat();
-    if (src.channels() === 3 || src.channels() === 4) {
-      cv.cvtColor(src, grayMat, cv.COLOR_RGBA2GRAY, 0);
-    } else {
-      src.copyTo(grayMat);
-    }
-
-    cv.normalize(grayMat, dst, 0, 255, cv.NORM_MINMAX, cv.CV_8UC1);
-    cv.imshow(destinationId, dst);
-
-    let histogramModel = this.extractHistogram(dst);
-
-    src.delete();
-    grayMat.delete();
-    dst.delete();
-    return histogramModel;
+  #applyTransform(sourceId, destinationId, transform) {
+    return withOwnedResources((own) => {
+      const source = own(cv.imread(sourceId));
+      const destination = own(new cv.Mat());
+      const grayMat = own(new cv.Mat());
+      copyGrayscale(source, grayMat);
+      transform(grayMat, destination);
+      cv.imshow(destinationId, destination);
+      return this.extractHistogram(destination);
+    });
   }
 }

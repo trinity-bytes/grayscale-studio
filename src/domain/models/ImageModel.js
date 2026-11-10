@@ -49,7 +49,7 @@ export class ImageModel {
 
   /**
    * Retorna un objeto con la metadata esencial de la imagen (dimensiones y rango de intensidad).
-   * Evita exponer la referencia directa al estado interno, manteniendo encapsulamiento.
+   * Devuelve la referencia compartida a los metadatos por compatibilidad.
    * @returns {{ totalPixels: number, width: number, height: number, minVal: number, maxVal: number }} Objeto con la metadata de la imagen
    */
   getMetadata() {

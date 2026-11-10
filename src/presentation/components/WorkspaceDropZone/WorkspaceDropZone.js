@@ -1,270 +1,179 @@
 import html from './WorkspaceDropZone.html?raw';
 import './WorkspaceDropZone.css';
-import '../../../shared/components/EmptyState/EmptyState.js';
 import { strings } from '../../../shared/i18n/strings.js';
 
-/**
- * ==========================================
- * WORKSPACE DROP ZONE (Presentation Component)
- * ==========================================
- * Componente Web Component que implementa la zona de trabajo principal.
- * Permite arrastrar y soltar imágenes o seleccionarlas desde el explorador.
- * Contiene los canvas para la imagen original y procesada, así como la barra
- * de herramientas con botones de ecualizar, expandir y ver ecuaciones.
- * Se registra como elemento personalizado <workspace-drop-zone>.
- *
- * Eventos despachados:
- * - `on-image-selected`: Cuando se selecciona un archivo de imagen
- * - `on-equalize`: Cuando se solicita ecualizar la imagen
- * - `on-expand`: Cuando se solicita expandir la imagen
- * - `on-show-math`: Cuando se solicita ver las ecuaciones matemáticas
- * - `on-error`: Cuando ocurre un error (tipo de archivo inválido)
- *
- * @module src/presentation/components/WorkspaceDropZone/WorkspaceDropZone
- */
+/** Owns document controls, image canvases and their associated frequency panels. */
 export class WorkspaceDropZone extends HTMLElement {
-  /**
-   * Se ejecuta cuando el componente se conecta al DOM.
-   * Renderiza el template HTML y vincula todos los eventos.
-   */
   connectedCallback() {
     this.innerHTML = html;
+    this.operation = 'equalize';
+    this.processed = false;
+    this.applyRevision = 0;
+    this.hideMetrics('original-metrics');
+    this.hideMetrics('result-metrics');
     this.bindEvents();
   }
 
-  /**
-   * Vincula todos los eventos de interacción: drag-and-drop, selección de archivo,
-   * clic en botones de la barra de herramientas.
-   */
   bindEvents() {
-    const dropZone = this.querySelector('#drop-area');
-    const fileInput = this.querySelector('#file-input');
-    const dropHint = this.querySelector('#drop-hint-text');
-    const placeholder = this.querySelector('#placeholder-content');
-
-    // Prevenir comportamientos por defecto de drag-and-drop
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, this.preventDefaults, false);
+    const input = this.querySelector('#file-input');
+    for (const id of ['btn-browse', 'btn-replace']) {
+      this.querySelector(`#${id}`).addEventListener('click', () => input.click());
+    }
+    input.addEventListener('change', () => {
+      if (input.files.length) this.emitFile(input.files[0]);
+      input.value = '';
     });
-
-    // Efecto visual al arrastrar sobre la zona
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropZone.addEventListener(eventName, () => {
-        dropZone.classList.add('border-primary');
-        dropZone.classList.remove('border-outline-variant');
-        dropZone.classList.add('bg-primary/5');
-        dropHint.classList.remove('hidden');
-        placeholder.style.opacity = '0.6';
-      }, false);
+    for (const [id, operation] of [['btn-equalize', 'equalize'], ['btn-expand', 'expand']]) {
+      this.querySelector(`#${id}`).addEventListener('click', () => this.selectOperation(operation));
+    }
+    this.querySelector('#btn-apply').addEventListener('click', () => {
+      const revision = ++this.applyRevision;
+      const operation = this.operation;
+      this.setAttribute('aria-busy', 'true');
+      this.querySelector('#btn-apply').disabled = true;
+      this.querySelector('#btn-apply').textContent = 'Procesando…';
+      this.querySelector('#btn-equalize').disabled = true;
+      this.querySelector('#btn-expand').disabled = true;
+      this.dispatchEvent(new CustomEvent('on-processing-started', { bubbles: true, detail: { operation } }));
+      // Two frames let the pending state paint before synchronous native processing.
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (revision !== this.applyRevision || !this.isConnected) return;
+        this.dispatchEvent(new CustomEvent(`on-${operation}`, { bubbles: true, composed: true }));
+        this.finishProcessing();
+      }));
     });
-
-    // Restablecer efecto visual al salir de la zona
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, () => {
-        dropZone.classList.remove('border-primary');
-        dropZone.classList.add('border-outline-variant');
-        dropZone.classList.remove('bg-primary/5');
-        dropHint.classList.add('hidden');
-        placeholder.style.opacity = '';
-      }, false);
-    });
-
-    // Manejar la imagen soltada
-    dropZone.addEventListener('drop', (e) => {
-      const dt = e.dataTransfer;
-      const files = dt.files;
-      if (files.length > 0) {
-        const file = files[0];
-        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (!validTypes.includes(file.type)) {
-          this.showError(strings.dropzone.invalidType);
-          return;
-        }
-        this.emitFile(file);
-      }
-    }, false);
-
-    // Botón de explorar archivos
-    this.querySelector('#btn-browse').addEventListener('click', () => {
-      fileInput.click();
-    });
-
-    // Cambio en el input de archivos
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        this.emitFile(e.target.files[0]);
-      }
-    });
-
-    // Botones de la barra de herramientas
-    this.querySelector('#btn-equalize').addEventListener('click', () => {
-      this.dispatchEvent(new CustomEvent('on-equalize', { bubbles: true, composed: true }));
-    });
-
-    this.querySelector('#btn-expand').addEventListener('click', () => {
-      this.dispatchEvent(new CustomEvent('on-expand', { bubbles: true, composed: true }));
-    });
-
     this.querySelector('#btn-show-math').addEventListener('click', () => {
       this.dispatchEvent(new CustomEvent('on-show-math', { bubbles: true, composed: true }));
     });
+    const zone = this.querySelector('#drop-area');
+    for (const name of ['dragenter', 'dragover', 'dragleave', 'drop']) {
+      zone.addEventListener(name, event => {
+        event.preventDefault(); event.stopPropagation();
+        zone.classList.toggle('is-dragging', name === 'dragenter' || name === 'dragover');
+      });
+    }
+    zone.addEventListener('drop', event => {
+      const file = event.dataTransfer?.files[0];
+      if (!file) return;
+      if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+        this.showError(strings.dropzone.invalidType); return;
+      }
+      this.emitFile(file);
+    });
   }
 
-  /**
-   * Previene el comportamiento por defecto de eventos de drag-and-drop.
-   * @param {DragEvent} e - Evento de drag-and-drop
-   */
-  preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
+  finishProcessing() {
+    this.removeAttribute('aria-busy');
+    this.querySelector('#btn-apply').textContent = 'Aplicar';
+    this.querySelector('#btn-apply').disabled = this.getCanvas().hidden;
+    this.querySelector('#btn-equalize').disabled = false;
+    this.querySelector('#btn-expand').disabled = false;
   }
 
-  /**
-   * Emite un evento personalizado con el archivo de imagen seleccionado.
-   * @param {File} file - Archivo de imagen a emitir
-   */
+  disconnectedCallback() { this.applyRevision++; }
+
+  selectOperation(operation) {
+    this.operation = operation;
+    this.querySelector('#btn-equalize').setAttribute('aria-pressed', String(operation === 'equalize'));
+    this.querySelector('#btn-expand').setAttribute('aria-pressed', String(operation === 'expand'));
+    this.dispatchEvent(new CustomEvent('on-operation-selected', { bubbles: true, detail: { operation } }));
+  }
+
+  setView(calculation) {
+    if (calculation) document.getElementById('analysis-panel')?.scrollIntoView({ block: 'start' });
+  }
+
   emitFile(file) {
-    this.dispatchEvent(new CustomEvent('on-image-selected', {
-      bubbles: true,
-      composed: true,
-      detail: { file }
-    }));
+    this.setDocument(file);
+    this.dispatchEvent(new CustomEvent('on-image-selected', { bubbles: true, composed: true, detail: { file } }));
   }
 
-  /**
-   * Emite un evento de error con el mensaje especificado.
-   * @param {string} message - Mensaje de error a emitir
-   */
+  setDocument(file) {
+    this.filename = file?.name || 'Sin imagen';
+    this.querySelector('#document-name').textContent = this.filename;
+    this.querySelector('#file-caption').textContent = this.filename;
+    this.querySelector('#document-meta').textContent = 'Cargando imagen…';
+    this.setAttribute('aria-busy', 'true');
+  }
+
+  setMetadata(width, height) {
+    const total = width * height;
+    this.querySelector('#document-meta').textContent = `${width} × ${height} · 8 bits · 1 canal`;
+    this.querySelector('#pixel-caption').textContent = `${total.toLocaleString('es')} píxeles`;
+    this.querySelectorAll('.pixel-count').forEach(el => { el.textContent = `${total.toLocaleString('es')} px`; });
+    this.querySelector('#btn-replace').textContent = 'Reemplazar';
+    this.removeAttribute('aria-busy');
+  }
+
   showError(message) {
-    this.dispatchEvent(new CustomEvent('on-error', {
-      bubbles: true,
-      composed: true,
-      detail: { message }
-    }));
+    this.dispatchEvent(new CustomEvent('on-error', { bubbles: true, composed: true, detail: { message } }));
   }
-
-  /**
-   * Muestra el canvas y oculta el placeholder.
-   */
+  getCanvas() { return this.querySelector('#main-canvas'); }
+  getProcessedCanvas() { return this.querySelector('#processed-canvas'); }
+  getOriginalCanvas() { return this.querySelector('#original-histogram-canvas'); }
+  getResultCanvas() { return this.querySelector('#result-histogram-canvas'); }
   showCanvas() {
-    this.querySelector('#placeholder-content').classList.add('hidden');
-    this.querySelector('#canvas-container').classList.remove('hidden');
-    this.showToolbar();
+    this.querySelector('#placeholder-content').hidden = true;
+    this.querySelector('#original-placeholder').hidden = true;
+    this.getCanvas().hidden = false;
   }
-
-  /**
-   * Muestra el placeholder y oculta el canvas.
-   */
   showPlaceholder() {
-    this.querySelector('#placeholder-content').classList.remove('hidden');
-    this.querySelector('#canvas-container').classList.add('hidden');
-    this.hideToolbar();
+    this.applyRevision++;
+    this.finishProcessing();
+    this.disableToolbarButtons();
+    this.querySelector('#placeholder-content').hidden = false;
+    this.querySelector('#original-placeholder').hidden = false;
+    this.getCanvas().hidden = true;
+    this.querySelector('#document-meta').textContent = 'PNG o JPG · Escala de grises';
+    this.querySelector('#pixel-caption').textContent = '— píxeles';
+    this.querySelectorAll('.pixel-count').forEach(el => { el.textContent = '— px'; });
+    this.removeAttribute('aria-busy');
+    this.hideHistogramContainers(); this.hideProcessedCanvas();
   }
-
-  /**
-   * Retorna el elemento canvas principal de la imagen original.
-   * @returns {HTMLCanvasElement} Elemento canvas principal
-   */
-  getCanvas() {
-    return this.querySelector('#main-canvas');
-  }
-
-  /**
-   * Retorna el elemento canvas de la imagen procesada.
-   * @returns {HTMLCanvasElement} Elemento canvas de imagen procesada
-   */
-  getProcessedCanvas() {
-    return this.querySelector('#processed-canvas');
-  }
-
-  /**
-   * Muestra el contenedor de la imagen procesada.
-   */
   showProcessedCanvas() {
-    this.querySelector('#processed-container').classList.remove('hidden');
+    this.processed = true;
+    this.getProcessedCanvas().hidden = false;
+    this.querySelector('#result-placeholder').hidden = true;
   }
-
-  /**
-   * Oculta el contenedor de la imagen procesada.
-   */
   hideProcessedCanvas() {
-    this.querySelector('#processed-container').classList.add('hidden');
+    this.processed = false;
+    this.getProcessedCanvas().hidden = true;
+    this.querySelector('#result-placeholder').hidden = false;
+    this.querySelector('#result-title').textContent = 'Resultado';
+    this.hideResultHistogram(); this.hideMetrics('result-metrics');
   }
-
-  /**
-   * Restaura el workspace al estado original: oculta imagen procesada y botón de ecuaciones.
-   */
+  setResultOperation(operation) {
+    if (this.processed) this.querySelector('#result-title').textContent = operation === 'expand' ? 'Expansión' : 'Ecualización';
+  }
   resetToOriginal() {
-    this.hideProcessedCanvas();
-    this.hideMathButton();
+    this.applyRevision++;
+    this.removeAttribute('aria-busy');
+    this.querySelector('#btn-apply').textContent = 'Aplicar';
+    this.querySelector('#btn-equalize').disabled = false;
+    this.querySelector('#btn-expand').disabled = false;
+    this.hideProcessedCanvas(); this.hideMathButton();
   }
-
-  // --- Métodos de la barra de herramientas ---
-
-  /**
-   * Muestra la barra de herramientas del workspace.
-   */
-  showToolbar() {
-    const toolbar = this.querySelector('#workspace-toolbar');
-    if (toolbar) toolbar.classList.remove('hidden');
-  }
-
-  /**
-   * Oculta la barra de herramientas del workspace.
-   */
-  hideToolbar() {
-    const toolbar = this.querySelector('#workspace-toolbar');
-    if (toolbar) toolbar.classList.add('hidden');
-  }
-
-  /**
-   * Habilita los botones de ecualizar y expandir de la barra de herramientas.
-   */
-  enableToolbarButtons() {
-    const btnEqualize = this.querySelector('#btn-equalize');
-    const btnExpand = this.querySelector('#btn-expand');
-    if (btnEqualize) {
-      btnEqualize.disabled = false;
-      btnEqualize.removeAttribute('title');
-    }
-    if (btnExpand) {
-      btnExpand.disabled = false;
-      btnExpand.removeAttribute('title');
+  showToolbar() {}
+  hideToolbar() {}
+  enableToolbarButtons() { this.querySelector('#btn-apply').disabled = false; }
+  disableToolbarButtons() { this.querySelector('#btn-apply').disabled = true; }
+  showMathButton() { this.querySelector('#btn-show-math').classList.remove('hidden'); }
+  hideMathButton() { this.querySelector('#btn-show-math').classList.add('hidden'); }
+  showMetrics(id, metrics) {
+    const container = this.querySelector(`#${id}`);
+    container.replaceChildren();
+    for (const [label, value] of [['Mín.', metrics.min], ['Máx.', metrics.max], ['Media', metrics.mean], ['σ', metrics.std]]) {
+      const item = document.createElement('div'); item.className = 'metric-item';
+      const name = document.createElement('span'); name.className = 'metric-label'; name.textContent = label;
+      const number = document.createElement('span'); number.className = 'metric-value';
+      number.textContent = typeof value === 'number' ? value.toLocaleString('es', { maximumFractionDigits: 2 }) : value;
+      item.append(name, number); container.append(item);
     }
   }
-
-  /**
-   * Deshabilita los botones de ecualizar y expandir de la barra de herramientas.
-   * Muestra un tooltip indicando que se debe cargar una imagen primero.
-   */
-  disableToolbarButtons() {
-    const btnEqualize = this.querySelector('#btn-equalize');
-    const btnExpand = this.querySelector('#btn-expand');
-    if (btnEqualize) {
-      btnEqualize.disabled = true;
-      btnEqualize.setAttribute('title', strings.dropzone.loadImageFirst);
-    }
-    if (btnExpand) {
-      btnExpand.disabled = true;
-      btnExpand.setAttribute('title', strings.dropzone.loadImageFirst);
-    }
-  }
-
-  /**
-   * Muestra el botón de ver ecuaciones matemáticas.
-   */
-  showMathButton() {
-    const btn = this.querySelector('#btn-show-math');
-    if (btn) btn.classList.remove('hidden');
-  }
-
-  /**
-   * Oculta el botón de ver ecuaciones matemáticas.
-   */
-  hideMathButton() {
-    const btn = this.querySelector('#btn-show-math');
-    if (btn) btn.classList.add('hidden');
-  }
+  hideMetrics(id) { this.showMetrics(id, { min: '—', max: '—', mean: '—', std: '—' }); }
+  showHistogramContainers() { this.querySelector('#original-pane').classList.add('has-histogram'); }
+  hideHistogramContainers() { this.querySelectorAll('.image-pane').forEach(el => el.classList.remove('has-histogram')); }
+  showResultHistogram() { this.querySelector('#result-pane').classList.add('has-histogram'); }
+  hideResultHistogram() { this.querySelector('#result-pane').classList.remove('has-histogram'); }
 }
-
 customElements.define('workspace-drop-zone', WorkspaceDropZone);

@@ -39,6 +39,15 @@ export class MainView {
     document.body.appendChild(this.hiddenImage);
 
     this._setupNavListeners();
+    this.workspace?.addEventListener('on-processing-started', event => {
+      this.setStatus(event.detail.operation === 'expand' ? 'Aplicando expansión…' : 'Aplicando ecualización…');
+    });
+    this.workspace?.addEventListener('on-operation-selected', event => {
+      this.analysisPanel.selectOperation(event.detail.operation);
+    });
+    for (const source of [this.workspace, this.analysisPanel]) {
+      source?.addEventListener('on-intensity-selected', event => this.analysisPanel.selectIntensity(event.detail.intensity));
+    }
   }
 
   /**
@@ -72,6 +81,16 @@ export class MainView {
     this.workspace.addEventListener("on-image-selected", (e) => {
       handler(e.detail.file);
     });
+  }
+
+  /** Publish loading after controller resets, keeping the active read/decode busy. */
+  beginImageLoad(file) {
+    this.workspace.showPlaceholder();
+    this.workspace.hideHistogramContainers();
+    this.analysisPanel.showEmptyStates();
+    this.workspace.hideMetrics('original-metrics');
+    this.workspace.setDocument(file);
+    this.setStatus('Cargando imagen…');
   }
 
   /**
@@ -115,6 +134,8 @@ export class MainView {
    * @param {string} msg - Mensaje de error a mostrar
    */
   showError(msg) {
+    this.workspace?.removeAttribute('aria-busy');
+    this.setStatus('No se pudo completar la operación');
     this.errorAlert.show(msg);
   }
 
@@ -140,7 +161,12 @@ export class MainView {
       : "-";
     const depth = channels ? strings.imageInfo.bitDepthValue : "-";
     const fmt = channels ? strings.imageInfo.loadedFromMemory : "-";
-    this.imageInfoPanel.updateInfo(res, ch, depth, fmt);
+    if (!channels) this.imageInfoPanel.clear();
+    else {
+      this.imageInfoPanel.updateInfo(res, ch, depth, fmt);
+      this.workspace.setMetadata(width, height);
+      this.setStatus('Imagen lista');
+    }
   }
 
   /**
@@ -149,14 +175,7 @@ export class MainView {
    */
   updateThumbnail(canvasElement) {
     if (!canvasElement) return;
-    canvasElement.toBlob((blob) => {
-      if (!blob) return;
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        this.imageInfoPanel.setThumbnail(reader.result);
-      };
-      reader.readAsDataURL(blob);
-    }, 'image/png');
+    this.imageInfoPanel.setThumbnailFromCanvas(canvasElement);
   }
 
   /**
@@ -187,14 +206,58 @@ export class MainView {
     this.workspace.hideMathButton();
   }
 
-  /**
-   * Establece la fuente de la imagen oculta en base64 y ejecuta un callback al cargar.
-   * @param {string} base64Data - Cadena data URL de la imagen en base64
-   * @param {function(): void} onLoadCallback - Callback a ejecutar cuando la imagen termine de cargar
-   */
-  setHiddenImageSrc(base64Data, onLoadCallback) {
-    this.hiddenImage.onload = onLoadCallback;
-    this.hiddenImage.src = base64Data;
+  /** Cancel a pending decode without modifying the last successfully decoded image. */
+  cancelPendingImageLoad() {
+    if (!this.pendingImage) return;
+    this.pendingImage.onload = null;
+    this.pendingImage.onerror = null;
+    this.pendingImage.removeAttribute('src');
+    this.pendingImage = null;
+  }
+
+  /** Decode each request in its own element; publish only after successful decoding. */
+  setHiddenImageSrc(base64Data, onLoadCallback, onErrorCallback = () => {}) {
+    this.cancelPendingImageLoad();
+    const image = document.createElement('img');
+    image.id = this.hiddenImage.id;
+    image.style.display = 'none';
+    this.pendingImage = image;
+    const settle = callback => {
+      if (this.pendingImage !== image) return;
+      image.onload = null;
+      image.onerror = null;
+      this.pendingImage = null;
+      callback();
+    };
+    image.onload = () => settle(() => {
+      this.hiddenImage.replaceWith(image);
+      this.hiddenImage = image;
+      onLoadCallback();
+    });
+    image.onerror = () => settle(() => onErrorCallback(new Error('Image decoding failed.')));
+    image.src = base64Data;
+  }
+
+  /** Keep DOM and component-specific state transitions inside the view façade. */
+  setWasmStatus(status) {
+    this.topNavBar?.setWasmStatus(status);
+    this.setStatus(status === 'Ready' ? 'Listo' : 'Cargando motor…');
+  }
+
+  updateOriginalThumbnail() {
+    this.updateThumbnail(this.workspace.getCanvas());
+  }
+
+  showProcessedResult() {
+    this.showProcessedCanvas();
+    this.showMathButton();
+    this.showResultHistogram();
+    this.workspace.dispatchEvent(new CustomEvent('on-processed-state-changed', {
+      bubbles: true,
+      composed: true,
+      detail: { processed: true },
+    }));
+    this.updateThumbnail(this.workspace.getProcessedCanvas());
   }
 
   /**
@@ -261,7 +324,7 @@ export class MainView {
    * @returns {string} ID del canvas de histograma original
    */
   getOriginalHistogramCanvas() {
-    return this.analysisPanel.getOriginalCanvas().id;
+    return this.workspace.getOriginalCanvas().id;
   }
 
   /**
@@ -269,7 +332,7 @@ export class MainView {
    * @returns {string} ID del canvas de histograma de resultado
    */
   getResultHistogramCanvas() {
-    return this.analysisPanel.getResultCanvas().id;
+    return this.workspace.getResultCanvas().id;
   }
 
   /**
@@ -292,7 +355,7 @@ export class MainView {
    * Cambia a la pestaña visual del panel de análisis.
    */
   switchToVisualTab() {
-    this.analysisPanel.switchToVisualTab();
+    this.analysisPanel.selectOperation(this.workspace.operation);
   }
 
   /**
@@ -300,6 +363,7 @@ export class MainView {
    */
   switchToMathEqTab() {
     this.analysisPanel.switchToMathEqTab();
+    this.focusAnalysisPanel();
   }
 
   /**
@@ -307,6 +371,7 @@ export class MainView {
    */
   switchToMathExpTab() {
     this.analysisPanel.switchToMathExpTab();
+    this.focusAnalysisPanel();
   }
 
   /**
@@ -315,7 +380,7 @@ export class MainView {
    * @param {{ min: number, max: number, mean: number, std: number }} metrics - Objeto con las métricas a mostrar
    */
   showMetrics(containerId, metrics) {
-    this.analysisPanel.showMetrics(containerId, metrics);
+    this.workspace.showMetrics(containerId, metrics);
   }
 
   /**
@@ -323,21 +388,21 @@ export class MainView {
    * @param {string} containerId - ID del contenedor de métricas
    */
   hideMetrics(containerId) {
-    this.analysisPanel.hideMetrics(containerId);
+    this.workspace.hideMetrics(containerId);
   }
 
   /**
    * Muestra el histograma de resultado y oculta su estado vacío.
    */
   showResultHistogram() {
-    this.analysisPanel.showResultHistogram();
+    this.workspace.showResultHistogram();
   }
 
   /**
    * Restaura el histograma de resultado a su estado vacío.
    */
   hideResultHistogram() {
-    this.analysisPanel.hideResultHistogram();
+    this.workspace.hideResultHistogram();
   }
 
   /**
@@ -358,14 +423,14 @@ export class MainView {
    * Muestra los contenedores de histogramas (original y resultado).
    */
   showHistogramContainers() {
-    this.analysisPanel.showHistogramContainers();
+    this.workspace.showHistogramContainers();
   }
 
   /**
    * Oculta los contenedores de histogramas.
    */
   hideHistogramContainers() {
-    this.analysisPanel.hideHistogramContainers();
+    this.workspace.hideHistogramContainers();
   }
 
   /**
@@ -375,6 +440,8 @@ export class MainView {
    */
   showEqualizationTable(frequencies, lut) {
     this.analysisPanel.showEqualizationTable(frequencies, lut);
+    this.workspace.setResultOperation('equalize');
+    if (this.workspace.processed) this.setStatus('Ecualización aplicada');
   }
 
   /**
@@ -384,6 +451,8 @@ export class MainView {
    */
   showExpansionProcedure(frequencies, lut) {
     this.analysisPanel.showExpansionProcedure(frequencies, lut);
+    this.workspace.setResultOperation('expand');
+    if (this.workspace.processed) this.setStatus('Expansión aplicada');
   }
 
   /**
@@ -391,17 +460,19 @@ export class MainView {
    */
   focusAnalysisPanel() {
     if (this.analysisPanel) {
-      this.analysisPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      this.analysisPanel.classList.add('animate-pulse-highlight');
-      setTimeout(() => {
-        this.analysisPanel.classList.remove('animate-pulse-highlight');
-      }, 1500);
+      this.workspace.setView(true);
+      this.analysisPanel.focus({ preventScroll: true });
     }
   }
 
   /**
    * Abre el cajón de historial de operaciones.
    */
+  setStatus(message) {
+    const status = document.getElementById('application-status');
+    if (status) status.textContent = `OpenCV / ${message}`;
+  }
+
   openHistory() {
     if (this.historyDrawer) {
       this.historyDrawer.open();

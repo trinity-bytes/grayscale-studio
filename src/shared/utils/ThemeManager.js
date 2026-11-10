@@ -18,12 +18,17 @@ export const ThemeManager = {
    * Agrega o remueve la clase "dark" en el elemento raíz (<html>).
    */
   init() {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    let saved;
+    try {
+      saved = localStorage.getItem(STORAGE_KEY);
+    } catch {
+      // Theme selection must remain available when browser storage is denied.
+    }
     if (saved === 'dark') {
       document.documentElement.classList.add('dark');
     } else if (saved === 'light') {
       document.documentElement.classList.remove('dark');
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    } else if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
       document.documentElement.classList.add('dark');
     }
   },
@@ -35,7 +40,11 @@ export const ThemeManager = {
   toggle() {
     document.documentElement.classList.toggle('dark');
     const isDark = document.documentElement.classList.contains('dark');
-    localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
+    try {
+      localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
+    } catch {
+      // The in-memory preference still applies for this session.
+    }
   },
 
   /**

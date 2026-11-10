@@ -85,15 +85,31 @@ describe('HistogramMath — CDF computation', () => {
 // Equalization LUT Tests
 // ──────────────────────────────────────────────
 describe('HistogramMath — Equalization LUT', () => {
-  it('equalization LUT = round(CDF * 255) for all 256 bins', () => {
-    const freq = uniformFrequencies(10);
-    const model = makeModel(freq);
-    const math = new HistogramMath(model);
-    const { cdf, lut } = math.getEqualizationData();
+  it('normalizes the first occupied cumulative bin instead of scaling raw CDF', () => {
+    const frequencies = new Array(256).fill(0);
+    [80, 112, 144, 176].forEach((level, i) => { frequencies[level] = [2048, 1024, 512, 512][i]; });
+    const { lut, cdf } = new HistogramMath(makeModel(frequencies)).getEqualizationData();
+    expect([80, 112, 144, 176].map(level => lut[level])).toEqual([0, 128, 191, 255]);
+    expect(cdf[80]).toBe(0.5);
+  });
 
-    for (let i = 0; i < 256; i++) {
-      expect(lut[i]).toBe(Math.round(cdf[i] * 255));
+  it('matches native ties-to-even equalization quantization', () => {
+    const frequencies = new Array(256).fill(0);
+    frequencies[0] = 1;
+    frequencies[1] = 1;
+    frequencies[2] = 5;
+    const { lut } = new HistogramMath(makeModel(frequencies)).getEqualizationData();
+    expect([lut[0], lut[1], lut[2]]).toEqual([0, 42, 255]);
+  });
+
+  it('preserves constant intensities under equalization and leaves empty LUTs zero', () => {
+    for (const intensity of [0, 128, 255]) {
+      const { lut } = new HistogramMath(makeModel(flatFrequencies(intensity))).getEqualizationData();
+      expect(lut[intensity]).toBe(intensity);
     }
+    const empty = new HistogramMath(makeModel(new Array(256).fill(0)));
+    expect(empty.getEqualizationData().lut).toEqual(new Array(256).fill(0));
+    expect(empty.getExpansionData().lut).toEqual(new Array(256).fill(0));
   });
 
   it('equalization LUT values are in range 0–255', () => {
@@ -108,18 +124,14 @@ describe('HistogramMath — Equalization LUT', () => {
     }
   });
 
-  it('equalization LUT for uniform distribution is approximately linear', () => {
+  it('equalization LUT for a uniform distribution is identity', () => {
     const freq = uniformFrequencies(10);
     const model = makeModel(freq);
     const math = new HistogramMath(model);
     const { lut } = math.getEqualizationData();
 
-    // With uniform distribution, CDF(i) ≈ (i+1)/256
-    // So lut[i] ≈ round((i+1)/256 * 255) ≈ i for most values
-    for (let i = 0; i < 256; i++) {
-      const expected = Math.round(((i + 1) / 256) * 255);
-      expect(lut[i]).toBe(expected);
-    }
+    // Removing the first occupied CDF bin gives the identity for a uniform distribution.
+    for (let i = 0; i < 256; i++) expect(lut[i]).toBe(i);
   });
 
   it('equalization LUT ends at 255', () => {
@@ -136,7 +148,7 @@ describe('HistogramMath — Equalization LUT', () => {
 // Expansion LUT Tests
 // ──────────────────────────────────────────────
 describe('HistogramMath — Expansion LUT', () => {
-  it('expansion LUT = linear min-max mapping for all 256 bins', () => {
+  it('maps selected endpoint and midpoint levels under native Min-Max normalization', () => {
     // Frequencies only at bins 50 and 200 → min=50, max=200
     const freq = new Array(256).fill(0);
     freq[50] = 100;
@@ -202,37 +214,37 @@ describe('HistogramMath — Expansion LUT', () => {
 // Edge Case: Flat Image
 // ──────────────────────────────────────────────
 describe('HistogramMath — Edge case: flat image', () => {
-  it('returns identity LUT for expansion when all pixels have same intensity', () => {
+  it('returns zero LUT for native normalization when all pixels have same intensity', () => {
     const freq = flatFrequencies(128, 2560);
     const model = makeModel(freq);
     const math = new HistogramMath(model);
     const { lut } = math.getExpansionData();
 
-    // min == max → identity LUT
+    // Native Min-Max normalization maps constant images to zero.
     for (let i = 0; i < 256; i++) {
-      expect(lut[i]).toBe(i);
+      expect(lut[i]).toBe(0);
     }
   });
 
-  it('returns identity LUT for expansion when all pixels are intensity 0', () => {
+  it('returns zero LUT for native normalization when all pixels are intensity 0', () => {
     const freq = flatFrequencies(0, 1000);
     const model = makeModel(freq);
     const math = new HistogramMath(model);
     const { lut } = math.getExpansionData();
 
     for (let i = 0; i < 256; i++) {
-      expect(lut[i]).toBe(i);
+      expect(lut[i]).toBe(0);
     }
   });
 
-  it('returns identity LUT for expansion when all pixels are intensity 255', () => {
+  it('returns zero LUT for native normalization when all pixels are intensity 255', () => {
     const freq = flatFrequencies(255, 1000);
     const model = makeModel(freq);
     const math = new HistogramMath(model);
     const { lut } = math.getExpansionData();
 
     for (let i = 0; i < 256; i++) {
-      expect(lut[i]).toBe(i);
+      expect(lut[i]).toBe(0);
     }
   });
 
@@ -251,5 +263,29 @@ describe('HistogramMath — Edge case: flat image', () => {
     for (let i = 100; i < 256; i++) {
       expect(cdf[i]).toBeCloseTo(1.0, 6);
     }
+  });
+});
+
+describe('HistogramMath — native float32 expansion', () => {
+  it.each([
+    [[0, 1, 6], [0, 42, 255]],
+    [[196, 203, 210], [0, 127, 255]],
+  ])('matches native normalization for %j', (pixels, expected) => {
+    const frequencies = new Array(256).fill(0);
+    pixels.forEach(value => { frequencies[value]++; });
+    const { lut } = new HistogramMath(makeModel(frequencies)).getExpansionData();
+    expect(pixels.map(value => lut[value])).toEqual(expected);
+  });
+});
+
+describe('HistogramMath — large-image operand conversion', () => {
+  it('rounds the native float32 denominator before equalization division', () => {
+    const frequencies = new Array(256).fill(0);
+    frequencies[0] = 4095;
+    frequencies[128] = 3190961;
+    frequencies[255] = 13586256;
+    const { lut } = new HistogramMath(makeModel(frequencies)).getEqualizationData();
+    // Native equalizeHist on a 4096 × 4097 image maps this occupied level to49.
+    expect(lut[128]).toBe(49);
   });
 });
