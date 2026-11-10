@@ -1,3 +1,4 @@
+import { computeHistogramMetrics } from '../../domain/models/HistogramMetrics.js';
 import { HistogramMath } from '../../domain/models/HistogramMath.js';
 import { strings } from '../../shared/i18n/strings.js';
 
@@ -49,6 +50,8 @@ export class MainController {
     /** @type {string|null} Última operación ejecutada ('equalize' o 'expand') */
     this.lastOperation = null;
 
+    this.loadRevision = 0;
+    this.histogramMath = null;
     this.init();
   }
 
@@ -63,11 +66,7 @@ export class MainController {
     this.view.bindShowMath(this.handleShowMath.bind(this));
     this.view.bindError(this.handleError.bind(this));
     
-    // Establecer estado de WASM como listo
-    const topNavBar = document.querySelector('top-nav-bar');
-    if (topNavBar) {
-      topNavBar.setWasmStatus('Ready');
-    }
+    this.view.setWasmStatus('Ready');
   }
 
   /**
@@ -76,40 +75,7 @@ export class MainController {
    * @returns {{ min: number, max: number, mean: number, std: number }} Objeto con las métricas calculadas
    */
   computeMetrics(histogram) {
-    const freq = histogram.getFrequencies();
-    const totalPixels = freq.reduce((sum, v) => sum + v, 0);
-    if (totalPixels === 0) return { min: 0, max: 0, mean: 0, std: 0 };
-
-    // Encontrar niveles de intensidad mínimos y máximos con frecuencia no nula
-    let min = 0;
-    let max = 255;
-    for (let i = 0; i < 256; i++) {
-      if (freq[i] > 0) { min = i; break; }
-    }
-    for (let i = 255; i >= 0; i--) {
-      if (freq[i] > 0) { max = i; break; }
-    }
-
-    // Media ponderada
-    let sum = 0;
-    for (let i = 0; i < 256; i++) {
-      sum += i * freq[i];
-    }
-    const mean = sum / totalPixels;
-
-    // Desviación estándar ponderada
-    let varianceSum = 0;
-    for (let i = 0; i < 256; i++) {
-      varianceSum += freq[i] * (i - mean) ** 2;
-    }
-    const std = Math.sqrt(varianceSum / totalPixels);
-
-    return {
-      min,
-      max,
-      mean: Math.round(mean * 100) / 100,
-      std: Math.round(std * 100) / 100,
-    };
+    return computeHistogramMetrics(histogram);
   }
 
   /**
@@ -119,96 +85,75 @@ export class MainController {
    * @param {File} file - Archivo de imagen seleccionado por el usuario
    */
   async handleFileSelected(file) {
+    const revision = ++this.loadRevision;
+    this.view.cancelPendingImageLoad();
+    this.clearImageState();
+    this.view.hideError();
+    this.view.disableControls();
+    this.view.hideMathButton();
+    this.view.resetToOriginal();
+    this.view.hideResultHistogram();
+    this.currentFilename = file?.name ?? null;
+
+    const fail = message => {
+      if (revision !== this.loadRevision) return;
+      this.clearImageState();
+      this.view.showPlaceholder();
+      this.view.updateImageInfo();
+      this.view.hideHistogramContainers();
+      this.view.showEmptyStates();
+      this.view.hideMetrics('original-metrics');
+      this.view.hideMetrics('result-metrics');
+      this.view.showError(message);
+    };
+
     try {
-      this.view.hideError();
-      this.view.disableControls();
-      this.view.hideMathButton();
-      this.view.resetToOriginal();
-      this.view.hideResultHistogram();
-      this.lastOperation = null;
-      this.currentFilename = file.name;
-      
-      // Cargar archivo como base64
       const base64Data = await this.loadUseCase.execute(file);
-      
-      // Esperar a que la imagen oculta cargue los datos base64 para procesarlos
+      if (revision !== this.loadRevision) return;
       this.view.setHiddenImageSrc(base64Data, () => {
+        if (revision !== this.loadRevision) return;
         try {
           this.view.showCanvas();
-          
-          // Ejecutar extracción y validación usando el caso de uso
-          this.currentImageModel = this.loadUseCase.executeMathematicalExtraction(
-            this.view.getHiddenImageId(),
-            this.view.getWorkspaceCanvasId()
+          const image = this.loadUseCase.executeMathematicalExtraction(
+            this.view.getHiddenImageId(), this.view.getWorkspaceCanvasId()
           );
-
-          if (!this.currentImageModel.isStrictGrayscale) {
-            this.view.showError(strings.errors.colorImage);
-            this.view.showPlaceholder();
-            this.view.updateImageInfo();
-            this.view.hideHistogramContainers();
-            this.view.showEmptyStates();
+          if (!image.isStrictGrayscale) {
+            fail(strings.errors.colorImage);
             return;
           }
-
-          // Imagen en grises válida
-          const metadata = this.currentImageModel.getMetadata();
-          this.view.updateImageInfo(
-             metadata.width,
-             metadata.height,
-             1 // Canales
-          );
-
-          // Actualizar miniatura desde el canvas del workspace
-          const workspaceCanvas = this.view.workspace.getCanvas();
-          this.view.updateThumbnail(workspaceCanvas);
-
-          // Renderizar histograma original
-          this.currentHistogram = this.currentImageModel.getHistogram();
-          this.chartRenderer.render(
-            this.view.getOriginalHistogramCanvas(),
-            this.currentHistogram
-          );
-
-          // Mostrar métricas del histograma original
-          const originalMetrics = this.computeMetrics(this.currentHistogram);
-          this.view.showMetrics('original-metrics', originalMetrics);
-
-          // Mostrar contenedores de histogramas y ocultar estado vacío
+          this.currentImageModel = image;
+          const metadata = image.getMetadata();
+          this.view.updateImageInfo(metadata.width, metadata.height, 1);
+          this.view.updateOriginalThumbnail();
+          this.currentHistogram = image.getHistogram();
+          this.chartRenderer.render(this.view.getOriginalHistogramCanvas(), this.currentHistogram);
+          this.view.showMetrics('original-metrics', this.computeMetrics(this.currentHistogram));
           this.view.showHistogramContainers();
           this.view.hideEmptyStates();
-
-          // Ocultar métricas de resultado (sin procesamiento aún)
           this.view.hideMetrics('result-metrics');
-
-          // Calcular visualizaciones matemáticas
           this.histogramMath = new HistogramMath(this.currentHistogram);
-          
-          this.chartRenderer.renderMath(
-            this.view.getMathEqCanvas(),
-            this.histogramMath,
-            "equalization"
-          );
-
-          this.chartRenderer.renderMath(
-            this.view.getMathExpCanvas(),
-            this.histogramMath,
-            "expansion"
-          );
-
+          this.chartRenderer.renderMath(this.view.getMathEqCanvas(), this.histogramMath, 'equalization');
+          this.chartRenderer.renderMath(this.view.getMathExpCanvas(), this.histogramMath, 'expansion');
           this.view.switchToVisualTab();
-
           this.view.enableControls();
         } catch (error) {
           console.error(error);
-          this.view.showError(strings.errors.processingFailed);
+          fail(strings.errors.processingFailed);
         }
-      });
-      
+      }, () => fail(strings.errors.loadFailed));
     } catch (error) {
+      if (revision !== this.loadRevision) return;
       console.error(error);
-      this.view.showError(strings.errors.loadFailed);
+      fail(strings.errors.loadFailed);
     }
+  }
+
+  /** Invalidate analytical state before a new load or after a rejected image. */
+  clearImageState() {
+    this.currentImageModel = null;
+    this.currentHistogram = null;
+    this.histogramMath = null;
+    this.lastOperation = null;
   }
 
   /**
@@ -217,56 +162,7 @@ export class MainController {
    * renderiza el histograma de resultado y registra la operación en el historial.
    */
   handleEqualize() {
-    try {
-      this.lastOperation = 'equalize';
-
-      const newHistogram = this.equalizeUseCase.execute(
-        this.view.getHiddenImageId(),
-        this.view.getProcessedCanvasId()
-      );
-
-      this.view.showProcessedCanvas();
-      this.view.showMathButton();
-      this.view.showResultHistogram();
-
-      // Despachar evento de cambio de estado procesado
-      this.view.workspace.dispatchEvent(new CustomEvent('on-processed-state-changed', {
-        bubbles: true,
-        composed: true,
-        detail: { processed: true }
-      }));
-
-      // Actualizar miniatura desde el canvas procesado
-      const processedCanvas = this.view.workspace.getProcessedCanvas();
-      this.view.updateThumbnail(processedCanvas);
-
-      this.chartRenderer.render(
-        this.view.getResultHistogramCanvas(),
-        newHistogram
-      );
-
-      // Mostrar métricas del histograma de resultado
-      const resultMetrics = this.computeMetrics(newHistogram);
-      this.view.showMetrics('result-metrics', resultMetrics);
-
-      // Renderizar tabla de conversión
-      const eqData = this.histogramMath.getEqualizationData();
-      this.view.showEqualizationTable(this.currentHistogram.getFrequencies(), eqData.lut);
-
-      // Agregar entrada al historial
-      const originalMetrics = this.computeMetrics(this.currentHistogram);
-      this.view.addHistoryEntry({
-        type: 'equalize',
-        filename: this.currentFilename,
-        metricsBefore: originalMetrics,
-        metricsAfter: resultMetrics
-      });
-      
-      this.view.switchToVisualTab();
-    } catch (error) {
-      console.error(error);
-      this.view.showError(strings.errors.equalizeFailed);
-    }
+    this.runOperation('equalize', this.equalizeUseCase, strings.errors.equalizeFailed);
   }
 
   /**
@@ -275,55 +171,37 @@ export class MainController {
    * renderiza el histograma de resultado y registra la operación en el historial.
    */
   handleExpand() {
+    this.runOperation('expand', this.expandUseCase, strings.errors.expandFailed);
+  }
+
+  /** Keep successful-operation publication shared; preserve operation-specific math and errors. */
+  runOperation(operation, useCase, errorMessage) {
+    if (!this.currentHistogram || !this.histogramMath) return;
     try {
-      this.lastOperation = 'expand';
-
-      const newHistogram = this.expandUseCase.execute(
-        this.view.getHiddenImageId(),
-        this.view.getProcessedCanvasId()
+      const newHistogram = useCase.execute(
+        this.view.getHiddenImageId(), this.view.getProcessedCanvasId()
       );
-
-      this.view.showProcessedCanvas();
-      this.view.showMathButton();
-      this.view.showResultHistogram();
-
-      // Despachar evento de cambio de estado procesado
-      this.view.workspace.dispatchEvent(new CustomEvent('on-processed-state-changed', {
-        bubbles: true,
-        composed: true,
-        detail: { processed: true }
-      }));
-
-      // Actualizar miniatura desde el canvas procesado
-      const processedCanvas = this.view.workspace.getProcessedCanvas();
-      this.view.updateThumbnail(processedCanvas);
-
-      this.chartRenderer.render(
-        this.view.getResultHistogramCanvas(),
-        newHistogram
-      );
-
-      // Mostrar métricas del histograma de resultado
+      this.view.showProcessedResult();
+      this.chartRenderer.render(this.view.getResultHistogramCanvas(), newHistogram);
       const resultMetrics = this.computeMetrics(newHistogram);
       this.view.showMetrics('result-metrics', resultMetrics);
-
-      // Renderizar detalles del procedimiento de expansión
-      const expData = this.histogramMath.getExpansionData();
-      this.view.showExpansionProcedure(this.currentHistogram.getFrequencies(), expData.lut);
-
-      // Agregar entrada al historial
-      const originalMetrics = this.computeMetrics(this.currentHistogram);
+      const frequencies = this.currentHistogram.getFrequencies();
+      if (operation === 'equalize') {
+        this.view.showEqualizationTable(frequencies, this.histogramMath.getEqualizationData().lut);
+      } else {
+        this.view.showExpansionProcedure(frequencies, this.histogramMath.getExpansionData().lut);
+      }
       this.view.addHistoryEntry({
-        type: 'expand',
+        type: operation,
         filename: this.currentFilename,
-        metricsBefore: originalMetrics,
-        metricsAfter: resultMetrics
+        metricsBefore: this.computeMetrics(this.currentHistogram),
+        metricsAfter: resultMetrics,
       });
-
       this.view.switchToVisualTab();
+      this.lastOperation = operation;
     } catch (error) {
       console.error(error);
-      this.view.showError(strings.errors.expandFailed);
+      this.view.showError(errorMessage);
     }
   }
 

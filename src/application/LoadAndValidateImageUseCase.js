@@ -1,5 +1,3 @@
-import { BrowserFileReader } from "../infrastructure/file/BrowserFileReader.js";
-
 /**
  * ==========================================
  * LOAD AND VALIDATE IMAGE USE CASE
@@ -15,22 +13,23 @@ export class LoadAndValidateImageUseCase {
   /**
    * Crea una instancia del caso de uso de carga y validación.
    * @param {import('../domain/services/ImageProcessor.js').ILoadProcessor} loadProcessor - Procesador de carga que ejecuta el pipeline matemático
+   * @param {{readAsDataURL(file: File): Promise<string>}} fileReader - Injected file-reading port
    */
-  constructor(loadProcessor) {
+  constructor(loadProcessor, fileReader) {
     /** @type {import('../domain/services/ImageProcessor.js').ILoadProcessor} Procesador inyectado para operaciones de carga */
     this.loadProcessor = loadProcessor;
+    this.fileReader = fileReader;
   }
 
   /**
    * Lee un archivo de imagen del sistema de archivos del navegador y lo convierte
-   * a una cadena de datos base64 Utiliza BrowserFileReader internamente.
+   * a una cadena de datos base64 mediante el lector inyectado.
    * @param {File} rawFile - Objeto nativo Web API (File) proporcionado por inputs o drag-and-drop
    * @returns {Promise<string>} Promesa que resuelve con la cadena base64 de la imagen (data URL)
    * @throws {Error} Si el archivo es inválido, corrupto o no se puede leer
    */
   async execute(rawFile) {
-    const imageBase64Data = await BrowserFileReader.readAsDataURL(rawFile);
-    return imageBase64Data;
+    return this.fileReader.readAsDataURL(rawFile);
   }
 
   /**

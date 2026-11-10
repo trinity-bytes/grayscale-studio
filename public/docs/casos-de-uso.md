@@ -46,10 +46,10 @@ Orquesta la carga de una imagen desde el disco del usuario hacia la memoria del 
 ### Constructor
 
 ```javascript
-constructor(loadProcessor: ILoadProcessor)
+constructor(loadProcessor: ILoadProcessor, fileReader: { readAsDataURL(file: File): Promise<string> })
 ```
 
-Depende de la interfaz `ILoadProcessor`, no de la implementacion concreta.
+Recibe el procesador `ILoadProcessor` y un puerto de lectura de archivos. El Composition Root inyecta `BrowserFileReader`; el caso de uso no importa infraestructura.
 
 ### Metodos
 
@@ -64,7 +64,7 @@ Lee el archivo del disco y lo convierte a base64.
 
 **Flujo interno**:
 1. Valida que el archivo sea una imagen (`file.type.startsWith('image/')`)
-2. Usa `BrowserFileReader.readAsDataURL()` para convertir a base64
+2. Delega en `fileReader.readAsDataURL()`, inyectado como `BrowserFileReader` en la aplicación, para convertir a base64
 3. Retorna la cadena base64
 
 **Errores posibles**:
@@ -167,8 +167,13 @@ La ecualizacion usa la **Funcion de Distribucion Acumulada (CDF)**:
 ```
 PDF(k) = nk / N           (donde nk = frecuencia del nivel k, N = total pixeles)
 CDF(k) = sum(PDF(0..k))   (distribucion acumulada)
-LUT(k) = round(CDF(k) * 255)  (mapeo a rango 0-255)
+H(k) = sum(n0..nk)        (conteo acumulado entero)
+Hmin = primer conteo acumulado no nulo
+escala = f32(255 / f32(N - Hmin))
+LUT(k) = Q8(f32(f32(max(0, H(k) - Hmin)) * escala))
 ```
+
+`f32` redondea a precisión simple. `Q8` convierte al entero más cercano con empates al par y saturación a [0, 255]. La CDF se conserva como acumulado normalizado para la explicación; no se usa `round(CDF * 255)`. Una imagen uniforme conserva su intensidad bajo ecualización; sin píxeles, la LUT es cero. Las operaciones nativas siguen en OpenCV y se contrastan con estas LUT mediante pruebas reales.
 
 ### Errores posibles
 
@@ -233,13 +238,18 @@ Ejecuta la expansion de la imagen.
 La expansion usa **normalizacion lineal Min-Max**:
 
 ```
-Para cada nivel i:
-  Si i <= min:  LUT(i) = 0
-  Si i >= max:  LUT(i) = 255
-  Si min < i < max:  LUT(i) = round((i - min) * 255 / (max - min))
+Si max > min:
+  escalaDouble = 255 / (max - min)
+  escala = f32(escalaDouble)
+  desplazamiento = f32(-min * escalaDouble)
+  LUT(i) = Q8(f32(f32(i * escala) + desplazamiento))
+Si max == min:
+  LUT(i) = 0
 ```
 
-Donde `min` y `max` son los primeros y ultimos niveles con frecuencia > 0.
+Donde `min` y `max` son los primeros y últimos niveles con frecuencia > 0. `f32` se aplica por separado al producto y a la suma; el desplazamiento se calcula desde la escala de doble precisión. `Q8` usa empates al par, no `Math.round`. Las imágenes uniformes se normalizan a cero, igual que `cv.normalize` del motor de referencia. Sin datos, la explicación muestra estado vacío.
+
+Los histogramas usan 256 bins y rango `[0, 256)` para incluir el nivel 255. La verificación reproducible está en [numerical-consistency.md](../../docs/audits/numerical-consistency.md) dentro del repositorio.
 
 ### Errores posibles
 
@@ -286,7 +296,7 @@ Calcula automaticamente:
 | Metodo | Retorno | Descripcion |
 |--------|---------|-------------|
 | `getEqualizationData()` | `{ cdf: number[], lut: number[] }` | Datos de ecualizacion |
-| `getExpansionData()` | `{ lut: number[] }` | Datos de expansion |
+| `getExpansionData()` | `{ lut, min, max, scale, shift }` | LUT y parámetros float32 de expansión |
 
 ### Propiedades
 

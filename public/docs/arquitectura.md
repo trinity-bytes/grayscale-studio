@@ -79,7 +79,7 @@ Presentation ──► Application ──► Domain ◄── Infrastructure
 ```javascript
 // main.js - Composition Root
 const processor = new OpenCvImageProcessor();           // Infrastructure
-const loadUseCase = new LoadAndValidateImageUseCase(processor);  // Application
+const loadUseCase = new LoadAndValidateImageUseCase(processor, BrowserFileReader);  // Application
 const equalizeUseCase = new EqualizeImageUseCase(processor);     // Application
 const expandUseCase = new ExpandImageUseCase(processor);         // Application
 const chartRenderer = new ChartJsRenderer();                      // Infrastructure
@@ -163,7 +163,7 @@ class ImageModel {
 
 ### Value Objects
 
-**HistogramModel** — Objeto valor inmutable:
+**HistogramModel** — Modelo de frecuencias con referencia compartida al arreglo:
 
 ```javascript
 class HistogramModel {

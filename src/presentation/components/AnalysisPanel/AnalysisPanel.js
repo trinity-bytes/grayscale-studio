@@ -1,3 +1,5 @@
+import { HistogramMath } from '../../../domain/models/HistogramMath.js';
+import { HistogramModel } from '../../../domain/models/HistogramModel.js';
 import html from './AnalysisPanel.html?raw';
 import './AnalysisPanel.css';
 import '../../../shared/components/EmptyState/EmptyState.js';
@@ -314,24 +316,28 @@ export class AnalysisPanel extends HTMLElement {
 
     if (!minValEl || !maxValEl || !rangeValEl || !scaleValEl || !stepsEl || !container) return;
 
-    let min = 0;
-    while (min < 256 && frequencies[min] === 0) min++;
-
-    let max = 255;
-    while (max >= 0 && frequencies[max] === 0) max--;
-
-    if (min >= max) {
+    const { min, max, scale, shift } = new HistogramMath(new HistogramModel(frequencies)).getExpansionData();
+    if (min < 0) {
+      minValEl.textContent = '—';
+      maxValEl.textContent = '—';
+      rangeValEl.textContent = '—';
+      scaleValEl.textContent = '—';
+      stepsEl.textContent = 'Sin datos de imagen para calcular la expansión.';
+      container.classList.remove('hidden');
+      return;
+    }
+    if (min === max) {
       minValEl.textContent = min;
-      maxValEl.textContent = min;
+      maxValEl.textContent = max;
       rangeValEl.textContent = '0';
-      scaleValEl.textContent = '1.0000';
-      stepsEl.innerHTML = `<li>La imagen tiene intensidad uniforme (${min}). No requiere expansión.</li>`;
+      scaleValEl.textContent = '0.0000';
+      stepsEl.innerHTML = `<li>Imagen uniforme (${min}): OpenCV normaliza todos los píxeles a intensidad 0.</li>`;
       container.classList.remove('hidden');
       return;
     }
 
     const range = max - min;
-    const factor = 255 / range;
+    const factor = scale;
 
     minValEl.textContent = min;
     maxValEl.textContent = max;
@@ -345,7 +351,7 @@ export class AnalysisPanel extends HTMLElement {
         html += `
           <li>
             Nivel <span class="font-semibold">${i}</span>: 
-            round((${i} - ${min}) × ${factor.toFixed(4)}) = 
+            Q8(f32(f32(${i} × ${scale}) + (${shift}))) =
             <span class="font-semibold text-primary dark:text-inverse-primary">${mapped}</span>
           </li>
         `;

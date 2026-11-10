@@ -140,7 +140,8 @@ export class MainView {
       : "-";
     const depth = channels ? strings.imageInfo.bitDepthValue : "-";
     const fmt = channels ? strings.imageInfo.loadedFromMemory : "-";
-    this.imageInfoPanel.updateInfo(res, ch, depth, fmt);
+    if (!channels) this.imageInfoPanel.clear();
+    else this.imageInfoPanel.updateInfo(res, ch, depth, fmt);
   }
 
   /**
@@ -149,14 +150,7 @@ export class MainView {
    */
   updateThumbnail(canvasElement) {
     if (!canvasElement) return;
-    canvasElement.toBlob((blob) => {
-      if (!blob) return;
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        this.imageInfoPanel.setThumbnail(reader.result);
-      };
-      reader.readAsDataURL(blob);
-    }, 'image/png');
+    this.imageInfoPanel.setThumbnailFromCanvas(canvasElement);
   }
 
   /**
@@ -187,14 +181,57 @@ export class MainView {
     this.workspace.hideMathButton();
   }
 
-  /**
-   * Establece la fuente de la imagen oculta en base64 y ejecuta un callback al cargar.
-   * @param {string} base64Data - Cadena data URL de la imagen en base64
-   * @param {function(): void} onLoadCallback - Callback a ejecutar cuando la imagen termine de cargar
-   */
-  setHiddenImageSrc(base64Data, onLoadCallback) {
-    this.hiddenImage.onload = onLoadCallback;
-    this.hiddenImage.src = base64Data;
+  /** Cancel a pending decode without modifying the last successfully decoded image. */
+  cancelPendingImageLoad() {
+    if (!this.pendingImage) return;
+    this.pendingImage.onload = null;
+    this.pendingImage.onerror = null;
+    this.pendingImage.removeAttribute('src');
+    this.pendingImage = null;
+  }
+
+  /** Decode each request in its own element; publish only after successful decoding. */
+  setHiddenImageSrc(base64Data, onLoadCallback, onErrorCallback = () => {}) {
+    this.cancelPendingImageLoad();
+    const image = document.createElement('img');
+    image.id = this.hiddenImage.id;
+    image.style.display = 'none';
+    this.pendingImage = image;
+    const settle = callback => {
+      if (this.pendingImage !== image) return;
+      image.onload = null;
+      image.onerror = null;
+      this.pendingImage = null;
+      callback();
+    };
+    image.onload = () => settle(() => {
+      this.hiddenImage.replaceWith(image);
+      this.hiddenImage = image;
+      onLoadCallback();
+    });
+    image.onerror = () => settle(() => onErrorCallback(new Error('Image decoding failed.')));
+    image.src = base64Data;
+  }
+
+  /** Keep DOM and component-specific state transitions inside the view façade. */
+  setWasmStatus(status) {
+    this.topNavBar?.setWasmStatus(status);
+  }
+
+  updateOriginalThumbnail() {
+    this.updateThumbnail(this.workspace.getCanvas());
+  }
+
+  showProcessedResult() {
+    this.showProcessedCanvas();
+    this.showMathButton();
+    this.showResultHistogram();
+    this.workspace.dispatchEvent(new CustomEvent('on-processed-state-changed', {
+      bubbles: true,
+      composed: true,
+      detail: { processed: true },
+    }));
+    this.updateThumbnail(this.workspace.getProcessedCanvas());
   }
 
   /**

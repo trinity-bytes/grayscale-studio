@@ -75,6 +75,7 @@ export const strings = {
     colorImage: 'Imagen a color detectada. Por favor sube una imagen en escala de grises.',
     processingFailed: 'Error al procesar imagen con OpenCV.',
     loadFailed: 'No se pudo cargar el archivo.',
+    engineUnavailable: 'No se pudo iniciar OpenCV. Recarga la página para volver a intentarlo.',
     equalizeFailed: 'Error al ecualizar la imagen.',
     expandFailed: 'Error al expandir la imagen.',
   },
