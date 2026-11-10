@@ -42,7 +42,7 @@ it('renders external history fields as text without rewriting rejected storage',
     document.body.innerHTML = '<history-drawer></history-drawer>';
     const drawer = document.querySelector('history-drawer');
     expect(storageHash()).toBe(before);
-    expect(drawer.querySelectorAll('svg,img,script')).toHaveLength(0);
+    expect(drawer.querySelectorAll('img,script,.history-card svg')).toHaveLength(0);
     if (value.startsWith('[')) {
       expect(drawer.entries).toHaveLength(1);
       expect(drawer.querySelector('.history-card-title').textContent).toBe(entry.filename);

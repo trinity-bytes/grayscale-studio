@@ -134,6 +134,8 @@ export class MainController {
           this.histogramMath = new HistogramMath(this.currentHistogram);
           this.chartRenderer.renderMath(this.view.getMathEqCanvas(), this.histogramMath, 'equalization');
           this.chartRenderer.renderMath(this.view.getMathExpCanvas(), this.histogramMath, 'expansion');
+          this.view.showEqualizationTable(this.currentHistogram.getFrequencies(), this.histogramMath.getEqualizationData().lut);
+          this.view.showExpansionProcedure(this.currentHistogram.getFrequencies(), this.histogramMath.getExpansionData().lut);
           this.view.switchToVisualTab();
           this.view.enableControls();
         } catch (error) {

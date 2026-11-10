@@ -1,271 +1,70 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, expect, it } from 'vitest';
 import './AnalysisPanel.js';
-
-/**
- * Helper: create and attach the custom element to the DOM.
- */
-function createPanel() {
-  const panel = document.createElement('analysis-panel');
-  document.body.appendChild(panel);
-  return panel;
-}
-
-describe('AnalysisPanel — Rendering', () => {
-  let panel;
-
-  beforeEach(() => {
-    document.body.innerHTML = '';
-    panel = createPanel();
-  });
-
-  it('renders 3 tabs: Visual, Math: Eq, Math: Exp', () => {
-    const tabs = panel.querySelectorAll('.tab-btn');
-    expect(tabs).toHaveLength(3);
-    expect(tabs[0].textContent.trim()).toBe('Visual');
-    expect(tabs[1].textContent.trim()).toBe('Ecuaciones');
-    expect(tabs[2].textContent.trim()).toBe('Explicación');
-  });
-
-  it('renders 3 tab content panels', () => {
-    const contents = panel.querySelectorAll('.tab-content');
-    expect(contents).toHaveLength(3);
-    expect(panel.querySelector('#tab-visual')).not.toBeNull();
-    expect(panel.querySelector('#tab-math-eq')).not.toBeNull();
-    expect(panel.querySelector('#tab-math-exp')).not.toBeNull();
-  });
-
-  it('first tab (Visual) is active by default', () => {
-    const tabs = panel.querySelectorAll('.tab-btn');
-    expect(tabs[0].classList.contains('active')).toBe(true);
-
-    // Visual content should be visible (no 'hidden' class)
-    const visualContent = panel.querySelector('#tab-visual');
-    expect(visualContent.classList.contains('hidden')).toBe(false);
-  });
+import { HistogramMath } from '../../../domain/models/HistogramMath.js';
+import { HistogramModel } from '../../../domain/models/HistogramModel.js';
+let panel;
+beforeEach(() => {
+  document.body.innerHTML = '<analysis-panel></analysis-panel>';
+  panel = document.querySelector('analysis-panel');
 });
-
-describe('AnalysisPanel — Tab switching', () => {
-  let panel;
-
-  beforeEach(() => {
-    document.body.innerHTML = '';
-    panel = createPanel();
-  });
-
-  it('clicking Math: Eq tab shows eq content and hides others', () => {
-    const eqTab = panel.querySelector('[data-target="tab-math-eq"]');
-    eqTab.click();
-
-    const eqContent = panel.querySelector('#tab-math-eq');
-    expect(eqContent.classList.contains('hidden')).toBe(false);
-
-    const visualContent = panel.querySelector('#tab-visual');
-    expect(visualContent.classList.contains('hidden')).toBe(true);
-
-    const expContent = panel.querySelector('#tab-math-exp');
-    expect(expContent.classList.contains('hidden')).toBe(true);
-  });
-
-  it('clicking Math: Exp tab shows exp content and hides others', () => {
-    const expTab = panel.querySelector('[data-target="tab-math-exp"]');
-    expTab.click();
-
-    const expContent = panel.querySelector('#tab-math-exp');
-    expect(expContent.classList.contains('hidden')).toBe(false);
-
-    const visualContent = panel.querySelector('#tab-visual');
-    expect(visualContent.classList.contains('hidden')).toBe(true);
-
-    const eqContent = panel.querySelector('#tab-math-eq');
-    expect(eqContent.classList.contains('hidden')).toBe(true);
-  });
-
-  it('clicking Visual tab shows visual content and hides others', () => {
-    // First switch away
-    panel.querySelector('[data-target="tab-math-eq"]').click();
-    // Then switch back
-    panel.querySelector('[data-target="tab-visual"]').click();
-
-    const visualContent = panel.querySelector('#tab-visual');
-    expect(visualContent.classList.contains('hidden')).toBe(false);
-
-    const eqContent = panel.querySelector('#tab-math-eq');
-    expect(eqContent.classList.contains('hidden')).toBe(true);
-  });
-
-  it('only one tab has active class at a time', () => {
-    panel.querySelector('[data-target="tab-math-eq"]').click();
-
-    const tabs = panel.querySelectorAll('.tab-btn');
-    const activeTabs = Array.from(tabs).filter(t => t.classList.contains('active'));
-    expect(activeTabs).toHaveLength(1);
-    expect(activeTabs[0].getAttribute('data-target')).toBe('tab-math-eq');
-  });
+const data = () => {
+  const frequencies = new Array(256).fill(0); frequencies[10] = 50; frequencies[100] = 150;
+  const math = new HistogramMath(new HistogramModel(frequencies));
+  panel.showEqualizationTable(frequencies, math.getEqualizationData().lut);
+  panel.showExpansionProcedure(frequencies, math.getExpansionData().lut);
+  return math;
+};
+it('starts with unavailable calculations and no tutorial tabs or fabricated measurements', () => {
+  expect(panel.querySelector('#selected-output').textContent).toBe('—');
+  expect(panel.querySelectorAll('.tab-btn')).toHaveLength(0);
+  expect(panel.querySelector('#inspect-lut').disabled).toBe(true);
+  expect(panel.getMathEqCanvas().id).toBe('math-eq-canvas');
+  expect(panel.getMathExpCanvas().id).toBe('math-exp-canvas');
 });
-
-describe('AnalysisPanel — switch methods', () => {
-  let panel;
-
-  beforeEach(() => {
-    document.body.innerHTML = '';
-    panel = createPanel();
-  });
-
-  it('switchToVisualTab activates the visual tab', () => {
-    // Switch away first
-    panel.querySelector('[data-target="tab-math-eq"]').click();
-
-    panel.switchToVisualTab();
-
-    const visualContent = panel.querySelector('#tab-visual');
-    expect(visualContent.classList.contains('hidden')).toBe(false);
-
-    const eqContent = panel.querySelector('#tab-math-eq');
-    expect(eqContent.classList.contains('hidden')).toBe(true);
-  });
-
-  it('switchToMathEqTab activates the eq tab', () => {
-    panel.switchToMathEqTab();
-
-    const eqContent = panel.querySelector('#tab-math-eq');
-    expect(eqContent.classList.contains('hidden')).toBe(false);
-
-    const visualContent = panel.querySelector('#tab-visual');
-    expect(visualContent.classList.contains('hidden')).toBe(true);
-  });
-
-  it('switchToMathExpTab activates the exp tab', () => {
-    panel.switchToMathExpTab();
-
-    const expContent = panel.querySelector('#tab-math-exp');
-    expect(expContent.classList.contains('hidden')).toBe(false);
-
-    const visualContent = panel.querySelector('#tab-visual');
-    expect(visualContent.classList.contains('hidden')).toBe(true);
-  });
+it('inspects the exact existing domain LUT and CDF with a keyboard-operable intensity range', () => {
+  const math = data(); panel.switchToMathEqTab();
+  const range = panel.querySelector('#intensity-input'); range.value = '100'; range.dispatchEvent(new Event('input'));
+  expect(panel.querySelector('#selected-output').textContent).toBe(String(math.getEqualizationData().lut[100]));
+  expect(panel.querySelector('#selected-input').textContent).toBe('100');
+  expect(panel.querySelector('#numeric-substitution').textContent).toContain('Q8');
+  expect(panel.querySelector('#algorithm-constants').textContent).toContain('200');
 });
-
-describe('AnalysisPanel — Canvas getters', () => {
-  let panel;
-
-  beforeEach(() => {
-    document.body.innerHTML = '';
-    panel = createPanel();
-  });
-
-  it('getMathEqCanvas returns the equalization canvas element', () => {
-    const canvas = panel.getMathEqCanvas();
-    expect(canvas).not.toBeNull();
-    expect(canvas.tagName).toBe('CANVAS');
-    expect(canvas.id).toBe('math-eq-canvas');
-  });
-
-  it('getMathExpCanvas returns the expansion canvas element', () => {
-    const canvas = panel.getMathExpCanvas();
-    expect(canvas).not.toBeNull();
-    expect(canvas.tagName).toBe('CANVAS');
-    expect(canvas.id).toBe('math-exp-canvas');
-  });
-
-  it('getOriginalCanvas returns the original histogram canvas', () => {
-    const canvas = panel.getOriginalCanvas();
-    expect(canvas).not.toBeNull();
-    expect(canvas.id).toBe('original-histogram-canvas');
-  });
-
-  it('getResultCanvas returns the result histogram canvas', () => {
-    const canvas = panel.getResultCanvas();
-    expect(canvas).not.toBeNull();
-    expect(canvas.id).toBe('result-histogram-canvas');
-  });
+it('shows five neighboring levels then allows inspecting all 256 levels, including zero bins', () => {
+  data(); panel.selectIntensity(100);
+  expect(panel.querySelectorAll('#lut-body tr')).toHaveLength(5);
+  panel.querySelector('#inspect-lut').click();
+  expect(panel.querySelectorAll('#lut-body tr')).toHaveLength(256);
+  expect(panel.querySelector('#inspect-lut').getAttribute('aria-expanded')).toBe('true');
 });
-
-describe('AnalysisPanel — Conversion table and procedure rendering', () => {
-  let panel;
-  const sampleFreqs = new Array(256).fill(0);
-  sampleFreqs[10] = 50;
-  sampleFreqs[100] = 150;
-  
-  const sampleLut = new Array(256).fill(0);
-  sampleLut[10] = 0;
-  sampleLut[100] = 255;
-
-  beforeEach(() => {
-    document.body.innerHTML = '';
-    panel = createPanel();
-  });
-
-  it('showEqualizationTable renders non-zero intensity levels', () => {
-    panel.showEqualizationTable(sampleFreqs, sampleLut);
-    
-    const rows = panel.querySelectorAll('#eq-conversion-table-body tr');
-    expect(rows).toHaveLength(2); // Only intensities 10 and 100 have freqs > 0
-    
-    const firstRowCols = rows[0].querySelectorAll('td');
-    expect(firstRowCols[0].textContent.trim()).toBe('10');
-    expect(firstRowCols[1].textContent.trim()).toBe('50');
-    expect(firstRowCols[4].textContent.trim()).toBe('0');
-  });
-
-  it('showExpansionProcedure renders min, max, range, scale, and mapping details', () => {
-    panel.showExpansionProcedure(sampleFreqs, sampleLut);
-    
-    const minVal = panel.querySelector('#exp-min-val').textContent.trim();
-    const maxVal = panel.querySelector('#exp-max-val').textContent.trim();
-    const rangeVal = panel.querySelector('#exp-range-val').textContent.trim();
-    const scaleVal = panel.querySelector('#exp-scale-val').textContent.trim();
-    
-    expect(minVal).toBe('10');
-    expect(maxVal).toBe('100');
-    expect(rangeVal).toBe('90');
-    expect(scaleVal).toBe((255 / 90).toFixed(4));
-    
-    const steps = panel.querySelectorAll('#exp-procedure-steps li');
-    expect(steps).toHaveLength(2);
-  });
+it('switches both operations without changing their numeric mappings', () => {
+  const math = data(); panel.selectIntensity(10); panel.switchToMathExpTab();
+  expect(panel.querySelector('#selected-output').textContent).toBe(String(math.getExpansionData().lut[10]));
+  expect(panel.querySelector('#algorithm-constants').textContent).toContain('100');
+  panel.switchToMathEqTab();
+  expect(panel.querySelector('#selected-output').textContent).toBe('0');
 });
-
-describe('AnalysisPanel — native numerical semantics', () => {
-  beforeEach(() => { document.body.innerHTML = ''; });
-
-  it('explains CDF-min normalization and ties-to-even instead of raw CDF scaling', () => {
-    const panel = createPanel();
-    const equation = panel.querySelector('#tab-math-eq').textContent;
-    expect(equation).toContain('CDFmin');
-    expect(equation).toContain('Q8');
-    expect(equation).toContain('empates al par');
-    expect(equation).not.toContain('round(CDF(i)');
-  });
-
-  it('explains native constant-image normalization to zero', () => {
-    const panel = createPanel();
-    const frequencies = new Array(256).fill(0);
-    frequencies[128] = 3;
-    panel.showExpansionProcedure(frequencies, new Array(256).fill(0));
-    expect(panel.querySelector('#exp-min-val').textContent).toBe('128');
-    expect(panel.querySelector('#exp-max-val').textContent).toBe('128');
-    expect(panel.querySelector('#exp-scale-val').textContent).toBe('0.0000');
-    expect(panel.querySelector('#exp-procedure-steps').textContent).toContain('intensidad 0');
-  });
-
-  it('does not describe missing data as a uniform image at intensity 256', () => {
-    const panel = createPanel();
-    panel.showExpansionProcedure(new Array(256).fill(0), new Array(256).fill(0));
-    expect(panel.querySelector('#exp-procedure-steps').textContent).toContain('Sin datos');
-    expect(panel.querySelector('#exp-min-val').textContent).toBe('—');
-  });
-
-  it('does not describe a native float32 result with a contradictory double-precision formula', () => {
-    const panel = createPanel();
-    const frequencies = new Array(256).fill(0);
-    [196, 203, 210].forEach(value => { frequencies[value] = 1; });
-    const lut = new Array(256).fill(0);
-    lut[203] = 127;
-    lut[210] = 255;
-    panel.showExpansionProcedure(frequencies, lut);
-    const explanation = panel.querySelector('#exp-procedure-steps').textContent;
-    expect(explanation).toContain('127');
-    expect(explanation).toContain('Q8');
-    expect(explanation).not.toContain('round(');
-  });
+it('preserves ties-to-even and float32 explanation, rather than a contradictory round formula', () => {
+  data();
+  expect(panel.textContent).toContain('empates al par');
+  expect(panel.textContent).toContain('f32');
+  expect(panel.textContent).toContain('CDFmin');
+  expect(panel.textContent).toContain('f32(N − hmin)');
+});
+it('explains uniform-image expansion to zero and equalization preserving the original intensity', () => {
+  const frequencies = new Array(256).fill(0); frequencies[128] = 3;
+  const math = new HistogramMath(new HistogramModel(frequencies));
+  panel.showEqualizationTable(frequencies, math.getEqualizationData().lut);
+  panel.showExpansionProcedure(frequencies, math.getExpansionData().lut);
+  panel.selectIntensity(128); panel.switchToMathExpTab();
+  expect(panel.querySelector('#selected-output').textContent).toBe('0');
+  expect(panel.querySelector('#numeric-substitution').textContent).toContain('intensidad 0');
+  panel.switchToMathEqTab();
+  expect(panel.querySelector('#selected-output').textContent).toBe('128');
+});
+it('clears every derived value after a rejected or missing image', () => {
+  data(); panel.showEmptyStates();
+  expect(panel.querySelector('#selected-output').textContent).toBe('—');
+  expect(panel.querySelector('#algorithm-constants').textContent).not.toContain('200');
+  expect(panel.querySelectorAll('#lut-body tr')).toHaveLength(0);
+  expect(panel.querySelector('#intensity-input').disabled).toBe(true);
 });

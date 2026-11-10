@@ -2,365 +2,113 @@ import { HistogramMath } from '../../../domain/models/HistogramMath.js';
 import { HistogramModel } from '../../../domain/models/HistogramModel.js';
 import html from './AnalysisPanel.html?raw';
 import './AnalysisPanel.css';
-import '../../../shared/components/EmptyState/EmptyState.js';
-import { strings } from '../../../shared/i18n/strings.js';
 
-/**
- * ==========================================
- * ANALYSIS PANEL (Presentation Component)
- * ==========================================
- * Componente Web Component que muestra el panel de análisis de histogramas.
- * Contiene tres pestañas: Visual (histogramas), Ecuaciones (CDF/LUT)
- * y Explicación. Soporta navegación por teclado (WAI-ARIA Tabs pattern)
- * y gestiona la visualización de métricas estadísticas, tablas de conversión
- * y gráficas matemáticas.
- *
- * @module src/presentation/components/AnalysisPanel/AnalysisPanel
- */
+const decimal = (value, digits = 6) => value.toLocaleString('es', { maximumFractionDigits: digits });
+
+/** Compact inspection of existing domain values; never implements a second transform. */
 export class AnalysisPanel extends HTMLElement {
-  /**
-   * Se ejecuta cuando el componente se conecta al DOM.
-   * Renderiza el template HTML y configura las pestañas.
-   */
   connectedCallback() {
-    this.className = "flex-1 flex flex-col";
     this.innerHTML = html;
-    this.setupTabs();
-  }
-
-  /**
-   * Configura el sistema de pestañas con navegación por clic y teclado.
-   * Implementa el patrón WAI-ARIA Tabs para accesibilidad.
-   */
-  setupTabs() {
-    const tabList = this.querySelector('#analysis-tabs');
-    const tabs = this.querySelectorAll('.tab-btn');
-    const contents = this.querySelectorAll('.tab-content');
-
-    const activateTab = (tab) => {
-      tabs.forEach(t => {
-        t.classList.remove('active', 'text-primary', 'bg-primary/10');
-        t.classList.add('text-on-surface-variant');
-        t.setAttribute('aria-selected', 'false');
-        t.setAttribute('tabindex', '-1');
-      });
-      contents.forEach(c => {
-        c.classList.add('hidden');
-        c.classList.remove('flex');
-      });
-
-      tab.classList.add('active', 'text-primary', 'bg-primary/10');
-      tab.classList.remove('text-on-surface-variant');
-      tab.setAttribute('aria-selected', 'true');
-      tab.setAttribute('tabindex', '0');
-      
-      const targetId = tab.getAttribute('data-target');
-      const targetContent = this.querySelector(`#${targetId}`);
-      if (targetContent) {
-        targetContent.classList.remove('hidden');
-        targetContent.classList.add('flex');
-        // Forzar a Chart.js recalcular tamaños de canvas después de que la pestaña sea visible
-        requestAnimationFrame(() => {
-          window.dispatchEvent(new Event('resize'));
-        });
-      }
-    };
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => activateTab(tab));
+    this.operation = 'equalize'; this.intensity = 128; this.expanded = false;
+    this.mappings = {};
+    this.querySelector('#intensity-input').addEventListener('input', event => this.selectIntensity(Number(event.target.value)));
+    this.querySelector('#inspect-lut').addEventListener('click', () => {
+      this.expanded = !this.expanded; this.renderSelection();
     });
-
-    // Navegación por teclado (patrón WAI-ARIA Tabs)
-    tabList.addEventListener('keydown', (e) => {
-      const tabArray = Array.from(tabs);
-      const currentIndex = tabArray.indexOf(document.activeElement);
-
-      let nextIndex = -1;
-
-      if (e.key === 'ArrowRight') {
-        nextIndex = (currentIndex + 1) % tabArray.length;
-      } else if (e.key === 'ArrowLeft') {
-        nextIndex = (currentIndex - 1 + tabArray.length) % tabArray.length;
-      } else if (e.key === 'Home') {
-        nextIndex = 0;
-      } else if (e.key === 'End') {
-        nextIndex = tabArray.length - 1;
-      }
-
-      if (nextIndex >= 0) {
-        e.preventDefault();
-        activateTab(tabArray[nextIndex]);
-        tabArray[nextIndex].focus();
-      }
-    });
-
-    // Inicializar primera pestaña
-    if (tabs.length > 0) {
-      tabs[0].click();
-    }
+    this.selectOperation('equalize');
   }
 
-  /**
-   * Retorna el elemento canvas del histograma original.
-   * @returns {HTMLCanvasElement} Elemento canvas del histograma original
-   */
-  getOriginalCanvas() {
-    return this.querySelector('#original-histogram-canvas');
-  }
-
-  /**
-   * Retorna el elemento canvas del histograma de resultado.
-   * @returns {HTMLCanvasElement} Elemento canvas del histograma de resultado
-   */
-  getResultCanvas() {
-    return this.querySelector('#result-histogram-canvas');
-  }
-
-  /**
-   * Retorna el elemento canvas de las ecuaciones de ecualización.
-   * @returns {HTMLCanvasElement} Elemento canvas de ecuaciones de ecualización
-   */
-  getMathEqCanvas() {
-    return this.querySelector('#math-eq-canvas');
-  }
-
-  /**
-   * Retorna el elemento canvas de las ecuaciones de expansión.
-   * @returns {HTMLCanvasElement} Elemento canvas de ecuaciones de expansión
-   */
-  getMathExpCanvas() {
-    return this.querySelector('#math-exp-canvas');
-  }
-
-  /**
-   * Muestra todos los estados vacíos de las pestañas.
-   */
+  getMathEqCanvas() { return this.querySelector('#math-eq-canvas'); }
+  getMathExpCanvas() { return this.querySelector('#math-exp-canvas'); }
+  switchToVisualTab() { /* The calculation rail stays visible beside the image pair. */ }
+  switchToMathEqTab() { this.selectOperation('equalize'); }
+  switchToMathExpTab() { this.selectOperation('expand'); }
+  hideEmptyStates() { this.classList.add('has-calculation'); }
   showEmptyStates() {
-    this.querySelectorAll('.tab-empty-state').forEach(el => {
-      el.hidden = false;
-    });
+    this.math = null; this.mappings = {}; this.expanded = false;
+    this.classList.remove('has-calculation'); this.renderSelection();
   }
 
-  /**
-   * Oculta todos los estados vacíos de las pestañas.
-   */
-  hideEmptyStates() {
-    this.querySelectorAll('.tab-empty-state').forEach(el => {
-      el.hidden = true;
-    });
+  selectOperation(operation) {
+    this.operation = operation;
+    const equalization = operation === 'equalize';
+    this.querySelector('#formula-name').textContent = equalization ? 'Ecualización' : 'Expansión';
+    this.querySelector('#inspector-kind').textContent = equalization ? 'CDF / LUT' : 'Min–Max / LUT';
+    this.querySelector('#mapping-formula').innerHTML = equalization
+      ? '<span>s = Q8(255 ×</span><span class="fraction"><span>CDF(r) − CDFmin</span><span>1 − CDFmin</span></span><span>)</span>'
+      : '<span>s = Q8(255 ×</span><span class="fraction"><span>r − mín.</span><span>máx. − mín.</span></span><span>)</span>';
+    this.querySelector('#eq-chart-block').hidden = !equalization;
+    this.querySelector('#exp-chart-block').hidden = equalization;
+    this.renderSelection();
+    requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
   }
 
-  /**
-   * Cambia a la pestaña visual (histogramas).
-   */
-  switchToVisualTab() {
-    const visualTab = this.querySelector('[data-target="tab-visual"]');
-    if (visualTab) visualTab.click();
-  }
+  showEqualizationTable(frequencies, lut) { this.setData(frequencies, lut, 'equalize'); }
+  showExpansionProcedure(frequencies, lut) { this.setData(frequencies, lut, 'expand'); }
 
-  /**
-   * Cambia a la pestaña de ecuaciones de ecualización.
-   */
-  switchToMathEqTab() {
-    const eqTab = this.querySelector('[data-target="tab-math-eq"]');
-    if (eqTab) eqTab.click();
-  }
-
-  /**
-   * Cambia a la pestaña de ecuaciones de expansión.
-   */
-  switchToMathExpTab() {
-    const expTab = this.querySelector('[data-target="tab-math-exp"]');
-    if (expTab) expTab.click();
-  }
-
-  /**
-   * Muestra las métricas estadísticas del histograma en el contenedor especificado.
-   * @param {string} containerId - ID del contenedor ('original-metrics' o 'result-metrics')
-   * @param {{ min: number, max: number, mean: number, std: number }} metrics - Objeto con las métricas a mostrar
-   */
-  showMetrics(containerId, metrics) {
-    const container = this.querySelector(`#${containerId}`);
-    if (!container) return;
-    container.innerHTML = `
-      <div class="metric-item">
-        <span class="metric-label">${strings.analysis.metricsMin}</span>
-        <span class="metric-value">${metrics.min}</span>
-      </div>
-      <div class="metric-item">
-        <span class="metric-label">${strings.analysis.metricsMax}</span>
-        <span class="metric-value">${metrics.max}</span>
-      </div>
-      <div class="metric-item">
-        <span class="metric-label">${strings.analysis.metricsMean}</span>
-        <span class="metric-value">${metrics.mean}</span>
-      </div>
-      <div class="metric-item">
-        <span class="metric-label">${strings.analysis.metricsStd}</span>
-        <span class="metric-value">${metrics.std}</span>
-      </div>
-    `;
-    container.classList.remove('hidden');
-  }
-
-  /**
-   * Limpia y oculta las métricas del contenedor especificado.
-   * @param {string} containerId - ID del contenedor de métricas a limpiar
-   */
-  hideMetrics(containerId) {
-    const container = this.querySelector(`#${containerId}`);
-    if (!container) return;
-    container.innerHTML = '';
-    container.classList.add('hidden');
-  }
-
-  /**
-   * Muestra los contenedores de histogramas y oculta el estado vacío principal.
-   * Se llama cuando se carga una imagen.
-   */
-  showHistogramContainers() {
-    const containers = this.querySelector('#histogram-containers');
-    if (containers) containers.classList.remove('hidden');
-  }
-
-  /**
-   * Oculta los contenedores de histogramas y muestra el estado vacío principal.
-   * Se llama al restablecer al estado inicial.
-   */
-  hideHistogramContainers() {
-    const containers = this.querySelector('#histogram-containers');
-    if (containers) containers.classList.add('hidden');
-  }
-
-  /**
-   * Muestra el canvas del histograma de resultado y oculta su estado vacío.
-   * Se llama después de completar un procesamiento.
-   */
-  showResultHistogram() {
-    const emptyState = this.querySelector('#result-empty-state');
-    const histogramContainer = this.querySelector('#result-histogram-container');
-    if (emptyState) emptyState.classList.add('hidden');
-    if (histogramContainer) histogramContainer.classList.remove('hidden');
-  }
-
-  /**
-   * Restaura el histograma de resultado a su estado vacío.
-   * Se llama al cargar una nueva imagen.
-   */
-  hideResultHistogram() {
-    const emptyState = this.querySelector('#result-empty-state');
-    const histogramContainer = this.querySelector('#result-histogram-container');
-    if (emptyState) emptyState.classList.remove('hidden');
-    if (histogramContainer) histogramContainer.classList.add('hidden');
-
-    const eqTableContainer = this.querySelector('#eq-conversion-table-container');
-    const expProcContainer = this.querySelector('#exp-procedure-container');
-    if (eqTableContainer) eqTableContainer.classList.add('hidden');
-    if (expProcContainer) expProcContainer.classList.add('hidden');
-  }
-
-  /**
-   * Renderiza la tabla de conversión paso a paso para el proceso de ecualización.
-   * Muestra nivel de entrada, frecuencia, PDF, CDF y nivel de salida para cada intensidad.
-   * @param {number[]} frequencies - Frecuencias originales del histograma (256 niveles)
-   * @param {number[]} lut - Tabla de búsqueda de ecualización (256 niveles)
-   */
-  showEqualizationTable(frequencies, lut) {
-    const tableBody = this.querySelector('#eq-conversion-table-body');
-    const container = this.querySelector('#eq-conversion-table-container');
-    if (!tableBody || !container) return;
-
-    const totalPixels = frequencies.reduce((a, b) => a + b, 0);
-    let cumulativeSum = 0;
-    let html = '';
-
-    for (let i = 0; i < 256; i++) {
-      const freq = frequencies[i];
-      cumulativeSum += freq;
-      
-      if (freq > 0) {
-        const pdf = totalPixels > 0 ? (freq / totalPixels) : 0;
-        const cdf = totalPixels > 0 ? (cumulativeSum / totalPixels) : 0;
-        const mapped = lut[i];
-
-        html += `
-          <tr class="hover:bg-surface-variant/40">
-            <td class="font-semibold text-on-surface p-2">${i}</td>
-            <td class="p-2">${freq}</td>
-            <td class="p-2">${pdf.toFixed(4)}</td>
-            <td class="p-2">${cdf.toFixed(4)}</td>
-            <td class="font-semibold text-primary dark:text-inverse-primary p-2">${mapped}</td>
-          </tr>
-        `;
-      }
+  setData(frequencies, lut, operation) {
+    this.math = new HistogramMath(new HistogramModel(frequencies));
+    this.mappings[operation] = lut;
+    if (this.math.totalPixels && !this.hasSelection) {
+      this.intensity = frequencies.findIndex((count, index) => count && this.math.cdf[index] >= 0.5);
+      if (this.intensity < 0) this.intensity = frequencies.findIndex(count => count > 0);
     }
-
-    tableBody.innerHTML = html;
-    container.classList.remove('hidden');
+    this.hideEmptyStates(); this.renderSelection();
   }
 
-  /**
-   * Renderiza los detalles del procedimiento de expansión paso a paso.
-   * Muestra los valores mínimos, máximos, rango, factor de escala y
-   * la fórmula de mapeo para cada nivel de intensidad.
-   * @param {number[]} frequencies - Frecuencias originales del histograma (256 niveles)
-   * @param {number[]} lut - Tabla de búsqueda de expansión (256 niveles)
-   */
-  showExpansionProcedure(frequencies, lut) {
-    const minValEl = this.querySelector('#exp-min-val');
-    const maxValEl = this.querySelector('#exp-max-val');
-    const rangeValEl = this.querySelector('#exp-range-val');
-    const scaleValEl = this.querySelector('#exp-scale-val');
-    const stepsEl = this.querySelector('#exp-procedure-steps');
-    const container = this.querySelector('#exp-procedure-container');
+  selectIntensity(value) {
+    if (!Number.isFinite(value)) return;
+    this.intensity = Math.min(255, Math.max(0, Math.round(value)));
+    this.hasSelection = true; this.renderSelection();
+  }
 
-    if (!minValEl || !maxValEl || !rangeValEl || !scaleValEl || !stepsEl || !container) return;
-
-    const { min, max, scale, shift } = new HistogramMath(new HistogramModel(frequencies)).getExpansionData();
-    if (min < 0) {
-      minValEl.textContent = '—';
-      maxValEl.textContent = '—';
-      rangeValEl.textContent = '—';
-      scaleValEl.textContent = '—';
-      stepsEl.textContent = 'Sin datos de imagen para calcular la expansión.';
-      container.classList.remove('hidden');
+  renderSelection() {
+    const math = this.math;
+    const lut = this.mappings[this.operation];
+    const available = Boolean(math?.totalPixels && lut);
+    const range = this.querySelector('#intensity-input');
+    range.disabled = !available; range.value = this.intensity;
+    this.querySelector('#inspect-lut').disabled = !available;
+    this.querySelector('#selected-input').textContent = available ? this.intensity : '—';
+    this.querySelector('#selected-output').textContent = available ? lut[this.intensity] : '—';
+    const constants = this.querySelector('#algorithm-constants');
+    const substitution = this.querySelector('#numeric-substitution');
+    const body = this.querySelector('#lut-body'); body.replaceChildren();
+    const toggle = this.querySelector('#inspect-lut');
+    toggle.setAttribute('aria-expanded', String(this.expanded));
+    toggle.textContent = this.expanded ? 'Volver al detalle' : 'Inspeccionar LUT';
+    this.querySelector('#lut-container').classList.toggle('expanded', this.expanded);
+    if (!available) {
+      constants.textContent = 'N = — · CDFmin = —';
+      substitution.textContent = 'Carga una imagen para inspeccionar sus valores.';
+      this.querySelector('#lut-caption').textContent = 'Sin datos';
       return;
     }
-    if (min === max) {
-      minValEl.textContent = min;
-      maxValEl.textContent = max;
-      rangeValEl.textContent = '0';
-      scaleValEl.textContent = '0.0000';
-      stepsEl.innerHTML = `<li>Imagen uniforme (${min}): OpenCV normaliza todos los píxeles a intensidad 0.</li>`;
-      container.classList.remove('hidden');
-      return;
+    const { min, max, scale, shift } = math.getExpansionData();
+    const firstCount = math.frequencies[min];
+    if (this.operation === 'equalize') {
+      constants.textContent = `N = ${math.totalPixels} · CDFmin = ${decimal(firstCount / math.totalPixels)}`;
+      const cumulative = math.frequencies.slice(0, this.intensity + 1).reduce((sum, count) => sum + count, 0);
+      substitution.textContent = min === max
+        ? `Imagen uniforme: conserva la intensidad ${min}.`
+        : `k ≈ ${decimal(Math.fround(255 / Math.fround(math.totalPixels - firstCount)), 8)}; Q8(f32(f32(${Math.max(0, cumulative - firstCount)}) × k)) = ${lut[this.intensity]}`;
+    } else {
+      constants.textContent = `mín. = ${min} · máx. = ${max} · N = ${math.totalPixels}`;
+      substitution.textContent = min === max
+        ? `Imagen uniforme (${min}): todos los píxeles se normalizan a intensidad 0.`
+        : `Q8(f32(f32(${this.intensity} × ${scale}) + (${shift}))) = ${lut[this.intensity]}`;
     }
-
-    const range = max - min;
-    const factor = scale;
-
-    minValEl.textContent = min;
-    maxValEl.textContent = max;
-    rangeValEl.textContent = range;
-    scaleValEl.textContent = factor.toFixed(4);
-
-    let html = '';
-    for (let i = 0; i < 256; i++) {
-      if (frequencies[i] > 0) {
-        const mapped = lut[i];
-        html += `
-          <li>
-            Nivel <span class="font-semibold">${i}</span>: 
-            Q8(f32(f32(${i} × ${scale}) + (${shift}))) =
-            <span class="font-semibold text-primary dark:text-inverse-primary">${mapped}</span>
-          </li>
-        `;
+    const start = this.expanded ? 0 : Math.max(0, Math.min(251, this.intensity - 2));
+    const end = this.expanded ? 255 : start + 4;
+    this.querySelector('#lut-caption').textContent = this.expanded ? '256 niveles · LUT completa' : `Niveles ${start}–${end} de 256`;
+    for (let intensity = start; intensity <= end; intensity++) {
+      const row = document.createElement('tr');
+      if (intensity === this.intensity) { row.className = 'selected-row'; row.setAttribute('aria-current', 'true'); }
+      for (const value of [intensity, math.frequencies[intensity], decimal(math.cdf[intensity], 4), lut[intensity]]) {
+        const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
       }
+      body.append(row);
     }
-
-    stepsEl.innerHTML = html;
-    container.classList.remove('hidden');
   }
 }
-
 customElements.define('analysis-panel', AnalysisPanel);

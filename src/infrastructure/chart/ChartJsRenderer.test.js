@@ -120,3 +120,12 @@ describe('dark Studio mathematical charts', () => {
     expect(instances).toHaveLength(1);
   });
 });
+
+it('publishes exact source and result frequency tables as nonvisual chart alternatives', () => {
+  const body = document.createElement('tbody'); body.id = 'result-histogram-canvas-data'; document.body.append(body);
+  renderer.render('result-histogram-canvas', new HistogramModel(frequencies([[0, 2], [3, 5], [255, 9]])));
+  expect(body.querySelectorAll('tr')).toHaveLength(64);
+  expect(body.querySelector('tr').textContent).toContain('0–3');
+  expect(body.querySelector('tr').lastElementChild.textContent).toBe('7');
+  expect([...body.querySelectorAll('tr')].reduce((sum, row) => sum + Number(row.lastElementChild.textContent), 0)).toBe(16);
+});

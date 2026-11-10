@@ -1,46 +1,67 @@
-/* =============================================
- * WORKSPACEDROPZONE.CSS — Estilos de la Zona de Arrastre del Workspace
- * =============================================
- * Estilos scoped para el componente WorkspaceDropZone Web Component. Define
- * el layout del host (flex column), toolbar de operaciones con botones
- * Ecualizar/Expansión, y sobrescrituras de modo oscuro para el panel de
- * herramientas y sub-panels de vidrio.
- *
- * Componentes afectados: <workspace-drop-zone>, :host, #workspace-toolbar
- * Convenciones: Se usa :host para layout del Shadow DOM. Los botones deshabilitados
- *               usan opacity: 0.5 y cursor: not-allowed. El hover levita el botón
- *               con translateY(-1px).
- */
-
-:host {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
+workspace-drop-zone { display: contents; }
+.document-bar { grid-area: document; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 14px 20px; min-height: 86px; }
+.document-identity { min-width: 0; flex: 0 1 400px; }
+.document-identity h1 { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.document-identity p { margin-top: 3px; font-size: 12px; color: var(--muted); }
+.operation-controls { display: flex; align-items: center; gap: 12px; flex: 0 0 472px; }
+.operation-selector { width: 284px; display: flex; padding: 4px; background: var(--surface); border-radius: 8px; }
+.operation-selector button { flex: 1; min-height: 36px; padding: 8px 18px; border-radius: 6px; color: var(--muted); }
+.operation-selector button[aria-pressed="true"] { background: var(--selected); color: var(--ink); }
+.document-bar > .quiet-button { flex: 0 0 101px; }
+.workbench { grid-area: workbench; min-width: 0; padding: 20px 24px 28px; }
+.image-pair { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.image-pane { min-width: 0; }
+.pane-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.pane-heading h2 { font-size: 14px; font-weight: 500; color: var(--secondary); }
+.pixel-count { font: 11px var(--font-mono); color: var(--muted); }
+.image-well { width: 100%; aspect-ratio: 3 / 2; display: grid; place-items: center; overflow: hidden; background: var(--surface); border-radius: 4px; }
+.image-well canvas { width: 100%; height: 100%; object-fit: contain; }
+.image-well p { color: var(--muted); font-size: 12px; padding: 20px; text-align: center; }
+.histogram-panel { margin-top: 12px; padding: 16px; border-radius: 8px; background: var(--surface); }
+.histogram-heading, .chart-units { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.histogram-heading h3 { font-size: 13px; font-weight: 400; color: var(--secondary); }
+.histogram-heading span, .chart-units { color: var(--muted); font-size: 11px; }
+.chart-units { margin: 14px 0 4px; }
+.histogram-container { position: relative; height: 156px; }
+.histogram-container canvas { visibility: hidden; }
+.has-histogram .histogram-container canvas { visibility: visible; }
+.histogram-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 12px; border-bottom: 1px solid var(--divider); }
+.has-histogram .histogram-empty { display: none; }
+.image-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; border-top: 1px solid var(--divider); padding-top: 12px; margin-top: 12px; }
+.metric-item { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.metric-label { color: var(--muted); font-size: 11px; }
+.metric-value { font: 13px var(--font-mono); overflow-wrap: anywhere; }
+.workbench-caption { display: flex; justify-content: space-between; gap: 20px; color: var(--muted); font-size: 11px; margin-top: 20px; }
+#file-caption { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#pixel-caption { font-family: var(--font-mono); flex-shrink: 0; }
+.upload-target { display: flex; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 20px; text-align: center; }
+.upload-target h2 { font-size: 14px; font-weight: 500; }
+.result-placeholder { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.result-placeholder p { padding: 0; color: var(--ink); font-size: 14px; }
+.result-placeholder > span { color: var(--muted); }
+.is-dragging { outline: 2px dashed var(--accent); outline-offset: -6px; }
+@media (max-width: 1150px) {
+  .workbench { padding: 16px; }
+  .document-bar { gap: 16px; padding-inline: 16px; }
+  .operation-selector button { padding-inline: 12px; }
+  .histogram-panel { padding: 12px; }
+  .histogram-heading { flex-wrap: wrap; }
+  .histogram-container { height: 140px; }
+  .image-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); row-gap: 14px; }
 }
 
-#workspace-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: flex-end;
-  flex-shrink: 0;
+@media (max-width: 1279px) {
+  .document-identity { flex-basis: 200px; }
+  .document-bar { padding-inline: 20px; }
+  .workbench { padding: 20px 24px 28px; }
+  .histogram-panel { padding: 16px; }
 }
 
-#workspace-toolbar button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-#workspace-toolbar button:not(:disabled):hover {
-  transform: translateY(-1px);
-}
-
-.dark #workspace-toolbar .glass-sub-panel {
-  background: rgba(30, 33, 41, 0.85);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.dark #workspace-toolbar button:not(:disabled):hover {
-  background: rgba(255, 255, 255, 0.08);
-}
+.histogram-data { display: none; margin-top: 12px; color: var(--muted); font-size: 11px; }
+.has-histogram .histogram-data { display: block; }
+.histogram-data summary { cursor: pointer; padding-block: 5px; }
+.histogram-data-scroll { max-height: 240px; overflow: auto; }
+.histogram-data table { width: 100%; border-collapse: collapse; font: 11px var(--font-mono); }
+.histogram-data caption { text-align: left; font: 11px Poppins,sans-serif; padding-block: 8px; }
+.histogram-data td, .histogram-data th { padding: 6px 4px; text-align: right; border-bottom: 1px solid var(--divider); }
+.histogram-data td:first-child, .histogram-data th:first-child { text-align: left; }

@@ -1,11 +1,2 @@
-/* =============================================
- * ERRORALERT.CSS — Estilos del Componente de Alerta de Error
- * =============================================
- * Estilos scoped para el componente ErrorAlert Web Component. Actualmente
- * este archivo está vacío porque el componente se estiliza completamente
- * con clases de Tailwind utility inline en el template HTML.
- *
- * Componentes afectados: <error-alert>
- * Convenciones: Reservado para futuros estilos custom que no se puedan
- *               expresar con utilidades Tailwind.
- */
+error-alert { grid-area: error; display: block; padding: 0 20px; }
+.error-banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #241a1a; border: 1px solid #805454; color: #ffd4d4; padding: 10px 16px; border-radius: 8px; margin-top: 12px; font-size: 13px; }

@@ -16,6 +16,7 @@
  * @module src/main
  */
 
+import { installScreenGuard } from "./shared/utils/ScreenGuard.js";
 import { MainView } from "./presentation/views/MainView.js";
 import { MainController } from "./presentation/controllers/MainController.js";
 import { LoadAndValidateImageUseCase } from "./application/LoadAndValidateImageUseCase.js";
@@ -34,7 +35,9 @@ import "./shared/styles/main.css";
  * luego inyecta todas las dependencias y crea el controlador principal.
  */
 export function bootstrapApp() {
+  installScreenGuard();
   ThemeManager.init();
+  document.documentElement.classList.add('dark');
   console.log("Inicializando aplicación GrayScale Master en capas limpias...");
 
   const startedAt = Date.now();
@@ -70,6 +73,11 @@ export function bootstrapApp() {
         overlay.setAttribute('role', 'alert');
         const message = overlay.querySelector('p');
         if (message) message.textContent = strings.errors.engineUnavailable;
+        const retry = document.createElement('button');
+        retry.className = 'primary-action';
+        retry.textContent = 'Reintentar';
+        retry.addEventListener('click', () => window.location.reload());
+        overlay.append(retry);
         overlay.querySelectorAll('.animate-pulse').forEach(element => element.classList.remove('animate-pulse'));
       }
     }

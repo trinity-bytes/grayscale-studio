@@ -41,7 +41,7 @@ describe('hidden image loading', () => {
 it('keeps processed events, thumbnails and ready status behind the view facade', () => {
   const view = new MainView();
   const workspace = document.createElement('div');
-  Object.assign(workspace, { getCanvas: () => 'original', getProcessedCanvas: () => 'processed', showProcessedCanvas: vi.fn(), showMathButton: vi.fn() });
+  Object.assign(workspace, { getCanvas: () => 'original', getProcessedCanvas: () => 'processed', showProcessedCanvas: vi.fn(), showMathButton: vi.fn(), showResultHistogram: vi.fn() });
   view.workspace = workspace;
   view.analysisPanel = { showResultHistogram: vi.fn() };
   view.imageInfoPanel = { setThumbnailFromCanvas: vi.fn() };
@@ -55,7 +55,7 @@ it('keeps processed events, thumbnails and ready status behind the view facade',
   expect(view.imageInfoPanel.setThumbnailFromCanvas.mock.calls).toEqual([['original'], ['processed']]);
   expect(workspace.showProcessedCanvas).toHaveBeenCalledOnce();
   expect(workspace.showMathButton).toHaveBeenCalledOnce();
-  expect(view.analysisPanel.showResultHistogram).toHaveBeenCalledOnce();
+  expect(view.workspace.showResultHistogram).toHaveBeenCalledOnce();
   expect(listener).toHaveBeenCalledOnce();
   expect(listener.mock.calls[0][0]).toMatchObject({ detail: { processed: true }, bubbles: true, composed: true });
 });

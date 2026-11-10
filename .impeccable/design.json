@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T01:11:35.779133Z",
+  "title": "Design System: Grayscale Studio",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Ground",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#111111",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "well": {
+        "role": "neutral",
+        "displayName": "Well",
+        "canonical": "#191919",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "selected": {
+        "role": "neutral",
+        "displayName": "Selected",
+        "canonical": "#282828",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "divider": {
+        "role": "neutral",
+        "displayName": "Divider",
+        "canonical": "#292929",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#F4F4F4",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Secondary",
+        "canonical": "#B4B4B4",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#949494",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Accent",
+        "canonical": "#88B5FF",
+        "tonalRamp": [
+          "oklch(15% 0.025 260)",
+          "oklch(27% 0.045 260)",
+          "oklch(39% 0.065 260)",
+          "oklch(51% 0.085 260)",
+          "oklch(63% 0.105 260)",
+          "oklch(75% 0.095 260)",
+          "oklch(87% 0.055 260)",
+          "oklch(95% 0.015 260)"
+        ]
+      },
+      "action": {
+        "role": "neutral",
+        "displayName": "Action",
+        "canonical": "#F0F0F0",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "action-hover": {
+        "role": "neutral",
+        "displayName": "Action Hover",
+        "canonical": "#D4D4D4",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "frequency-fill": {
+        "role": "neutral",
+        "displayName": "Frequency Fill",
+        "canonical": "rgba(180,180,180,.14)",
+        "tonalRamp": [
+          "#262626",
+          "#444444",
+          "#626262",
+          "#808080",
+          "#9E9E9E",
+          "#BCBCBC",
+          "#DADADA",
+          "#F2F2F2"
+        ]
+      },
+      "processed-fill": {
+        "role": "primary",
+        "displayName": "Processed Fill",
+        "canonical": "rgba(136,181,255,.14)",
+        "tonalRamp": [
+          "oklch(15% 0.025 260)",
+          "oklch(27% 0.045 260)",
+          "oklch(39% 0.065 260)",
+          "oklch(51% 0.085 260)",
+          "oklch(63% 0.105 260)",
+          "oklch(75% 0.095 260)",
+          "oklch(87% 0.055 260)",
+          "oklch(95% 0.015 260)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "body": {
+        "displayName": "Interface",
+        "purpose": "Poppins UI language."
+      },
+      "data": {
+        "displayName": "Measured data",
+        "purpose": "Numeric columns and expressions."
+      },
+      "selected-value": {
+        "displayName": "Selected mapping",
+        "purpose": "Current input/output intensity."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "chart-animation",
+        "value": "false",
+        "purpose": "Data plots update without decorative animation."
+      },
+      {
+        "name": "processing-paint",
+        "value": "two requestAnimationFrame callbacks",
+        "purpose": "Paint pending state before synchronous processing, invalidated on replacement."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone-limit",
+        "value": "768px"
+      },
+      {
+        "name": "workbench-minimum",
+        "value": "1024px"
+      },
+      {
+        "name": "tablet-container-end",
+        "value": "1279px"
+      },
+      {
+        "name": "desktop-container",
+        "value": "1440px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Explicit document action with inverted neutral emphasis.",
+      "html": "<button class=\"ds-primary\">Aplicar</button>",
+      "css": ".ds-primary{font:500 13px Poppins,sans-serif;border:0;background:var(--action,#f0f0f0);color:var(--surface);border-radius:22px;min-height:44px;padding:12px 22px;cursor:pointer}.ds-primary:hover{background:#d4d4d4}.ds-primary:focus-visible{outline:2px solid var(--accent);outline-offset:4px}"
+    },
+    {
+      "name": "Quiet action",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Secondary navigation or replacement action.",
+      "html": "<button class=\"ds-quiet\">Reemplazar</button>",
+      "css": ".ds-quiet{font:13px Poppins,sans-serif;border:0;color:var(--ink);background:transparent;border-radius:8px;min-height:44px;padding:12px;cursor:pointer}.ds-quiet:hover{background:var(--selected)}.ds-quiet:focus-visible{outline:2px solid var(--accent);outline-offset:4px}"
+    },
+    {
+      "name": "Operation selector",
+      "kind": "custom",
+      "description": "Neutral selected state before explicit application.",
+      "html": "<div class=\"ds-selector\" role=\"group\" aria-label=\"Operaci\u00f3n\"><button aria-pressed=\"true\">Ecualizaci\u00f3n</button><button aria-pressed=\"false\">Expansi\u00f3n</button></div>",
+      "css": ".ds-selector{display:flex;background:var(--surface);padding:4px;border-radius:8px}.ds-selector button{border:0;border-radius:6px;background:transparent;color:var(--muted);font:13px Poppins,sans-serif;min-height:36px;padding:8px 18px;cursor:pointer}.ds-selector button[aria-pressed=\"true\"]{background:var(--selected);color:var(--ink)}.ds-selector button:hover{background:var(--selected)}.ds-selector button:focus-visible{outline:2px solid var(--accent);outline-offset:4px}"
+    },
+    {
+      "name": "Intensity range",
+      "kind": "input",
+      "description": "Keyboard-operable inspection of one input level.",
+      "html": "<label class=\"ds-range-label\" for=\"ds-intensity\">Entrada r</label><input class=\"ds-range\" id=\"ds-intensity\" type=\"range\" min=\"0\" max=\"255\" value=\"115\" />",
+      "css": ".ds-range-label{display:block;font:11px Poppins,sans-serif;color:var(--muted)}.ds-range{width:100%;height:12px;accent-color:var(--accent)}.ds-range:hover{cursor:pointer}.ds-range:focus-visible{outline:2px solid var(--accent);outline-offset:4px}"
+    },
+    {
+      "name": "Frequency panel",
+      "kind": "card",
+      "refersTo": "histogram-panel",
+      "description": "The opaque surface associated with one image distribution.",
+      "html": "<section class=\"ds-frequency\"><h3>Histograma</h3><p>64 intervalos \u00b7 4 niveles</p></section>",
+      "css": ".ds-frequency{background:var(--surface);border-radius:8px;padding:16px;color:var(--secondary);font:11px Poppins,sans-serif}.ds-frequency h3{font-size:13px;font-weight:400;margin:0 0 12px}.ds-frequency p{color:var(--muted);margin:0}"
+    },
+    {
+      "name": "Product navigation",
+      "kind": "nav",
+      "description": "Compact product scope and access to history.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Grayscale Studio\"><span>Grayscale Studio</span><button>Historial</button></nav>",
+      "css": ".ds-nav{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--divider);font:13px Poppins,sans-serif;color:var(--ink)}.ds-nav button{border:0;border-radius:8px;min-height:44px;padding:12px;background:transparent;color:var(--ink);font:inherit;cursor:pointer}.ds-nav button:hover{background:var(--selected)}.ds-nav button:focus-visible{outline:2px solid var(--accent);outline-offset:4px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Dark workbench",
+    "overview": "A compact, exclusively dark image workbench: original and processed images lead, their distributions sit directly beneath them, and a persistent calculation rail exposes the actual CDF/LUT mapping. The interface is a working tool, not a tutorial or a course.\n\nNeutral lightness steps establish hierarchy; blue marks processed data and inspection feedback rather than filling navigation. UI labels use local Poppins, while numerical columns and expressions use local IBM Plex Mono. Existing processing and numerical semantics remain outside the visual redesign.",
+    "keyCharacteristics": [
+      "Paired images with directly associated frequency panels.",
+      "A persistent, data-driven calculation inspector.",
+      "Neutral primary actions and blue processed data.",
+      "Opaque, flat surfaces and local typography."
+    ],
+    "rules": [
+      {
+        "name": "Data Color",
+        "body": "Use blue for processed values and inspection feedback; keep persistent navigation and surfaces neutral.",
+        "section": "colors"
+      },
+      {
+        "name": "Measured Numbers",
+        "body": "Use IBM Plex Mono for numeric columns, measurements and expressions, and Poppins for interface language.",
+        "section": "typography"
+      },
+      {
+        "name": "Flat Surfaces",
+        "body": "Separate resting regions through lightness and quiet rules, not decorative shadows or glass.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve the original project logo and symbol assets.",
+      "Do render image, histogram, CDF and LUT values from runtime data.",
+      "Do keep original and result histogram scales identical within a comparison.",
+      "Do show zero counts as zero and unavailable measurements as an em dash.",
+      "Do retain keyboard inspection, explicit processing actions and recoverable errors."
+    ],
+    "donts": [
+      "Don't introduce a light-theme toggle, glass surfaces or a tutorial stepper.",
+      "Don't smooth frequency or cumulative data into invented intermediate values.",
+      "Don't replace the original mark with a reconstructed or generated logo.",
+      "Don't claim screenshots establish accessibility certification or physical-device behavior."
+    ]
+  }
+}

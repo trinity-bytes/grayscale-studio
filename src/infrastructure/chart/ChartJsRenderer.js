@@ -123,7 +123,21 @@ export class ChartJsRenderer {
       footer: () => 'Clic: inspeccionar el primer nivel del intervalo',
     };
     canvas.setAttribute('role', 'img');
-    canvas.setAttribute('aria-label', `Histograma ${processed ? 'del resultado' : 'original'}: ${number.format(total)} píxeles; 64 intervalos de 4 niveles. Valores exactos en la tabla de transformación.`);
+    canvas.setAttribute('aria-label', `Histograma ${processed ? 'del resultado' : 'original'}: ${number.format(total)} píxeles; 64 intervalos de 4 niveles. Consulta Ver frecuencias para los valores exactos de esta distribución.`);
+
+    const tableBody = document.getElementById(`${canvasId}-data`);
+    if (tableBody) {
+      tableBody.replaceChildren();
+      bins.forEach((count, index) => {
+        const row = document.createElement('tr');
+        for (const value of [labels[index], count]) {
+          const cell = document.createElement('td');
+          cell.textContent = value;
+          row.append(cell);
+        }
+        tableBody.append(row);
+      });
+    }
 
     const chart = new Chart(canvas.getContext('2d'), {
       type: 'line',
@@ -171,8 +185,8 @@ export class ChartJsRenderer {
     };
     canvas.setAttribute('role', 'img');
     canvas.setAttribute('aria-label', isCdf
-      ? 'Distribución acumulada: CDF normalizada de los 256 niveles de entrada. Valores exactos en la tabla de transformación.'
-      : 'Expansión: transformación de los 256 niveles de entrada a intensidades entre 0 y 255. Valores exactos en la tabla de transformación.');
+      ? 'Distribución acumulada: CDF normalizada de los 256 niveles de entrada. Consulta Ver frecuencias para los valores exactos de esta distribución.'
+      : 'Expansión: transformación de los 256 niveles de entrada a intensidades entre 0 y 255. Consulta Ver frecuencias para los valores exactos de esta distribución.');
     const chart = new Chart(canvas.getContext('2d'), {
       type: 'line',
       data: {
