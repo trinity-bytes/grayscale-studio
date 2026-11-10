@@ -1,0 +1,28 @@
+# Implement the approved dark Studio
+Branch: `feat/dark-studio`; baseline `250094c`. Implement the approved Figma V2 without changing native processing or numerical semantics.
+Delivery: single-pr, continuing the previously accepted integrated feature-branch strategy, with separate local work-unit commits; no push/PR/merge. Forecast: 1800–2600 authored changed lines; cohesive presentation units may exceed the advisory 400-line slice. Runner: Vitest, Vite production build, cached Chromium serial browser checks.
+
+## Specs
+
+S1. Authorization: "vavava, dale. usa las herramientas que necesites" accepts the preceding proposal: "implementar la interfaz aprobada en Figma". Visual authority: file `vjIA1F1gChibIGuQlnHjcu`, dark V2 main `20:125`, refined charts and completed desktop/tablet states; existing `design-plans/figma-design-system-v2.md` records the approved visual system. Historical approval warnings in that document predate current authorization.
+S2. Accepted sequence: "Base visual: modo oscuro, tipografía, colores y distribución." Preserve Spanish interface terminology and existing native Web Components/Vite stack. No framework/dependency migration.
+S3. Accepted outcome: "Vista principal: imágenes original/resultado, controles, histogramas e inspector matemático, conectados al procesamiento existente." Keep OpenCV and existing HistogramMath outputs unchanged. Use real runtime data, no hardcoded fixture measurements. Approved histogram refinement: exact four-level stepped areas with shared frequency scale and inspectable values; CDF uses actual cumulative values.
+S4. Accepted coverage: "Estados y adaptación: carga, errores, historial, tablas y versión tablet; conservar el bloqueo móvil acordado." Final accepted Figma recovered from observations #250/#243: landscape tablet ONLY (1024×768/1180×820), portrait tablet rotates (768×1024/820×1180), phone uses larger device, narrow desktop maximizes. This supersedes the earlier assistant suggestion based on stale local notes. Desktop/landscape retain the inspector; mobile processing remains blocked. Existing image validation, replacement, stale callback isolation, history safety and storage format survive.
+S5. Accepted proof: "Validación: comparar con Figma y comprobar funcionamiento, accesibilidad y regresiones." Use focused RED→GREEN tests where meaningful, full suite/build and serial browser checks across 1440/1024/768/390 and actual interactions. Disclose unavailable proof; do not claim accessibility certification.
+
+## Tasks
+
+- T1 [S2,S3,S5] delegated charts; complete self-check: RED8→GREEN8, parent spot8 PASS; commit pending. Writer reason: independent chart unit and history unit launched together with disjoint surfaces. Preserve renderer signatures; tests pin truthful bins/CDF/shared scale. Risk item 3 (renderer shared with both operations).
+- T2 [S4,S5] delegated history; complete self-check: RED5→GREEN15, parent spot15 PASS; commit pending. Writer reason: independent charts/history work units launched together. Keep storage schema/public methods; implement dark sheet, confirmation, keyboard focus. Risk item 1 (explicit clear remains destructive) and item 3 (shared history behavior).
+- T3 [S1-S5] inline shell/workspace/inspector integration; pending. No independent writer surface: parent owns DOM relocation seam, view/controller integration and global styles. Risk items 3/4 (shared presentation contracts; pending-operation frame scheduling and replacement cancellation).
+- T4 [S1-S5] independent verification; pending after own checks. Named risk item 3; isolated probes against baseline, bounded correction/recheck. Browser visual proof performed serially for low RAM. RDD off/unmanaged.
+
+## Log
+
+L1. Original request: "vavava, dale. usa las herramientas que necesites". Previous proposed steps quoted in S2–S5. User explicitly authorized implementation after previous cleanup/numerical completion.
+L2. Initial Git: `250094c`, tracked tree clean, pre-existing untracked `PRODUCT.md` and `design-plans/` preserved. RDD global off. CodeGraph MCP unavailable/not indexed; direct mapped source fallback. Current Figma main design context/screenshot retrieved read-only in session `5a8f1d70-87ff-4327-be72-4b9a06ddca14`.
+L3. Design read: Operate; preserve native behavior, replace visual world with approved true-black-flat Poppins/IBM Plex Mono, blue on data, neutral inverted primary; images lead, CDF/LUT stays inspectable. No new concept or tutorial. Existing logo reused exactly; uploaded images and chart geometry remain dynamic. Cached Chromium available, no installs planned. Requested ODD luna model unavailable; workers inherit parent rather than invent a model identifier.
+
+L4. Recovered final accepted Figma handoff #250/#243 after tablet design context exposed stale local docs. Implement final landscape-only tablet policy and device notices, not the earlier draft tablet tabs. Current Figma tablet 42:167/portrait21:1925 retrieved. Own initial focused35 and full170 tests/build PASS before screen-policy adjustment.
+
+L5. T1/T2 accepted within disjoint surfaces; parent focused25 PASS including screen-policy2. Native assessment attempted per delegated gate, returned unassessable due untracked inventory; no review started because global RDD OFF. Named risk3 (and4 for pending processing) retains independent T4 verification regardless. New pending-operation cancellation test RED1/GREEN5, screen-policy module RED missing/GREEN2.
