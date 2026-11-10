@@ -11,8 +11,8 @@
     <a href="https://trinity-bytes.github.io/grayscale-studio/" target="_blank">
         <img src="https://img.shields.io/badge/Demo%20en%20vivo-0078d4?style=for-the-badge&logo=github&logoColor=white" alt="Abrir demo en vivo" />
     </a>
-    <a href="https://github.com/trinity-bytes/grayscale-studio/releases/tag/v0.8.0" target="_blank">
-        <img src="https://img.shields.io/badge/release-v0.8.0-0043c8?style=for-the-badge" alt="Último release" />
+    <a href="https://github.com/trinity-bytes/grayscale-studio/releases/tag/v0.10.0" target="_blank">
+        <img src="https://img.shields.io/badge/release-v0.10.0-0043c8?style=for-the-badge" alt="Último release" />
     </a>
 </p>
 <!-- markdownlint-enable MD033 -->
