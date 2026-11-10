@@ -68,3 +68,11 @@ it('clears every derived value after a rejected or missing image', () => {
   expect(panel.querySelectorAll('#lut-body tr')).toHaveLength(0);
   expect(panel.querySelector('#intensity-input').disabled).toBe(true);
 });
+
+it('publishes inspection changes to chart canvases and uses the approved mapping SVG', () => {
+  data(); panel.selectIntensity(100);
+  expect(panel.getMathEqCanvas().dataset.selectedIntensity).toBe('100');
+  expect(panel.getMathExpCanvas().dataset.selectedIntensity).toBe('100');
+  expect(panel.querySelector('.mapping-arrow').tagName).toBe('IMG');
+  expect(panel.querySelector('.mapping-arrow').getAttribute('src')).toContain('mapping-arrow.svg');
+});

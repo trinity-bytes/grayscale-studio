@@ -92,6 +92,7 @@ export class MainController {
     this.view.disableControls();
     this.view.hideMathButton();
     this.view.resetToOriginal();
+    this.view.beginImageLoad(file);
     this.view.hideResultHistogram();
     this.currentFilename = file?.name ?? null;
 

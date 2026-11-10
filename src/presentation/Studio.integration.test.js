@@ -143,3 +143,18 @@ it('keeps theme controls usable when accessing localStorage itself is denied', (
   expect(() => ThemeManager.toggle()).not.toThrow();
   expect(ThemeManager.isDark()).toBe(false);
 });
+
+it('keeps a deferred public file selection busy through reading and decoding', async () => {
+  const f = setupStudio();
+  let finish;
+  f.load.execute.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  f.view.workspace.emitFile(new File(['bytes'], 'pending.png', { type: 'image/png' }));
+  expect(f.view.workspace.querySelector('#document-meta').textContent).toBe('Cargando imagen…');
+  expect(f.view.workspace.querySelector('#btn-apply').disabled).toBe(true);
+  expect(f.view.workspace.getAttribute('aria-busy')).toBe('true');
+  finish('data:image/png;base64,pending');
+  await Promise.resolve();
+  expect(f.view.workspace.getAttribute('aria-busy')).toBe('true');
+  f.view.pendingImage.onload();
+  expect(f.view.workspace.hasAttribute('aria-busy')).toBe(false);
+});

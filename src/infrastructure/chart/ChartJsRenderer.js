@@ -2,11 +2,39 @@ const ORIGINAL_CANVAS = 'original-histogram-canvas';
 const RESULT_CANVAS = 'result-histogram-canvas';
 const number = new Intl.NumberFormat('es', { maximumFractionDigits: 2 });
 
+/** Draw the selected domain sample, not a smoothed/interpolated position. */
+const selectionGuide = {
+  id: 'studio-selection',
+  afterDatasetsDraw(chart) {
+    if (!chart.canvas.hasAttribute('data-selected-intensity')) return;
+    const intensity = Number(chart.canvas.dataset.selectedIntensity);
+    if (!Number.isInteger(intensity) || intensity < 0 || intensity > 255) return;
+    const point = chart.getDatasetMeta(0).data[intensity];
+    if (!point || point.skip) return;
+    const { ctx, chartArea } = chart;
+    ctx.save();
+    ctx.strokeStyle = '#949494';
+    ctx.lineWidth = 0.8;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(point.x, chartArea.top);
+    ctx.lineTo(point.x, chartArea.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#88b5ff';
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  },
+};
+
 /** Chart.js adapter for exact, unsmoothed Studio distributions and mappings. */
 export class ChartJsRenderer {
   constructor() {
     this.chartInstances = new Map();
     this.frequencyPeaks = new Map();
+    this.inspectionListeners = new Map();
   }
 
   getThemeColors() {
@@ -23,6 +51,9 @@ export class ChartJsRenderer {
   }
 
   destroyChart(canvasId) {
+    const inspection = this.inspectionListeners.get(canvasId);
+    if (inspection) inspection.canvas.removeEventListener('on-inspection-changed', inspection.listener);
+    this.inspectionListeners.delete(canvasId);
     this.chartInstances.get(canvasId)?.destroy();
     this.chartInstances.delete(canvasId);
     this.frequencyPeaks.delete(canvasId);
@@ -185,10 +216,11 @@ export class ChartJsRenderer {
     };
     canvas.setAttribute('role', 'img');
     canvas.setAttribute('aria-label', isCdf
-      ? 'Distribución acumulada: CDF normalizada de los 256 niveles de entrada. Consulta Ver frecuencias para los valores exactos de esta distribución.'
-      : 'Expansión: transformación de los 256 niveles de entrada a intensidades entre 0 y 255. Consulta Ver frecuencias para los valores exactos de esta distribución.');
+      ? 'Distribución acumulada: CDF normalizada de los 256 niveles de entrada. Valores exactos en la tabla de transformación.'
+      : 'Expansión: transformación de los 256 niveles de entrada a intensidades entre 0 y 255. Valores exactos en la tabla de transformación.');
     const chart = new Chart(canvas.getContext('2d'), {
       type: 'line',
+      plugins: [selectionGuide],
       data: {
         labels: histogramMath.labels,
         datasets: [{
@@ -206,6 +238,9 @@ export class ChartJsRenderer {
       },
       options,
     });
+    const listener = () => chart.update('none');
+    canvas.addEventListener('on-inspection-changed', listener);
+    this.inspectionListeners.set(canvasId, { canvas, listener });
     this.chartInstances.set(canvasId, chart);
   }
 }

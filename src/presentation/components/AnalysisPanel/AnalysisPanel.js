@@ -71,6 +71,11 @@ export class AnalysisPanel extends HTMLElement {
     this.querySelector('#inspect-lut').disabled = !available;
     this.querySelector('#selected-input').textContent = available ? this.intensity : '—';
     this.querySelector('#selected-output').textContent = available ? lut[this.intensity] : '—';
+    for (const canvas of [this.getMathEqCanvas(), this.getMathExpCanvas()]) {
+      if (available) canvas.dataset.selectedIntensity = this.intensity;
+      else delete canvas.dataset.selectedIntensity;
+      canvas.dispatchEvent(new Event('on-inspection-changed'));
+    }
     const constants = this.querySelector('#algorithm-constants');
     const substitution = this.querySelector('#numeric-substitution');
     const body = this.querySelector('#lut-body'); body.replaceChildren();

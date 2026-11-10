@@ -129,3 +129,23 @@ it('publishes exact source and result frequency tables as nonvisual chart altern
   expect(body.querySelector('tr').lastElementChild.textContent).toBe('7');
   expect([...body.querySelectorAll('tr')].reduce((sum, row) => sum + Number(row.lastElementChild.textContent), 0)).toBe(16);
 });
+
+it('draws the selected CDF guide and exact point and detaches replaced selection listeners', () => {
+  const math = new HistogramMath(new HistogramModel(frequencies([[10, 3], [90, 4]])));
+  const canvas = document.getElementById('math-eq-canvas');
+  canvas.dataset.selectedIntensity = '90';
+  renderer.renderMath(canvas.id, math, 'equalization');
+  const chart = instances[0];
+  const guide = chart.config.plugins.find(plugin => plugin.id === 'studio-selection');
+  const ctx = Object.fromEntries(['save', 'restore', 'setLineDash', 'beginPath', 'moveTo', 'lineTo', 'stroke', 'arc', 'fill'].map(method => [method, vi.fn()]));
+  guide.afterDatasetsDraw({ canvas, ctx, chartArea: {top: 8, bottom: 120}, getDatasetMeta: () => ({data: Array.from({length:256},()=>({x: 120,y: 8}))}) });
+  expect(ctx.moveTo).toHaveBeenCalledWith(120, 8);
+  expect(ctx.lineTo).toHaveBeenCalledWith(120, 120);
+  expect(ctx.arc).toHaveBeenCalledWith(120, 8, 3, 0, Math.PI * 2);
+  canvas.dispatchEvent(new Event('on-inspection-changed'));
+  expect(chart.update).toHaveBeenCalledOnce();
+  renderer.renderMath(canvas.id, math, 'equalization');
+  canvas.dispatchEvent(new Event('on-inspection-changed'));
+  expect(chart.update).toHaveBeenCalledOnce();
+  expect(instances[1].update).toHaveBeenCalledOnce();
+});

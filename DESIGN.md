@@ -165,7 +165,7 @@ History traps focus, restores its trigger and prior inert/scroll state, and dism
 
 ### Assets and implementation boundaries
 
-The existing negative logo/symbol PNGs in `public/assets/branding/` remain unchanged. Upload and rotate SVGs are local exports of the approved Figma; uploaded images and chart geometry remain dynamic, never screenshots of the design.
+The existing negative logo/symbol PNGs in `public/assets/branding/` remain unchanged. Upload, mapping-arrow and rotate SVGs are local exports of the approved Figma; uploaded images and chart geometry remain dynamic, never screenshots of the design.
 
 `MainView` retains the controller-facing facade and presentation wiring. `ChartJsRenderer` owns chart lifetime, exact aggregation and accessible frequency tables. Domain, application use cases and OpenCV processing are unchanged.
 

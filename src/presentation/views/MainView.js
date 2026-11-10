@@ -79,14 +79,18 @@ export class MainView {
    */
   bindFileSelected(handler) {
     this.workspace.addEventListener("on-image-selected", (e) => {
-      this.workspace.showPlaceholder();
-      this.workspace.hideHistogramContainers();
-      this.analysisPanel.showEmptyStates();
-      this.workspace.hideMetrics('original-metrics');
-      this.workspace.setDocument(e.detail.file);
-      this.setStatus('Cargando imagen…');
       handler(e.detail.file);
     });
+  }
+
+  /** Publish loading after controller resets, keeping the active read/decode busy. */
+  beginImageLoad(file) {
+    this.workspace.showPlaceholder();
+    this.workspace.hideHistogramContainers();
+    this.analysisPanel.showEmptyStates();
+    this.workspace.hideMetrics('original-metrics');
+    this.workspace.setDocument(file);
+    this.setStatus('Cargando imagen…');
   }
 
   /**
