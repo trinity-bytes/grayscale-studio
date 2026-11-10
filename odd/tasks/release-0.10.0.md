@@ -10,8 +10,8 @@ S3. Accepted proposed version/flow: `v0.10.0`; integrate cleanup and dark studio
 
 ## Tasks
 
-- T1 [S1,S3] inline integration into develop and release preparation; local merges/version/notes complete, checks pending. Risk5: release/environment. No independent writer surface; stateful Git sequence stays parent-owned.
-- T2 [S1,S3] independent verification of release candidate after own179-test suite/build, metadata/ancestry/protected-byte readback; pending. Risk5 and existing presentation contracts; one bounded correction/recheck if needed.
+- T1 [S1,S3] inline integration into develop and release preparation; complete at6be2439; own179tests/build and metadata invariantsPASS. Risk5: release/environment. No independent writer surface; stateful Git sequence stays parent-owned.
+- T2 [S1,S3] independent verification complete for6be2439: ancestry/no-ff/version/dependency/protected-byte checks and isolated buildPASS, no blockers. Risk5 and existing presentation contracts; one bounded correction/recheck if needed.
 - T3 [S1-S3] inline finish GitFlow and publish explicit branch/tag refs, then GitHub Release; pending. Risk5. Preserve existing private untracked notes.
 - T4 [S2] inline observe release/ref/Pages readback; pending. Pending external status is not a completed deployment.
 
@@ -24,3 +24,5 @@ L3. Source manifests both0.9.0; README badge/link stale0.8.0. Synchronize root m
 L4. Develop integrated cleanup then dark studio using conventional no-ff merge commits; release/0.10.0 created. npm version --no-git-tag-version --ignore-scripts synchronized package/root-lock metadata only; structural JSON comparison confirms every dependency entry unchanged. README release badge/link updated; CHANGELOG.md records actual feature/correction scope. Metadata-only preparation has no meaningful behavioral RED; verify structural version/dependency invariants plus full tests/build.
 
 L5. Parent release candidate checks: full179/179 tests PASS; Vite production build PASS; source/CI/Vite-config bytes match06ef65f; root version/lock metadata0.10.0 and dependency entries unchanged; CRLF-aware diff checkPASS. Preparing immutable metadata/notes commit for independent risk5 check before any push/tag.
+
+L6. Independent candidate verificationPASS: cleanup+feature ancestors included; two-parent integration merges; manifest/root-lock0.10.0; semantic package-lock graph unchanged; app/assets/CI/HTML/Vite bytes identical to06ef65f; private notes untracked. Isolated Vite8.0.10 buildPASS. Workflow Node20 must resolve≥20.19; real CI remains the authoritative remote execution proof. No new CI change. Parent spot structural readbackPASS; proceed to final merges, branch push and Pages observation before publishing versiontag/release.
