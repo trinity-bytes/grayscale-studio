@@ -1,157 +1,135 @@
-<!-- markdownlint-disable MD033 -->
+<!-- markdownlint-disable MD033 MD041 -->
 <div align="center">
-    <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://grayscale.jahattrinidad.com/assets/branding/grayscale-studio-full-logo-negativo.png" />
-        <source media="(prefers-color-scheme: light)" srcset="https://grayscale.jahattrinidad.com/assets/branding/grayscale-studio-full-logo.png" />
-        <img src="https://grayscale.jahattrinidad.com/assets/branding/grayscale-studio-full-logo.png" alt="Logotipo de Grayscale Studio" width="300">
-    </picture>
+    <a href="https://grayscale.jahattrinidad.com/">
+        <img src="docs/readme/cover.png" alt="Grayscale Studio: de la imagen al dato. Comparación entre una imagen original de bajo contraste y su versión ecualizada" width="100%">
+    </a>
+    <p>
+        <a href="https://grayscale.jahattrinidad.com/"><img src="https://img.shields.io/badge/Demo%20en%20vivo-88b5ff?style=for-the-badge&labelColor=111111" alt="Abrir demo en vivo"></a>
+        <a href="https://github.com/trinity-bytes/grayscale-studio/releases/tag/v0.10.0"><img src="https://img.shields.io/badge/release-v0.10.0-f4f4f4?style=for-the-badge&labelColor=111111" alt="Último release"></a>
+        <img src="https://img.shields.io/badge/licencia-ISC-f4f4f4?style=for-the-badge&labelColor=111111" alt="Licencia ISC">
+    </p>
 </div>
-<p align="center"><strong>Procesa y mejora imágenes en escala de grises con precisión profesional</strong></p>
-<p align="center">
-    <a href="https://grayscale.jahattrinidad.com/" target="_blank">
-        <img src="https://img.shields.io/badge/Demo%20en%20vivo-0078d4?style=for-the-badge&logo=github&logoColor=white" alt="Abrir demo en vivo" />
-    </a>
-    <a href="https://github.com/trinity-bytes/grayscale-studio/releases/tag/v0.10.0" target="_blank">
-        <img src="https://img.shields.io/badge/release-v0.10.0-0043c8?style=for-the-badge" alt="Último release" />
-    </a>
-</p>
 <!-- markdownlint-enable MD033 -->
 
-> Aplicación web profesional para la expansión y ecualización de histogramas de imágenes en escala de grises, construida bajo los principios de Clean Architecture y Domain-Driven Design (DDD).
+**Grayscale Studio** es un estudio web para analizar y transformar imágenes en escala de grises. Carga una imagen, observa su histograma y aplica **ecualización** o **expansión de contraste**. Cada paso del cálculo queda visible: CDF, LUT y tabla de transformación.
+
+Funciona en el navegador con **OpenCV.js** (WebAssembly) y **Chart.js**, sin backend. Está construido en Vanilla JavaScript con Web Components bajo **Clean Architecture** y **DDD**.
 
 ---
 
 ## Tabla de contenidos
 
-- [Descripción del proyecto](#descripción-del-proyecto)
+- [Vista general](#vista-general)
+- [Cómo funciona](#cómo-funciona)
 - [Características](#características)
-- [Tecnologías](#tecnologías)
-- [Arquitectura](#arquitectura)
 - [Inicio rápido](#inicio-rápido)
 - [Uso](#uso)
-- [Testing](#testing)
+- [Arquitectura](#arquitectura)
+- [Testing y verificación](#testing-y-verificación)
 - [Documentación](#documentación)
+- [Licencia](#licencia)
 
 ---
 
-## Descripción del proyecto
+## Vista general
 
-**GrayScale Studio** es una herramienta web diseñada para procesar imágenes en blanco y negro (JPG/JPEG/PNG). Validando matemáticamente que la imagen carezca de canales de color, el sistema extrae las frecuencias de intensidades (0-255), renderiza el histograma original y permite aplicar transformaciones de contraste:
+<!-- markdownlint-disable MD033 -->
+<p align="center">
+    <img src="docs/readme/studio-equalization.png" alt="Estudio con una imagen ecualizada: original y resultado con sus histogramas, y el inspector de cálculo con la CDF y la tabla de transformación" width="100%">
+    <br>
+    <sub><b>Ecualización.</b> Original y resultado con sus histogramas. El inspector muestra la fórmula, la CDF y la tabla r → s.</sub>
+</p>
 
-- **Ecualización** (no lineal): redistribución mediante CDF normalizada por el primer acumulado no nulo.
-- **Expansión** (lineal): estiramiento del rango dinámico Min-Max.
+<table>
+    <tr>
+        <td width="50%">
+            <img src="docs/readme/studio-expansion.png" alt="Estudio aplicando expansión de contraste Min-Max">
+            <p align="center"><sub><b>Expansión Min-Max.</b> Estiramiento lineal del rango dinámico.</sub></p>
+        </td>
+        <td width="50%">
+            <img src="docs/readme/chart-inspection.png" alt="Inspección de un nivel de intensidad sobre el histograma">
+            <p align="center"><sub><b>Inspección del gráfico.</b> Selecciona una intensidad y sigue su transformación.</sub></p>
+        </td>
+    </tr>
+    <tr>
+        <td width="50%">
+            <img src="docs/readme/inspector-cdf-lut.png" alt="Vista de la CDF y la LUT de 256 niveles">
+            <p align="center"><sub><b>CDF y LUT.</b> Los 256 niveles de la tabla de conversión.</sub></p>
+        </td>
+        <td width="50%">
+            <img src="docs/readme/history.png" alt="Drawer de historial con las últimas operaciones">
+            <p align="center"><sub><b>Historial.</b> Las últimas 20 operaciones, guardadas en el navegador.</sub></p>
+        </td>
+    </tr>
+    <tr>
+        <td width="50%">
+            <img src="docs/readme/tablet-landscape.png" alt="Interfaz en tablet horizontal de 1180 × 820">
+            <p align="center"><sub><b>Tablet horizontal.</b> Layout compacto para 1024 y 1180 px.</sub></p>
+        </td>
+        <td width="50%">
+            <img src="docs/readme/color-rejected.png" alt="Aviso de imagen con color rechazada">
+            <p align="center"><sub><b>Validación estricta.</b> Las imágenes con color se rechazan.</sub></p>
+        </td>
+    </tr>
+</table>
+<!-- markdownlint-enable MD033 -->
 
-El proyecto está construido con **Vanilla JavaScript** (Web Components), **OpenCV.js** para procesamiento de imagen, **Chart.js** para visualización de histogramas, **CSS nativo** para estilos, y **Vite** como bundler.
+> Las capturas provienen del diseño en Figma, con datos de muestra calculados a partir de píxeles reales.
+
+---
+
+## Cómo funciona
+
+1. **Validación.** OpenCV.js comprueba que la imagen (PNG, JPG o JPEG) no tenga canales de color.
+2. **Histograma.** Se extraen las frecuencias de las intensidades 0–255 y se renderiza el histograma original.
+3. **Transformación.** Se aplica una de dos operaciones:
+
+| Operación | Tipo | Fórmula |
+|---|---|---|
+| **Ecualización** | No lineal | `s = round(255 × (CDF(r) − CDFmin) / (1 − CDFmin))` |
+| **Expansión** | Lineal | `s = round(255 × (r − min) / (max − min))` |
+
+En la ecualización, `CDFmin` es el primer valor acumulado no nulo. El resultado se muestra junto a la imagen original con su propio histograma y sus métricas (mínimo, máximo, media y σ).
 
 ---
 
 ## Características
 
-### Procesamiento de imagen
-- **Carga por drag & Drop** o selección manual de archivos.
-- **Validación estricta de color** con OpenCV.js — imágenes con color son rechazadas.
-- **Ecualización de histograma** redistribución CDF con tabla de conversión paso a paso.
-- **Expansión Min-Max** estiramiento lineal del rango dinámico con procedimiento explicado.
+**Procesamiento**
 
-### Interfaz
-- **Estudio oscuro** con imágenes e histogramas asociados y un inspector matemático persistente (CDF/LUT).
-- **Operación explícita** — selecciona Ecualización o Expansión y pulsa Aplicar; Reemplazar permite cargar otra imagen.
-- **Inspección accesible** — selección de intensidad por teclado, LUT de 256 niveles y tablas de frecuencias por distribución.
-- **Métricas comparativas** — Mín, Máx, Media, Desviación Estándar del histograma.
-- **Historial de operaciones** — drawer lateral con las últimas 20 operaciones persistidas en localStorage.
-- **Modo exclusivamente oscuro** con superficies neutras y fuentes locales Poppins/IBM Plex Mono.
-- **Navegación activa** con indicador de estado WASM.
-- **Dispositivos** — escritorio y tablet horizontal; tablet vertical pide girar, teléfono requiere otro dispositivo y escritorio estrecho pide maximizar.
+- Carga por drag & drop o selección manual de archivos.
+- Validación estricta de color: una imagen con color no registra operaciones.
+- Ecualización por CDF con la sustitución numérica de cada nivel.
+- Expansión Min-Max con el procedimiento explicado.
 
----
+**Inspector matemático**
 
-## Tecnologías
+- Panel de cálculo persistente con fórmula, CDF y tabla de transformación.
+- Selección de intensidad con teclado y LUT completa de 256 niveles.
+- Tablas de frecuencias por histograma y métricas comparativas.
 
-| Tecnología | Rol |
-|---|---|
-| **Vanilla JavaScript (ES6 Modules)** | Capas de Dominio, Aplicación, Infraestructura y Presentación |
-| **Web Components** | Componentes de UI custom (Custom Elements) |
-| **Vite** | Servidor de desarrollo, bundler y build de producción |
-| **[OpenCV.js](https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html)** | Motor de procesamiento de imagen (WebAssembly) |
-| **[Chart.js](https://www.chartjs.org/)** | Renderizado interactivo de histogramas |
-| **CSS nativo** | Tokens y estilos de componentes, sin CDN de estilos |
-| **[Poppins](https://fonts.google.com/specimen/Poppins)** | Familia tipográfica (carga local) |
+**Interfaz**
 
----
-
-## Arquitectura
-
-Proyecto estructurado bajo **Clean Architecture** y **Domain-Driven Design**:
-
-```text
-grayscale-studio/
-├─ index.html                          # Entry point HTML
-├─ public/
-│  ├─ assets/                          # Branding, fuentes, cursores, imágenes
-│  └─ docs/                            # Documentación completa del proyecto
-├─ src/
-│  ├─ main.js                          # Composition Root (inyección de dependencias)
-│  ├─ domain/                          # Capa de Dominio (reglas puras)
-│  │  ├─ models/
-│  │  │  ├─ ImageModel.js              # Entidad de imagen
-│  │  │  ├─ HistogramModel.js          # Modelo de histograma
-│  │  │  └─ HistogramMath.js           # Funciones puras (CDF, LUT, métricas)
-│  │  └─ services/
-│  │     └─ ImageProcessor.js          # Contrato de dominio (interfaz)
-│  ├─ application/                     # Capa de Aplicación (casos de uso)
-│  │  ├─ LoadAndValidateImageUseCase.js
-│  │  ├─ EqualizeImageUseCase.js
-│  │  └─ ExpandImageUseCase.js
-│  ├─ infrastructure/                  # Capa de Infraestructura (implementaciones)
-│  │  ├─ file/BrowserFileReader.js     # Lectura de archivos via File API
-│  │  ├─ opencv/OpenCvImageProcessor.js # Implementación con OpenCV.js
-│  │  └─ chart/ChartJsRenderer.js      # Renderizado con Chart.js
-│  ├─ presentation/                    # Capa de Presentación (UI)
-│  │  ├─ views/MainView.js
-│  │  ├─ controllers/MainController.js
-│  │  └─ components/
-│  │     ├─ AnalysisPanel/             # Panel de análisis con 3 pestañas
-│  │     ├─ ErrorAlert/                # Alerta de errores inline
-│  │     ├─ HistoryDrawer/             # Drawer de historial de operaciones
-│  │     ├─ ImageInfoPanel/            # Panel de metadatos de imagen
-│  │     ├─ TopNavBar/                 # Barra de navegación superior
-│  │     └─ WorkspaceDropZone/         # Zona de arrastre + canvas
-│  └─ shared/                          # Código compartido
-│     ├─ components/
-│     │  ├─ PrimaryButton/             # Botón reutilizable
-│     │  └─ EmptyState/                # Placeholder de estado vacío
-│     ├─ i18n/strings.js               # Cadena de textos (i18n)
-│     ├─ utils/ThemeManager.js         # Gestor de tema claro/oscuro
-│     └─ styles/                       # CSS global (tipografía, efectos, cursores, layout)
-└─ package.json
-```
-
-**Flujo de datos:**
-`Usuario` → `MainView` → `MainController` → `UseCase` → `Domain` → `Infrastructure` → `Chart.js / OpenCV`
-
-Las dependencias apuntan hacia adentro: la infraestructura implementa contratos del dominio, los casos de uso orquestan la lógica, y el controller coordina la UI sin conocer los detalles de procesamiento.
+- Estudio oscuro con superficies neutras, Poppins e IBM Plex Mono servidas localmente.
+- Operación explícita: elige Ecualización o Expansión y pulsa **Aplicar**.
+- Historial lateral con las últimas 20 operaciones en `localStorage`.
+- Indicador de estado del motor WASM, con estados de carga, error y reintento.
+- Soporte para escritorio y tablet horizontal. En tablet vertical se pide girar el dispositivo, el teléfono no es compatible y en escritorio estrecho se pide maximizar la ventana.
 
 ---
 
 ## Inicio rápido
 
-Requisitos: [Node.js](https://nodejs.org/) >= 16
+Requisitos: [Node.js](https://nodejs.org/) `^20.19.0` o `>=22.12.0` (exigido por Vite 8).
 
 ```bash
-# Clonar el repositorio
 git clone https://github.com/trinity-bytes/grayscale-studio.git
 cd grayscale-studio
-
-# Instalar dependencias
 npm install
-
-# Iniciar servidor de desarrollo
 npm run dev
 ```
 
-Abrir la URL que muestra Vite en la terminal (generalmente `http://localhost:5173`).
-
-### Comandos disponibles
+Abre la URL que muestra Vite (normalmente `http://localhost:5173`).
 
 | Comando | Descripción |
 |---|---|
@@ -165,56 +143,86 @@ Abrir la URL que muestra Vite en la terminal (generalmente `http://localhost:517
 
 ## Uso
 
-1. Arrastra una imagen PNG/JPG en escala de grises o pulsa **Seleccionar archivo**. Las imágenes con color se rechazan sin registrar operaciones.
-2. Compara la imagen original y su histograma; los metadatos aparecen junto al nombre del archivo.
-3. Selecciona **Ecualización** o **Expansión** y pulsa **Aplicar**. Cambiar la selección por sí solo no procesa la imagen.
-4. Inspecciona la intensidad de entrada, la CDF/LUT y sus valores reales; **Inspeccionar LUT** muestra los 256 niveles. **Ver frecuencias** expone los datos de cada histograma.
-5. Usa **Reemplazar** para otra imagen y **Historial** para consultar las últimas operaciones. El borrado solicita confirmación.
-6. Utiliza escritorio o tablet horizontal. La interfaz es exclusivamente oscura.
+1. Arrastra una imagen PNG o JPG en escala de grises, o pulsa **Seleccionar archivo**.
+2. Revisa la imagen original, su histograma y sus metadatos.
+3. Elige **Ecualización** o **Expansión** y pulsa **Aplicar**. Cambiar la selección no procesa la imagen por sí solo.
+4. Inspecciona una intensidad, la CDF y la LUT. **Inspeccionar LUT** muestra los 256 niveles y **Ver frecuencias** muestra los datos de cada histograma.
+5. Usa **Reemplazar** para cargar otra imagen e **Historial** para consultar operaciones anteriores. Borrar el historial pide confirmación.
 
 ---
 
-## Testing
+## Arquitectura
+
+Las dependencias apuntan hacia el dominio. La infraestructura implementa los contratos del dominio, los casos de uso orquestan la lógica y el controller coordina la UI sin conocer los detalles del procesamiento.
+
+```text
+Usuario → MainView → MainController → UseCase → Domain ← Infrastructure (OpenCV.js, Chart.js)
+```
+
+```text
+src/
+├─ main.js                 # Composition root (inyección de dependencias)
+├─ domain/
+│  ├─ models/              # ImageModel, HistogramModel, HistogramMath (CDF, LUT, métricas)
+│  └─ services/            # ImageProcessor (contrato)
+├─ application/            # LoadAndValidateImage, EqualizeImage, ExpandImage
+├─ infrastructure/
+│  ├─ file/                # BrowserFileReader (File API)
+│  ├─ opencv/              # OpenCvImageProcessor
+│  └─ chart/               # ChartJsRenderer
+├─ presentation/
+│  ├─ views/ controllers/  # MainView, MainController
+│  └─ components/          # AnalysisPanel, ErrorAlert, HistoryDrawer, ImageInfoPanel, TopNavBar, WorkspaceDropZone
+└─ shared/                 # Componentes base, i18n, utilidades (ScreenGuard) y estilos globales
+```
+
+| Tecnología | Rol |
+|---|---|
+| Vanilla JavaScript (ES Modules) + Web Components | Todas las capas y los componentes de UI |
+| [OpenCV.js](https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html) | Motor de procesamiento de imagen (WebAssembly) |
+| [Chart.js](https://www.chartjs.org/) | Histogramas y curva CDF |
+| Vite | Desarrollo, bundling y build |
+| CSS nativo | Tokens y estilos de componentes |
+
+---
+
+## Testing y verificación
 
 ```bash
 npm run test         # Ejecutar una vez
-npm run test:watch   # Modo watch (re-ejecuta al guardar)
+npm run test:watch   # Re-ejecutar al guardar
 ```
 
-Los tests cubren la lógica matemática del dominio (CDF, LUT, métricas de histograma).
+Los tests cubren la matemática del dominio (CDF, LUT, métricas) y las utilidades compartidas.
 
----
-
-## Documentación
-
-El sistema visual actual y la procedencia de sus recursos están en [DESIGN.md](DESIGN.md).
-
-
-La documentación completa del proyecto está en [`public/docs/`](public/docs/):
-
-| Documento | Contenido |
-|---|---|
-| [README.md](public/docs/README.md) | Hub principal, quick start, stack |
-| [arquitectura.md](public/docs/arquitectura.md) | Clean Architecture, DDD, diagramas ASCII, SOLID |
-| [componentes.md](public/docs/componentes.md) | Guía de los 8 componentes Web Components |
-| [casos-de-uso.md](public/docs/casos-de-uso.md) | 3 use cases con algoritmos matemáticos |
-| [guia-desarrollador.md](public/docs/guia-desarrollador.md) | Cómo extender el proyecto |
-| [estilos-y-tema.md](public/docs/estilos-y-tema.md) | Sistema de diseño, Tailwind, dark mode |
-| [api-referencia.md](public/docs/api-referencia.md) | Referencia técnica de todas las clases |
-
----
-
-## Licencia
-
-ISC
-
-
-### Verificación matemática con OpenCV real
-
-La suite de Vitest no sustituye la comparación numérica con el motor. Ejecute el verificador explícito con el fixture oficial OpenCV.js 4.8.0 guardado fuera del repositorio:
+Vitest no reemplaza la comparación numérica con el motor real. Para eso existe un verificador explícito que usa el fixture oficial de OpenCV.js 4.8.0, guardado fuera del repositorio:
 
 ```bash
 node scripts/verify-opencv.mjs --runtime /absolute/path/to/opencv.cjs
 ```
 
-No instala dependencias ni descarga archivos automáticamente. Rechaza un fixture con hash distinto y falla si hay diferencias de píxeles o histogramas. Instrucciones, hash y alcance en [la verificación numérica](docs/audits/numerical-consistency.md).
+El verificador no instala dependencias ni descarga archivos. Rechaza un fixture con un hash distinto y falla ante cualquier diferencia en píxeles o histogramas. El hash, el alcance y las instrucciones están en [la verificación numérica](docs/audits/numerical-consistency.md).
+
+---
+
+## Documentación
+
+- [DESIGN.md](DESIGN.md): sistema visual y procedencia de los recursos.
+- [CHANGELOG.md](CHANGELOG.md): historial de versiones.
+- [`public/docs/`](public/docs/): documentación técnica.
+
+| Documento | Contenido |
+|---|---|
+| [README.md](public/docs/README.md) | Hub principal, quick start y stack |
+| [arquitectura.md](public/docs/arquitectura.md) | Clean Architecture, DDD y SOLID |
+| [componentes.md](public/docs/componentes.md) | Guía de los Web Components |
+| [casos-de-uso.md](public/docs/casos-de-uso.md) | Casos de uso y algoritmos |
+| [guia-desarrollador.md](public/docs/guia-desarrollador.md) | Cómo extender el proyecto |
+| [estilos-y-tema.md](public/docs/estilos-y-tema.md) | Sistema de estilos |
+| [api-referencia.md](public/docs/api-referencia.md) | Referencia técnica de las clases |
+
+---
+
+## Licencia
+
+[ISC](package.json)
