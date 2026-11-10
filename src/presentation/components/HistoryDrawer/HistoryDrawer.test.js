@@ -49,7 +49,7 @@ describe('HistoryDrawer', () => {
     expect(localStorage.getItem('grayscale-history')).toBe(raw);
   });
 
-  it('adds newest first, limits records to 20, persists the same record shape and clears through the button', () => {
+  it('adds newest first, limits records to 20, persists the same record shape and clears only after confirmation', () => {
     const drawer = mount();
     for (let i = 0; i < 21; i++) {
       drawer.addEntry({ type: 'expand', filename: `${i}.png`, metricsBefore: metrics, metricsAfter: metrics });
@@ -62,7 +62,10 @@ describe('HistoryDrawer', () => {
       ['id', 'type', 'filename', 'timestamp', 'metricsBefore', 'metricsAfter'].sort(),
     );
     expect(drawer.querySelector('.history-badge').textContent).toBe('Expansión');
+    drawer.open();
     drawer.querySelector('#history-clear-btn').click();
+    expect(drawer.entries).toHaveLength(20);
+    drawer.querySelector('#history-confirm-clear-btn').click();
     expect(drawer.entries).toEqual([]);
     expect(localStorage.getItem('grayscale-history')).toBe('[]');
     expect(drawer.querySelectorAll('.history-card')).toHaveLength(0);
@@ -126,5 +129,91 @@ describe('HistoryDrawer', () => {
     expect(document.body.style.overflow).toBe('');
     expect(() => drawer.clear()).not.toThrow();
     expect(drawer.entries).toEqual([]);
+  });
+});
+
+
+describe('HistoryDrawer modal interaction', () => {
+  it('starts unavailable to focus and restores focus, inert states and existing body overflow', () => {
+    const trigger = document.createElement('button');
+    trigger.textContent = 'Historial';
+    document.body.appendChild(trigger);
+    const existingInert = document.createElement('section');
+    existingInert.setAttribute('inert', '');
+    document.body.appendChild(existingInert);
+    const drawer = mount();
+    const dialog = drawer.querySelector('#history-drawer-container');
+    expect(dialog.hidden).toBe(true);
+    expect(dialog.getAttribute('role')).toBe('dialog');
+    document.body.style.overflow = 'clip';
+    trigger.focus();
+    drawer.open();
+    expect(dialog.hidden).toBe(false);
+    expect(trigger.hasAttribute('inert')).toBe(true);
+    expect(document.activeElement).toBe(drawer.querySelector('#history-close-btn'));
+    drawer.close();
+    expect(dialog.hidden).toBe(true);
+    expect(trigger.hasAttribute('inert')).toBe(false);
+    expect(existingInert.hasAttribute('inert')).toBe(true);
+    expect(document.body.style.overflow).toBe('clip');
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('keeps stored data untouched on cancel or Escape and closes confirmation before the drawer', () => {
+    const raw = JSON.stringify([storedEntry()]);
+    localStorage.setItem('grayscale-history', raw);
+    const drawer = mount();
+    drawer.open();
+    drawer.querySelector('#history-clear-btn').click();
+    expect(drawer.querySelector('#history-clear-confirmation').hidden).toBe(false);
+    expect(document.activeElement).toBe(drawer.querySelector('#history-cancel-clear-btn'));
+    drawer.querySelector('#history-cancel-clear-btn').click();
+    expect(localStorage.getItem('grayscale-history')).toBe(raw);
+    expect(document.activeElement).toBe(drawer.querySelector('#history-clear-btn'));
+    drawer.querySelector('#history-clear-btn').click();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(drawer.querySelector('#history-clear-confirmation').hidden).toBe(true);
+    expect(drawer.querySelector('#history-drawer-container').hidden).toBe(false);
+    expect(localStorage.getItem('grayscale-history')).toBe(raw);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(drawer.querySelector('#history-drawer-container').hidden).toBe(true);
+  });
+
+  it('wraps Tab in each active view and redirects attempts to focus the background', () => {
+    const background = document.createElement('button');
+    document.body.appendChild(background);
+    localStorage.setItem('grayscale-history', JSON.stringify([storedEntry()]));
+    const drawer = mount();
+    drawer.open();
+    const close = drawer.querySelector('#history-close-btn');
+    const clear = drawer.querySelector('#history-clear-btn');
+    close.focus();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }));
+    expect(document.activeElement).toBe(clear);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    expect(document.activeElement).toBe(close);
+    background.focus();
+    expect(document.activeElement).toBe(close);
+    clear.click();
+    const cancel = drawer.querySelector('#history-cancel-clear-btn');
+    const confirm = drawer.querySelector('#history-confirm-clear-btn');
+    cancel.focus();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }));
+    expect(document.activeElement).toBe(confirm);
+    confirm.click();
+    expect(document.activeElement).toBe(close);
+  });
+
+  it('releases background state and document listeners when disconnected', () => {
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    const drawer = mount();
+    drawer.open();
+    drawer.remove();
+    expect(trigger.hasAttribute('inert')).toBe(false);
+    expect(document.body.style.overflow).toBe('');
+    trigger.focus();
+    expect(document.activeElement).toBe(trigger);
+    expect(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))).not.toThrow();
   });
 });

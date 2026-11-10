@@ -228,13 +228,15 @@ class ChartJsRenderer {
 
 **Metodo `render()`**:
 - Destruye instancia anterior del canvas (previene memory leaks)
-- Renderiza histograma de barras con Chart.js
-- Usa colores del tema actual
+- Agrupa los 256 niveles en 64 intervalos exactos de cuatro niveles y dibuja un área escalonada sin suavizado
+- Comparte la escala de frecuencias entre original y resultado; un nuevo original descarta el resultado anterior
+- Mantiene una tabla accesible con las frecuencias de cada distribución
 
-**Metodo `renderMath()`**:
-- Renderiza grafico dual (barras + linea)
+**Metodo `renderMath()`** (estudio oscuro):
 - `type`: `"equalization"` o `"expansion"`
-- Eje Y izquierdo: frecuencias, eje Y derecho: intensidad de salida [0, 255]
+- Ecualización: CDF normalizada real, con eje Y [0, 1]
+- Expansión: LUT nativa, con eje Y [0, 255]
+- Publica `on-intensity-selected` con la intensidad seleccionada; no anima ni suaviza los datos
 
 ---
 
@@ -409,6 +411,8 @@ this.view.showError(strings.errors.colorImage);
 ---
 
 ## ThemeManager
+
+Utilidad heredada: su contrato se conserva, pero el estudio aprobado fuerza modo oscuro al arrancar y no ofrece un botón para alternarlo. La preferencia guardada no se reescribe.
 
 **Ubicacion**: `src/shared/utils/ThemeManager.js`
 

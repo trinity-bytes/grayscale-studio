@@ -41,7 +41,7 @@
 - **Ecualización** (no lineal): redistribución mediante CDF normalizada por el primer acumulado no nulo.
 - **Expansión** (lineal): estiramiento del rango dinámico Min-Max.
 
-El proyecto está construido con **Vanilla JavaScript** (Web Components), **OpenCV.js** para procesamiento de imagen, **Chart.js** para visualización de histogramas, **Tailwind CSS** para estilos, y **Vite** como bundler.
+El proyecto está construido con **Vanilla JavaScript** (Web Components), **OpenCV.js** para procesamiento de imagen, **Chart.js** para visualización de histogramas, **CSS nativo** para estilos, y **Vite** como bundler.
 
 ---
 
@@ -54,12 +54,14 @@ El proyecto está construido con **Vanilla JavaScript** (Web Components), **Open
 - **Expansión Min-Max** estiramiento lineal del rango dinámico con procedimiento explicado.
 
 ### Interfaz
-- **Panel de análisis** con 3 pestañas: Visual (histogramas duales), Ecuaciones (LUT), Explicación (procedimiento).
+- **Estudio oscuro** con imágenes e histogramas asociados y un inspector matemático persistente (CDF/LUT).
+- **Operación explícita** — selecciona Ecualización o Expansión y pulsa Aplicar; Reemplazar permite cargar otra imagen.
+- **Inspección accesible** — selección de intensidad por teclado, LUT de 256 niveles y tablas de frecuencias por distribución.
 - **Métricas comparativas** — Mín, Máx, Media, Desviación Estándar del histograma.
 - **Historial de operaciones** — drawer lateral con las últimas 20 operaciones persistidas en localStorage.
-- **Modo oscuro** con tokens semánticos y glassmorphism.
+- **Modo exclusivamente oscuro** con superficies neutras y fuentes locales Poppins/IBM Plex Mono.
 - **Navegación activa** con indicador de estado WASM.
-- **Guardia móvil** — pantalla de "Se Requiere Pantalla Grande" en dispositivos pequeños.
+- **Dispositivos** — escritorio y tablet horizontal; tablet vertical pide girar, teléfono requiere otro dispositivo y escritorio estrecho pide maximizar.
 
 ---
 
@@ -72,7 +74,7 @@ El proyecto está construido con **Vanilla JavaScript** (Web Components), **Open
 | **Vite** | Servidor de desarrollo, bundler y build de producción |
 | **[OpenCV.js](https://docs.opencv.org/4.x/d5/d10/tutorial_js_root.html)** | Motor de procesamiento de imagen (WebAssembly) |
 | **[Chart.js](https://www.chartjs.org/)** | Renderizado interactivo de histogramas |
-| **[Tailwind CSS](https://tailwindcss.com/)** | Sistema de estilos utility-first |
+| **CSS nativo** | Tokens y estilos de componentes, sin CDN de estilos |
 | **[Poppins](https://fonts.google.com/specimen/Poppins)** | Familia tipográfica (carga local) |
 
 ---
@@ -163,15 +165,12 @@ Abrir la URL que muestra Vite en la terminal (generalmente `http://localhost:517
 
 ## Uso
 
-1. **Arrastra** una imagen en escala de grises (.jpg/.jpeg/.png) a la zona de carga, o haz clic en "Explorar Archivos".
-2. Si la imagen tiene color, aparecerá un error indicando que solo se aceptan imágenes en grises.
-3. Al cargar una imagen válida se muestra:
-   - **Panel izquierdo**: metadatos de la imagen (resolución, canales, formato).
-   - **Centro**: imagen original con canvas de resultado.
-   - **Derecha**: panel de análisis con histogramas, métricas y tablas de conversión.
-4. Usa los botones **Ecualizar** o **Expandir** para procesar.
-5. Abre el **Historial** (ícono de reloj en la nav) para ver operaciones anteriores.
-6. Alterna entre **modo claro / oscuro** con el ícono de tema en la barra superior.
+1. Arrastra una imagen PNG/JPG en escala de grises o pulsa **Seleccionar archivo**. Las imágenes con color se rechazan sin registrar operaciones.
+2. Compara la imagen original y su histograma; los metadatos aparecen junto al nombre del archivo.
+3. Selecciona **Ecualización** o **Expansión** y pulsa **Aplicar**. Cambiar la selección por sí solo no procesa la imagen.
+4. Inspecciona la intensidad de entrada, la CDF/LUT y sus valores reales; **Inspeccionar LUT** muestra los 256 niveles. **Ver frecuencias** expone los datos de cada histograma.
+5. Usa **Reemplazar** para otra imagen y **Historial** para consultar las últimas operaciones. El borrado solicita confirmación.
+6. Utiliza escritorio o tablet horizontal. La interfaz es exclusivamente oscura.
 
 ---
 
@@ -187,6 +186,9 @@ Los tests cubren la lógica matemática del dominio (CDF, LUT, métricas de hist
 ---
 
 ## Documentación
+
+El sistema visual actual y la procedencia de sus recursos están en [DESIGN.md](DESIGN.md).
+
 
 La documentación completa del proyecto está en [`public/docs/`](public/docs/):
 

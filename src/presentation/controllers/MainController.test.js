@@ -20,7 +20,7 @@ function fixture() {
     'hideMetrics', 'switchToVisualTab', 'enableControls', 'showProcessedCanvas', 'showMathButton',
     'showResultHistogram', 'showEqualizationTable', 'showExpansionProcedure', 'addHistoryEntry',
     'switchToMathExpTab', 'switchToMathEqTab', 'setWasmStatus', 'cancelPendingImageLoad',
-    'updateOriginalThumbnail', 'showProcessedResult'];
+    'updateOriginalThumbnail', 'showProcessedResult', 'beginImageLoad'];
   const view = Object.fromEntries(methods.map(name => [name, vi.fn()]));
   view.workspace = { getCanvas: vi.fn(() => 'original'), getProcessedCanvas: vi.fn(() => 'processed'), dispatchEvent: vi.fn() };
   for (const name of ['HiddenImage', 'WorkspaceCanvas', 'ProcessedCanvas']) view[`get${name}Id`] = vi.fn(() => name);

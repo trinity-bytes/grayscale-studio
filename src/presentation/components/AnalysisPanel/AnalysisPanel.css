@@ -1,117 +1,50 @@
-/* =============================================
- * ANALYSISPANEL.CSS — Estilos del Panel de Análisis
- * =============================================
- * Estilos scoped para el componente AnalysisPanel Web Component. Define los
- * estilos de pestañas (tabs), grid de métricas, bloques de ecuaciones y
- * tablas de conversión usadas en las vistas Visual, Ecuaciones y Explicación.
- *
- * Componentes afectados: <analysis-panel>
- * Convenciones: Clases BEM scoped. Se usan variables CSS heredadas de
- *               effects.css (--surface-text, --primary-rgb, etc.). Las métricas
- *               usan grid de 4 columnas con unidades rem para tamaños reducidos.
- */
+analysis-panel { grid-area: inspector; display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 20px 20px 28px; }
+.inspector-heading, .lut-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.inspector-heading h2 { font-size: 16px; font-weight: 500; }
+.inspector-heading > span, .lut-heading > span { font-size: 11px; color: var(--muted); }
+.formula-card { padding: 12px 16px; background: var(--surface); border-radius: 8px; }
+.formula-card h3 { font-size: 12px; color: var(--secondary); font-weight: 400; margin-bottom: 14px; }
+.mapping-formula { display: flex; align-items: center; gap: 7px; font: 12px var(--font-mono); min-height: 42px; }
+.fraction { display: inline-flex; flex-direction: column; text-align: center; font-size: 11px; }
+.fraction > span { padding: 4px 0; }
+.fraction > span:first-child { border-bottom: 1px solid var(--secondary); }
+.algorithm-constants { font: 11px/1.7 var(--font-mono); color: var(--secondary); overflow-wrap: anywhere; }
+.selected-mapping { display: grid; grid-template-columns: 1fr 40px 1fr; align-items: center; gap: 12px; }
+.selected-mapping > div { display: flex; flex-direction: column; gap: 4px; }
+.selected-mapping label, .selected-mapping div > span { font-size: 11px; color: var(--muted); }
+.selected-mapping output { font: 500 26px var(--font-mono); }
+#selected-output { color: var(--accent); }
+.mapping-arrow { font-size: 20px; color: var(--muted); }
+#intensity-input { width: 100%; margin: 0; accent-color: var(--accent); height: 20px; }
+.numeric-substitution h3 { color: var(--muted); font-size: 12px; font-weight: 400; margin-bottom: 5px; }
+.numeric-substitution p { color: var(--secondary); font: 11px/1.7 var(--font-mono); overflow-wrap: anywhere; }
+.math-chart-block .chart-units { margin-top: 0; }
+.math-chart { position: relative; height: 148px; }
+.math-chart canvas { visibility: hidden; }
+.has-calculation .math-chart canvas { visibility: visible; }
+.lut-heading { border-top: 1px solid var(--divider); padding-top: 16px; }
+.lut-heading h3 { font-size: 13px; font-weight: 500; }
+.lut-container { width: 100%; }
+.lut-container.expanded { max-height: 320px; overflow: auto; }
+.lut-container table { width: 100%; border-collapse: collapse; font: 11px/1.5 var(--font-mono); table-layout: fixed; }
+.lut-container caption { caption-side: bottom; text-align: left; padding-top: 8px; color: var(--muted); font: 11px Poppins,sans-serif; }
+.lut-container th { color: var(--muted); font-weight: 400; padding: 0 4px 8px; }
+.lut-container th, .lut-container td { text-align: right; overflow-wrap: anywhere; }
+.lut-container th:first-child, .lut-container td:first-child { text-align: left; width: 42px; }
+.lut-container td { padding: 7px 4px; border-bottom: 1px solid var(--surface); color: var(--secondary); }
+.lut-container td:last-child { color: var(--accent); }
+.selected-row { background: var(--selected); }
+.selected-row td { color: var(--ink); }
+#inspect-lut { align-self: flex-start; }
+.precision-note { color: var(--muted); font-size: 11px; line-height: 1.7; }
+.precision-note summary { cursor: pointer; min-height: 28px; }
+.precision-note p { margin: 8px 0; overflow-wrap: anywhere; }
+@media (max-width: 1150px) { analysis-panel { padding: 16px; } .mapping-formula { font-size: 11px; gap: 5px; } }
 
-.tab-btn {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: transparent;
-  border: none;
-}
-.tab-btn:hover {
-  background-color: rgba(var(--primary-rgb), 0.05);
-}
+#inspector-empty { font-size: 12px; color: var(--muted); }
+.has-calculation #inspector-empty { display: none; }
+analysis-panel:not(.has-calculation) :is(.selected-mapping, #intensity-input, .numeric-substitution, .math-chart-block, .lut-heading, .lut-container, #inspect-lut, .precision-note) { display: none; }
 
-/* Metrics grid — compact 4-column layout below histograms */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  padding: 4px 0;
-}
-
-.metric-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-}
-
-.metric-label {
-  font-size: 0.625rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--surface-text-muted, #737688);
-}
-
-.metric-value {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--surface-text, #191c1e);
-}
-
-.dark .metric-value {
-  color: var(--surface-text, #e4e6ea);
-}
-
-/* Equation blocks in Ecuaciones / Explicación tabs */
-.equation-block {
-  background-color: rgba(var(--primary-rgb, 54, 162, 235), 0.05);
-  border: 1px solid rgba(var(--primary-rgb, 54, 162, 235), 0.12);
-}
-
-.equation-formula {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.8125rem;
-  padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.dark .equation-formula {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.equation-desc {
-  line-height: 1.5;
-}
-
-.equation-note {
-  font-style: italic;
-  opacity: 0.7;
-}
-
-/* Conversion Table Styling */
-.conversion-table {
-  border-spacing: 0;
-  width: 100%;
-}
-
-.conversion-table th {
-  font-weight: 600;
-  color: var(--surface-text-muted, #737688);
-}
-
-.conversion-table th,
-.conversion-table td {
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--outline-variant, rgba(115, 118, 136, 0.15));
-  text-align: center;
-}
-
-.conversion-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.conversion-table tr {
-  transition: background-color 0.2s ease;
-}
-
-.conversion-table tbody tr:hover {
-  background-color: rgba(var(--primary-rgb, 0, 87, 255), 0.05);
-}
-
-.dark .conversion-table tbody tr:hover {
-  background-color: rgba(var(--primary-rgb, 182, 196, 255), 0.1);
-}
-
+#intensity-input { height: 12px; margin-top: -6px; }
+.precision-note { margin-top: -4px; }
+@media (min-width: 1024px) and (max-width: 1279px) { analysis-panel { padding: 20px; } }

@@ -1,11 +1,6 @@
-/* =============================================
- * TOPNAVBAR.CSS — Estilos de la Barra de Navegación Superior
- * =============================================
- * Estilos scoped para el componente TopNavBar Web Component. Contiene
- * sobrescrituras mínimas del contenedor raíz que no se pueden expresar
- * con utilidades Tailwind directamente.
- *
- * Componentes afectados: <top-nav-bar>, #top-nav-root
- * Convenciones: La mayoría de estilos se aplican via Tailwind utility classes
- *               en el template HTML. Este archivo es para overrides específicos.
- */
+top-nav-bar { display: block; }
+.product-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--divider); min-height: 67px; }
+.product-logo { display: inline-flex; }
+.product-logo img { width: 180px; height: 42px; object-fit: contain; }
+.session-actions { display: flex; align-items: center; gap: 24px; }
+#wasm-status-text { font-size: 12px; color: var(--muted); }

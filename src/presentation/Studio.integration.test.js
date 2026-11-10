@@ -42,7 +42,7 @@ it('renders external history fields as text without rewriting rejected storage',
     document.body.innerHTML = '<history-drawer></history-drawer>';
     const drawer = document.querySelector('history-drawer');
     expect(storageHash()).toBe(before);
-    expect(drawer.querySelectorAll('svg,img,script')).toHaveLength(0);
+    expect(drawer.querySelectorAll('img,script,.history-card svg')).toHaveLength(0);
     if (value.startsWith('[')) {
       expect(drawer.entries).toHaveLength(1);
       expect(drawer.querySelector('.history-card-title').textContent).toBe(entry.filename);
@@ -142,4 +142,35 @@ it('keeps theme controls usable when accessing localStorage itself is denied', (
   expect(ThemeManager.isDark()).toBe(true);
   expect(() => ThemeManager.toggle()).not.toThrow();
   expect(ThemeManager.isDark()).toBe(false);
+});
+
+it('keeps a deferred public file selection busy through reading and decoding', async () => {
+  const f = setupStudio();
+  let finish;
+  f.load.execute.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  f.view.workspace.emitFile(new File(['bytes'], 'pending.png', { type: 'image/png' }));
+  expect(f.view.workspace.querySelector('#document-meta').textContent).toBe('Cargando imagen…');
+  expect(f.view.workspace.querySelector('#btn-apply').disabled).toBe(true);
+  expect(f.view.workspace.getAttribute('aria-busy')).toBe('true');
+  finish('data:image/png;base64,pending');
+  await Promise.resolve();
+  expect(f.view.workspace.getAttribute('aria-busy')).toBe('true');
+  f.view.pendingImage.onload();
+  expect(f.view.workspace.hasAttribute('aria-busy')).toBe(false);
+});
+
+it.each(['read', 'decode'])('clears busy after %s rejection through the public selection event', async stage => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+  const f = setupStudio();
+  const before = storageHash();
+  if (stage === 'read') f.load.execute.mockRejectedValueOnce(new Error('read failure'));
+  f.view.workspace.emitFile(new File(['bytes'], 'rejected.png', { type: 'image/png' }));
+  expect(f.view.workspace.getAttribute('aria-busy')).toBe('true');
+  await Promise.resolve();
+  if (stage === 'decode') f.view.pendingImage.onerror();
+  expect(f.view.workspace.hasAttribute('aria-busy')).toBe(false);
+  expect(f.view.workspace.querySelector('#btn-apply').disabled).toBe(true);
+  expect(f.view.workspace.getCanvas().hidden).toBe(true);
+  expect(f.view.analysisPanel.querySelector('#selected-output').textContent).toBe('—');
+  expect(storageHash()).toBe(before);
 });
